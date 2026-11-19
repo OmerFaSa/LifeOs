@@ -113,7 +113,7 @@
   function satirIci(s) { return kac(s).replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>').replace(/`([^`\n]+)`/g, '<code>$1</code>'); }
   function hucre(s) { return s.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(function (x) { return x.trim(); }); }
   function bicimle(metin) {
-    var satirlar = String(metin == null ? '' : metin).replace(/\r\n?/g, '\n').split('\n'), out = [], grup = null;
+    var satirlar = String(metin == null ? '' : metin).replace(/\r\n?/g, '\n').split('\n'), out = [], grup = null, kod = null;
     function tur(s) {
       if (/^\s*$/.test(s)) return 'bos';
       if (/^\s*[-*•]\s+/.test(s)) return 'ul';
@@ -135,12 +135,19 @@
       else out.push('<p>' + g.l.map(satirIci).join('<br>') + '</p>');
     }
     satirlar.forEach(function (s) {
+      if (/^\s*```/.test(s)) {
+        if (kod) { out.push('<pre class="king-md-kod"><code>' + kod.map(kac).join('\n') + '</code></pre>'); kod = null; }
+        else { kapat(); kod = []; }
+        return;
+      }
+      if (kod) { kod.push(s); return; }
       var t = tur(s);
       if (t === 'bos') return kapat();
       if (grup && grup.tur === t && t !== 'baslik') grup.l.push(s);
       else { kapat(); grup = { tur: t, l: [s] }; }
     });
     kapat();
+    if (kod) out.push('<pre class="king-md-kod"><code>' + kod.map(kac).join('\n') + '</code></pre>');
     return out.join('');
   }
 
@@ -222,11 +229,19 @@
     var s = d.s, kod = 0, ben = { kim: 'ben', metin: metin.slice(0, EN_UZUN), alt: [] };
     s.mesajlar.push(ben);
     d.bekliyor = true; d.hata = null; form.metin.value = ''; depoYaz(TASLAK, ''); kaydet(); ciz(true); // gönderilen kutuda kalmasın
-    kok.fetch('/api/kabuk/king', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-LifeOS': 'king' },
-      body: JSON.stringify(istekGovdesi(metin, secimGecerli(depoOku(ANAHTAR)), s)) })
+    var ac = typeof kok.AbortController === 'function' ? new kok.AbortController() : null;
+    var sureSaat = ac ? kok.setTimeout(function () { ac.abort(); }, 200000) : null;
+    var fetchAyar = { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', 'X-LifeOS': 'king' },
+      body: JSON.stringify(istekGovdesi(metin, secimGecerli(depoOku(ANAHTAR)), s)) };
+    if (ac) fetchAyar.signal = ac.signal;
+    kok.fetch('/api/kabuk/king', fetchAyar)
       .then(function (r) { kod = r.status; return r.json().catch(function () { return null; }); })
-      .then(function (r) { return { c: cevapSatirlari(r, kod), r: r }; }, function () { return { c: null, r: { mesaj: 'Başbuğ’a ulaşılamadı. Bilgisayar açık mı?' } }; })
+      .then(function (r) { return { c: cevapSatirlari(r, kod), r: r }; }, function (err) {
+        var zaman = err && err.name === 'AbortError';
+        return { c: null, r: { mesaj: zaman ? 'Başbuğ yanıtı zaman aşımına uğradı. Tekrar deneyebilirsin.' : 'Başbuğ’a ulaşılamadı. Bilgisayar açık mı?' } };
+      })
       .then(function (x) {
+        if (sureSaat) kok.clearTimeout(sureSaat);
         d.bekliyor = false;
         if (d.s !== s) return ciz();
         if (!x.c) { // hata: mesaj konuşmadan çıkar, yazılan kutuya ve taslağa geri döner
@@ -259,8 +274,9 @@
     var sayfa = kok.document.getElementById('sayfa');
     if (!sayfa) return;
     new kok.MutationObserver(function () {
+      if (sayfa.getAttribute('data-yer') !== 'king') return;
       if (kok.document.querySelector('.govde[data-sayfa="king"]') && !bolumEl()) ciz();
-    }).observe(sayfa, { childList: true, subtree: true });
+    }).observe(sayfa, { childList: true });
     // Enter gönderir (Shift + Enter yeni satır); örnek soru tıklanınca sorulur
     kok.document.addEventListener('keydown', function (e) {
       var t = e.target;

@@ -27,18 +27,23 @@ Ortam degiskenleri: LIFEOS_VERI_DB, LIFEOS_HESAP_DB (varsayilan %LOCALAPPDATA%\\
 (alan/, kabuk/harita.js, kalite/ icin depo koku; varsayilan bu depo), LIFEOS_NODE (varsayilan PATH'teki node),
 LIFEOS_KING_CEVRIMDISI (1 ise arastir aga cikmaz).
 """
+import atexit
 import collections
+import contextlib
+import contextvars
 import datetime
 import glob
 import importlib.util
 import json
 import os
+import queue
 import re
 import shutil
 import sqlite3
 import subprocess
 import sys
 import tempfile
+import threading
 import traceback
 import unicodedata
 
@@ -161,7 +166,10 @@ def tek_oku(c, a):
             a["kayitlar"].append(dict(alan=alan, yol=yol, tur=tur, govde=g, etiket=e, zaman=int(hlc[:13])))
 
 
-def anlik():
+_ANLIK_OTURUM = contextvars.ContextVar("mcp_anlik", default=None)
+
+
+def _anlik_oku():
     """Bir okuma ani: {kaynak, kayitlar, yayin, uyari}. Kopya cagri bitince silinir."""
     tek, hesap, _ = yollar()
     tur = "tek" if os.path.isfile(tek) else "hesap" if os.path.isfile(hesap) else None
@@ -177,6 +185,29 @@ def anlik():
         finally:
             c.close()
     return a
+
+
+def anlik():
+    """Aktif oturum varsa ayni anlik kopyayi paylasir; yoksa taze kopya okur."""
+    tutulan = _ANLIK_OTURUM.get()
+    if tutulan is not None:
+        if tutulan[0] is None:
+            tutulan[0] = _anlik_oku()
+        return tutulan[0]
+    return _anlik_oku()
+
+
+@contextlib.contextmanager
+def oturum_anlik():
+    """Ayni istek icindeki birden cok aracta tek SQLite kopyasini paylastirir."""
+    if _ANLIK_OTURUM.get() is not None:
+        yield
+        return
+    jeton = _ANLIK_OTURUM.set([None])
+    try:
+        yield
+    finally:
+        _ANLIK_OTURUM.reset(jeton)
 
 
 def kapali_mi(k):
@@ -242,19 +273,104 @@ def json_mu(metin):
         return metin
 
 
-def kopru(girdi):
-    """Motoru Node ile cagirir (king/kopru.js); hata ya da Node yoksa AracHatasi (suzgecsiz veri donmez)."""
-    node = os.environ.get("LIFEOS_NODE") or shutil.which("node")
-    if not node:
-        raise AracHatasi("Node.js bulunamadı; motorlar onunla çağrılır. KURULUM.md › LIFEOS_NODE.")
+_KOPRU_KILIT = threading.Lock()
+_KOPRU_ISCI = {"p": None, "node": None, "q": None}
+_KOPRU_KAPAT_KAYITLI = False
+
+
+def _kopru_kapat():
+    p = _KOPRU_ISCI.get("p")
+    _KOPRU_ISCI.update(p=None, node=None, q=None)
+    if p is None:
+        return
+    try:
+        if p.stdin:
+            p.stdin.close()
+    except OSError:
+        pass
+    try:
+        p.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        p.terminate()
+        try:
+            p.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            try:
+                p.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
+    except OSError:
+        pass
+    try:
+        if p.stdout:
+            p.stdout.close()
+    except OSError:
+        pass
+
+
+def _okuyucu_dongu(stdout, q):
+    try:
+        for s in iter(stdout.readline, b""):
+            q.put(s)
+    except Exception:
+        pass
+    finally:
+        q.put(None)
+
+
+def _kopru_tek_atim(node, girdi):
+    p = None
     try:
         p = subprocess.run([node, os.path.join(KOD, "king", "kopru.js")], capture_output=True, timeout=30,
                            input=json.dumps(girdi, ensure_ascii=False).encode("utf-8"),
                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        c = json.loads(p.stdout.decode("utf-8"))
+        return json.loads(p.stdout.decode("utf-8"))
     except (OSError, ValueError, subprocess.TimeoutExpired) as e:
-        gunluk("kopru:", e, (locals().get("p") and p.stderr[-500:]) or "")
+        gunluk("kopru:", e, (p and p.stderr[-500:]) or "")
         raise AracHatasi("Motor köprüsü çalışmadı: %s" % e)
+
+
+def kopru(girdi):
+    """Motoru Node ile cagirir (king/kopru.js); hata ya da Node yoksa AracHatasi (suzgecsiz veri donmez)."""
+    global _KOPRU_KAPAT_KAYITLI
+    node = os.environ.get("LIFEOS_NODE") or shutil.which("node")
+    if not node:
+        raise AracHatasi("Node.js bulunamadı; motorlar onunla çağrılır. KURULUM.md › LIFEOS_NODE.")
+    satir_girdi = (json.dumps(girdi, ensure_ascii=False) + "\n").encode("utf-8")
+    c = None
+    with _KOPRU_KILIT:
+        if not _KOPRU_KAPAT_KAYITLI:
+            atexit.register(_kopru_kapat)
+            _KOPRU_KAPAT_KAYITLI = True
+        p = _KOPRU_ISCI["p"]
+        if p is None or p.poll() is not None or _KOPRU_ISCI["node"] != node:
+            _kopru_kapat()
+            try:
+                p = subprocess.Popen(
+                    [node, os.path.join(KOD, "king", "kopru.js"), "--surekli"],
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                q = queue.Queue()
+                threading.Thread(target=_okuyucu_dongu, args=(p.stdout, q), daemon=True).start()
+                _KOPRU_ISCI.update(p=p, node=node, q=q)
+            except OSError:
+                _kopru_kapat()
+                p = None
+        if p is not None:
+            try:
+                p.stdin.write(satir_girdi)
+                p.stdin.flush()
+                satir = _KOPRU_ISCI["q"].get(timeout=30)
+                if satir is None:
+                    raise EOFError("kopru.js kapandi")
+                c = json.loads(satir.decode("utf-8"))
+            except (OSError, ValueError, queue.Empty, EOFError) as e:
+                gunluk("kopru surekli yeniden:", e)
+                _kopru_kapat()
+                c = None
+    if c is None:
+        c = _kopru_tek_atim(node, girdi)
     if "hata" in c:
         raise AracHatasi("Motor hatası: %s" % c["hata"])
     return c["tamam"]
@@ -274,7 +390,8 @@ def t_harita(_):
 
 def t_kayit_ara(arg):
     a, q = anlik(), katla(arg.get("metin", ""))
-    l = [k for k in acik(a) if k["alan"].startswith(arg.get("alan", "")) and k["yol"].startswith(arg.get("yol", ""))
+    acik_l = acik(a)
+    l = [k for k in acik_l if k["alan"].startswith(arg.get("alan", "")) and k["yol"].startswith(arg.get("yol", ""))
          and (not arg.get("tur") or k["tur"] == arg["tur"])
          and (not q or q in katla(k["alan"] + "|" + k["yol"] + " " + json.dumps(ort(k["govde"]), ensure_ascii=False)))]
     l.sort(key=lambda k: -(k["zaman"] or 0))
@@ -282,7 +399,7 @@ def t_kayit_ara(arg):
             "kayitlar": [{"kimlik": k["alan"] + "|" + k["yol"], "tur": k["tur"], "zaman": zaman_yazi(k["zaman"]),
                           "anahtarlar": sorted(k["govde"])[:20] if isinstance(k["govde"], dict) else None}
                          for k in l[:arg.get("sinir", 20)]],
-            "turler": sorted({k["tur"] for k in acik(a)}), "uyari": a["uyari"]}
+            "turler": sorted({k["tur"] for k in acik_l}), "uyari": a["uyari"]}
 
 
 def t_kayit_oku(arg):
@@ -365,6 +482,39 @@ def t_notlar(arg):
     return sonuc
 
 
+_ALAN_ASAMA = {}  # abs_yol -> (mtime_ns, size, veri, ders_indeks)
+_KALITE_OLCUM_MOD = None
+
+
+def _yol_durum(o):
+    return "onaylı" if o.get("durum") == "onayli" else "taslak (onaysız içerik; tekrara girmez)"
+
+
+def _yol_kapi(k):
+    return {"soru": hes(len((k or {}).get("sorular", []))),
+            "gecme": "soruların en az %%%d'i doğru" % round(100 * (k or {}).get("esik", 0))}
+
+
+def _asama_yukle(yol):
+    abs_yol = os.path.abspath(yol)
+    st = os.stat(yol)
+    onb = _ALAN_ASAMA.get(abs_yol)
+    if onb and onb[0] == st.st_mtime_ns and onb[1] == st.st_size:
+        return onb[2], onb[3]
+    with open(yol, encoding="utf-8") as f:
+        s = json.load(f)
+    dersler = {}
+    s_ad = s.get("ad")
+    for u in s.get("uniteler", []):
+        u_ad = u.get("ad")
+        for d in u.get("dersler", []):
+            did = d.get("id")
+            if did:
+                dersler[did] = (s_ad, u_ad, d)
+    _ALAN_ASAMA[abs_yol] = (st.st_mtime_ns, st.st_size, s, dersler)
+    return s, dersler
+
+
 def t_yol(arg):
     kok = os.path.join(yollar()[2], "alan")
     alanlar = sorted(d for d in os.listdir(kok) if glob.glob(os.path.join(kok, d, "asama-*.json"))) \
@@ -372,27 +522,17 @@ def t_yol(arg):
     alan = arg.get("alan", "felsefe")
     if alan not in alanlar:
         raise AracHatasi("Bu alanın yol haritası yok (veri yok). Var olanlar: %s." % (", ".join(alanlar) or "hiçbiri"))
-    asamalar = []
-    for yol in sorted(glob.glob(os.path.join(kok, alan, "asama-*.json"))):
-        with open(yol, encoding="utf-8") as f:
-            asamalar.append(json.load(f))
-
-    def durum(o):
-        return "onaylı" if o.get("durum") == "onayli" else "taslak (onaysız içerik; tekrara girmez)"
-
-    def kapi(k):
-        return {"soru": hes(len((k or {}).get("sorular", []))),
-                "gecme": "soruların en az %%%d'i doğru" % round(100 * (k or {}).get("esik", 0))}
+    asamalar = [_asama_yukle(yol) for yol in sorted(glob.glob(os.path.join(kok, alan, "asama-*.json")))]
 
     if arg.get("ders"):
-        for s in asamalar:
-            for u in s.get("uniteler", []):
-                for d in u.get("dersler", []):
-                    if d.get("id") == arg["ders"]:
-                        return {"asama": s.get("ad"), "unite": u.get("ad"), "ders": dict(d, durum=durum(d))}
+        hedef = arg["ders"]
+        for _, dersler in asamalar:
+            if hedef in dersler:
+                s_ad, u_ad, d = dersler[hedef]
+                return {"asama": s_ad, "unite": u_ad, "ders": dict(d, durum=_yol_durum(d))}
         raise AracHatasi("Bu kimlikte ders yok. Kimlikleri yol_haritasi (derssiz) verir.")
     kabuk, ilerleme = anlik().get("kabuk", {}), []
-    for s in asamalar:   # kabugun ogrenme kaydi (motor/yol.js): okunan ders, gecilen kapi; okumak asamayi gecirmez
+    for s, _ in asamalar:   # kabugun ogrenme kaydi (motor/yol.js): okunan ders, gecilen kapi; okumak asamayi gecirmez
         k = kabuk.get("lifeos.yol.%s" % s.get("id"))
         if isinstance(k, dict):
             ilerleme.append({"asama": s.get("id"), "okunan_ders": hes(len(k.get("dersler") or {})),
@@ -404,12 +544,12 @@ def t_yol(arg):
                                     "denenince tek depoya yazılır).",
             "kapi_sorulari": "Kapı soruları ve cevapları verilmez: ustalık kapısı ölçümdür.",
             "asamalar": [{"id": s.get("id"), "ad": s.get("ad"), "hedef": s.get("hedef"), "kanit_isi": s.get("kanitIsi"),
-                          "kapi": kapi(s.get("kapi")),
+                          "kapi": _yol_kapi(s.get("kapi")),
                           "uniteler": [{"id": u.get("id"), "ad": u.get("ad"), "kazanim": u.get("kazanim"),
-                                        "kapi": kapi(u.get("kapi")),
+                                        "kapi": _yol_kapi(u.get("kapi")),
                                         "dersler": [{"id": d.get("id"), "ad": d.get("ad"), "ozet": d.get("ozet"),
-                                                     "durum": durum(d)} for d in u.get("dersler", [])]}
-                                       for u in s.get("uniteler", [])]} for s in asamalar]}
+                                                     "durum": _yol_durum(d)} for d in u.get("dersler", [])]}
+                                       for u in s.get("uniteler", [])]} for s, _ in asamalar]}
 
 
 def t_tekrar(_):
@@ -468,11 +608,14 @@ def t_olcum(arg):
         return {"tarih": tarih, "olcut": hes(len(son)), "olcutler": [satir(o) for _, o in sorted(son.items())],
                 "butce_asimi": [], "butce_notlari": ["Karşılaştırılacak önceki kayıt yok; bütçe kapısı CI'da "
                                                      "`kalite/olcum.py --denetle` (son kayda karşı) ve temiz."]}
+    global _KALITE_OLCUM_MOD
     try:   # kalite motorunun kendi denetimi (kalite/olcum.py denetle): son kayit onceki kayda karsi
-        tarif = importlib.util.spec_from_file_location("kalite_olcum", os.path.join(KOD, "kalite", "olcum.py"))
-        kalite_olcum = importlib.util.module_from_spec(tarif)
-        tarif.loader.exec_module(kalite_olcum)
-        asim, notlar = kalite_olcum.denetle(son, butce, onceki, os.path.basename(kayitlar[-2])[:10] if onceki else None)
+        if _KALITE_OLCUM_MOD is None:
+            tarif = importlib.util.spec_from_file_location("kalite_olcum", os.path.join(KOD, "kalite", "olcum.py"))
+            mod = importlib.util.module_from_spec(tarif)
+            tarif.loader.exec_module(mod)
+            _KALITE_OLCUM_MOD = mod
+        asim, notlar = _KALITE_OLCUM_MOD.denetle(son, butce, onceki, os.path.basename(kayitlar[-2])[:10] if onceki else None)
     except Exception as e:  # noqa: BLE001  ekipten biri kalite/ uzerinde calisiyor olabilir
         asim, notlar = [], ["Bütçe denetimi yapılamadı: %s" % e]
     return {"tarih": tarih, "olcut": hes(len(son)), "olcutler": [satir(o) for _, o in sorted(son.items())],
@@ -551,8 +694,9 @@ def t_arastir(arg):
             uyari.append("Notlara bakılamadı: %s" % e)
             return []
 
-    r = arama.ara(arg["soru"], butce={"sure": ARAMA_SURE}, con=_ARAMA_CON[0], cfg={}, notlar=notlar,
-                  alan_kok=yollar()[2], cevrimdisi=cevrimdisi)
+    with oturum_anlik():
+        r = arama.ara(arg["soru"], butce={"sure": ARAMA_SURE}, con=_ARAMA_CON[0], cfg={}, notlar=notlar,
+                      alan_kok=yollar()[2], cevrimdisi=cevrimdisi)
     web_plan = any(a["kaynak"] == "web" for a in r["plan"])
     if cevrimdisi:
         ag = "çevrimdışı kip (LIFEOS_KING_CEVRIMDISI=1): web'e çıkılmadı; cevap yalnız notlarından ve alan içeriğinden."

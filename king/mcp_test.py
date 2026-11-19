@@ -416,6 +416,92 @@ dogru("stdio: araç çağrıları sonuç verir (notlar, niyet)", len(yanit) == 4
       yanit[2:] if yanit else p.stderr[-300:])
 dogru("stdio: günlük stderr'de", b"king-mcp" in p.stderr)
 
+print("Sürekli köprü ve önbellekler (Faz 1D)")
+import time  # noqa: E402
+harita_tmp = os.path.join(t, "surekli-harita.js")
+with open(harita_tmp, "w", encoding="utf-8") as f_:
+    f_.write("module.exports = { YERLER: [{ id: 'a1', ad: 'İlk', katman: 'kabuk', dal: 'ana', durum: 'yeni', aciklama: 'x', halka: true }], DALLAR: [] };\n")
+node_bin = mcp.shutil.which("node")
+if node_bin:
+    def _tek_atim(g):
+        r_ = subprocess.run([node_bin, str(KOK / "king" / "kopru.js")], input=json.dumps(g).encode("utf-8"),
+                            capture_output=True, timeout=20)
+        return json.loads(r_.stdout.decode("utf-8"))["tamam"]
+
+    reqs = [
+        {"is": "harita", "harita": harita_tmp},
+        {"is": "notlar", "zaman": MS, "kaynak": {}, "kabuk": kabuk_notlar, "kapali": [], "sinir": 5},
+        {"is": "tekrar", "simdi": MS, "gunSonu": MS + 3600_000, "kartlar": {"ays": [], "esp": []}, "kabuk": kabuk_kartlar},
+    ]
+    proc = subprocess.Popen([node_bin, str(KOK / "king" / "kopru.js"), "--surekli"],
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        yan_s = []
+        for g_ in reqs:
+            proc.stdin.write((json.dumps(g_) + "\n").encode("utf-8"))
+            proc.stdin.flush()
+            yan_s.append(json.loads(proc.stdout.readline().decode("utf-8"))["tamam"])
+        dogru("kopru.js --surekli 3 ardışık istek tek-atımla birebir aynı",
+              all(yan_s[i] == _tek_atim(reqs[i]) for i in range(3)), yan_s)
+        with open(harita_tmp, "w", encoding="utf-8") as f_:
+            f_.write("module.exports = { YERLER: [{ id: 'a2', ad: 'Yeni', katman: 'kabuk', dal: 'ana', durum: 'yeni', aciklama: 'y', halka: false }], DALLAR: [] };\n")
+        st_h = os.stat(harita_tmp)
+        os.utime(harita_tmp, ns=(st_h.st_atime_ns, st_h.st_mtime_ns + 2_000_000_000))
+        proc.stdin.write((json.dumps(reqs[0]) + "\n").encode("utf-8"))
+        proc.stdin.flush()
+        y_taze = json.loads(proc.stdout.readline().decode("utf-8"))["tamam"]
+        dogru("kopru.js --surekli değişen harita.js dosyasını tazeler",
+              y_taze["yerler"][0]["id"] == "a2" and y_taze["yerler"][0]["ad"] == "Yeni", y_taze)
+    finally:
+        proc.kill()
+        proc.wait(5)
+
+yol_dosya = Path(ICERIK, "alan", "felsefe", "asama-1.json")
+eski_yukle = mcp.json.load
+yukle_say = [0]
+
+
+def _izli_yukle(*a, **k):
+    yukle_say[0] += 1
+    return eski_yukle(*a, **k)
+
+
+mcp.json.load = _izli_yukle
+try:
+    d1 = mcp.t_yol({"ders": "ders1"})
+    yukle_say[0] = 0
+    d2 = mcp.t_yol({"ders": "ders1"})
+    dogru("t_yol aynı aşamayı önbellekten verir", d2["ders"]["metin"] == "DERS-METNI" and yukle_say[0] == 0, yukle_say[0])
+finally:
+    mcp.json.load = eski_yukle
+
+yeni_asama = json.loads(yol_dosya.read_text(encoding="utf-8"))
+yeni_asama["uniteler"][0]["dersler"][0]["metin"] = "TAZE-METIN"
+yol_dosya.write_text(json.dumps(yeni_asama, ensure_ascii=False), encoding="utf-8")
+st_y = os.stat(yol_dosya)
+os.utime(yol_dosya, ns=(st_y.st_atime_ns, st_y.st_mtime_ns + 2_000_000_000))
+dogru("t_yol değişen dosyayı anında yeniler", mcp.t_yol({"ders": "ders1"})["ders"]["metin"] == "TAZE-METIN")
+
+kopya_say = [0]
+_eski_kopya_ac = mcp.kopya_ac
+
+
+def _say_kopya(*a, **k):
+    kopya_say[0] += 1
+    return _eski_kopya_ac(*a, **k)
+
+
+mcp.kopya_ac = _say_kopya
+try:
+    with mcp.oturum_anlik():
+        arac("kayit_ara")
+        arac("notlar")
+    dogru("oturum_anlik() içinde iki araç tek kopya açar", kopya_say[0] == 1, kopya_say[0])
+    arac("kayit_ara")
+    dogru("oturum_anlik() dışında yeni taze kopya açar", kopya_say[0] == 2, kopya_say[0])
+finally:
+    mcp.kopya_ac = _eski_kopya_ac
+
 shutil.rmtree(t, ignore_errors=True)
 print("\n%s · %d kırmızı" % ("TEMİZ" if not kirmizi else "KIRMIZI", kirmizi))
 sys.exit(1 if kirmizi else 0)

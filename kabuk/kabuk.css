@@ -586,6 +586,8 @@ article.ders .ders__ozet{ color:var(--yazi-2); }
 .king-balon ul, .king-balon ol{ padding-left:1.3em; }
 .king-balon li + li{ margin-top:var(--a1); }
 .king-balon code{ padding:0 4px; border-radius:6px; font-size:.92em; background:var(--yuzey-2); }
+.king-balon pre.king-md-kod{ box-sizing:border-box; margin:0; padding:var(--a2) var(--a3); border-radius:var(--kose-k); overflow-x:auto; max-width:100%; background:var(--yuzey-2); box-shadow:inset 0 0 0 1px var(--cizgi); font-size:var(--yz-k); line-height:1.5; }
+.king-balon pre.king-md-kod code{ padding:0; border-radius:0; background:none; font-family:ui-monospace,Consolas,monospace; font-size:inherit; white-space:pre; }
 .king-md-tablo{ overflow-x:auto; }
 .king-md-tablo table{ border-collapse:collapse; font-size:var(--yz-k); }
 .king-md-tablo th, .king-md-tablo td{ padding:var(--a1) var(--a2); text-align:left; box-shadow:inset 0 -1px 0 var(--cizgi); }

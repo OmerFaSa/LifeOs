@@ -306,3 +306,103 @@ def run():
         no("KİP:" in olcu["sistem"] or "Açık ders" in olcu["sistem"], "kipsiz istek eskisi gibi")
     test("kip ve ders sistem metnine girer; kipsiz istek eskisi gibi", t_kip_sisteme_girer)
 
+    def t_dokum_artimli():
+        import json
+        import os
+        import shutil
+        import tempfile
+        from pathlib import Path
+        d = tempfile.mkdtemp(prefix="kopru-dokum-")
+        eski_beyin = kopru.BEYIN
+        try:
+            kopru.BEYIN = Path(d)
+            log = Path(d) / "k1" / ".system_generated" / "logs" / "transcript.jsonl"
+            log.parent.mkdir(parents=True, exist_ok=True)
+            log.write_text('{"type":"USER_INPUT"}\n{"type":"PLANNER_RES', encoding="utf-8")
+            s1, off1 = kopru._dokum_oku("k1", 0)
+            eq(len(s1), 1)
+            eq(s1[0]["type"], "USER_INPUT")
+            s2, off2 = kopru._dokum_oku("k1", off1)
+            eq((s2, off2), ([], off1))
+            with open(log, "ab") as f:
+                f.write(b'PONSE","status":"DONE","content":"Merhaba."}\n')
+            s3, off3 = kopru._dokum_oku("k1", off1)
+            eq(len(s3), 1)
+            eq(kopru.ag_cevap(s3), (True, "Merhaba.", None))
+            ok(off3 > off1)
+            # Dosya kisalirsa bastan okur
+            log.write_text('{"type":"PLANNER_RESPONSE","status":"DONE","content":"Yeni."}\n', encoding="utf-8")
+            s4, off4 = kopru._dokum_oku("k1", off3 + 500)
+            eq((len(s4), s4[0]["content"], off4 > 0), (1, "Yeni.", True))
+        finally:
+            kopru.BEYIN = eski_beyin
+            shutil.rmtree(d, ignore_errors=True)
+    test("Antigravity dokumu artimli ve yarim satir guvenli okunur", t_dokum_artimli)
+
+    def t_buyuk_gecmis_ve_es_zaman():
+        m = [{"role": "user" if i % 2 == 0 else "assistant", "content": ("mesaj%d " % i) + "kelime " * 30}
+             for i in range(200)]
+        l, kisa, atilan = kopru.gecmis_butcele(m, tam=6, kisa=80, butce=2500)
+        ok(l[-6:] == [dict(x) for x in m[-6:]], "son 6 tam kalir")
+        ok(sum(len(x["content"]) for x in l) <= 2500 and atilan > 0 and kisa > 0, (atilan, kisa))
+        hatalar = []
+        eski_hal = dict(kopru._HAL)
+        eski_claude = kopru._claude_yolu
+        kopru._claude_yolu = lambda: "claude-test"
+        try:
+            def isci():
+                try:
+                    for _ in range(30):
+                        kopru.hal("claude", tazele=True)
+                        kopru.durum()
+                except Exception as exc:  # noqa: BLE001
+                    hatalar.append(exc)
+            ipler = [threading.Thread(target=isci) for _ in range(4)]
+            for t in ipler:
+                t.start()
+            for t in ipler:
+                t.join(5)
+            eq(hatalar, [])
+        finally:
+            kopru._claude_yolu = eski_claude
+            with kopru._HAL_KILIT:
+                kopru._HAL.clear()
+                kopru._HAL.update(eski_hal)
+    test("200 mesajli gecmis butcelenir ve _HAL eszamanli erisimde yarismaz", t_buyuk_gecmis_ve_es_zaman)
+
+    def t_claude_iptal():
+        import os
+        import shutil
+        import sys
+        import tempfile
+        d = tempfile.mkdtemp(prefix="kopru-iptal-")
+        eski_yol = kopru._claude_yolu
+        try:
+            if os.name == "nt":
+                betik = os.path.join(d, "yavas.cmd")
+                with open(betik, "w", encoding="utf-8") as f:
+                    f.write('@echo off\n"%s" -c "import time; time.sleep(10)"\n' % sys.executable)
+            else:
+                betik = os.path.join(d, "yavas.sh")
+                with open(betik, "w", encoding="utf-8") as f:
+                    f.write('#!/bin/sh\nexec "%s" -c "import time; time.sleep(10)"\n' % sys.executable)
+                os.chmod(betik, 0o755)
+            kopru._claude_yolu = lambda: betik
+            t0 = time.monotonic()
+            sayac = [0]
+
+            def iptal():
+                sayac[0] += 1
+                return sayac[0] >= 2
+
+            try:
+                kopru._claude(None, "", [{"role": "user", "content": "x"}], 10, iptal=iptal)
+                ok(False, "iptal TimeoutError atmaliydi")
+            except TimeoutError as e:
+                ok("istemci gitti" in str(e) and time.monotonic() - t0 < 5, str(e))
+        finally:
+            kopru._claude_yolu = eski_yol
+            shutil.rmtree(d, ignore_errors=True)
+    test("claude cagrisi istemci iptalinde bekletmeden durur", t_claude_iptal)
+
+

@@ -5,11 +5,17 @@
  *   { is:'tekrar', simdi, gunSonu, kartlar:{ays:[], esp:[]}, kabuk?:[kart] } → Tekrar.plan özeti
  *   kabuk: yeni kabuğun tek depodaki kayıtları (motorun kendi biçimi; göç bağdaştırıcısından geçmez, doğrulanır). */
 'use strict';
+const fs = require('fs');
 const path = require('path');
 const KOK = path.resolve(__dirname, '..');
+const _haritaMtime = Object.create(null);
 
 function harita(g) {
-  const H = require(path.resolve(g.harita));
+  const yol = path.resolve(g.harita);
+  const mt = fs.statSync(yol).mtimeMs;
+  if (_haritaMtime[yol] !== undefined && _haritaMtime[yol] !== mt) delete require.cache[yol];
+  _haritaMtime[yol] = mt;
+  const H = require(yol);
   return { yerler: H.YERLER.map(y => ({ id: y.id, ad: y.ad, katman: y.katman, dal: y.dal, durum: y.durum,
     aciklama: y.aciklama, halkada: !!y.halka, eskiYer: y.eski ? true : undefined })), dallar: H.DALLAR };
 }
@@ -57,15 +63,34 @@ function tekrar(g) {
     bugun: p.tekrar.concat(p.yeni).slice(0, 20).map(x => ({ kimlik: x.id, on: x.on, durum: x.durum, vade: x.sonraki })) };
 }
 
-let girdi = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', d => { girdi += d; });
-process.stdin.on('end', () => {
+const ISLER = { harita, notlar, tekrar };
+function calistir(satir) {
   try {
-    const g = JSON.parse(girdi), is = { harita, notlar, tekrar }[g.is];
+    const g = JSON.parse(satir), is = ISLER[g.is];
     if (!is) throw new Error('bilinmeyen iş: ' + g.is);
-    process.stdout.write(JSON.stringify({ tamam: is(g) }));
+    return JSON.stringify({ tamam: is(g) });
   } catch (e) {
-    process.stdout.write(JSON.stringify({ hata: String(e && e.message || e) }));
+    return JSON.stringify({ hata: String(e && e.message || e) });
   }
-});
+}
+
+process.stdin.setEncoding('utf8');
+if (process.argv.includes('--surekli')) {
+  let tampon = '';
+  process.stdin.on('data', d => {
+    tampon += d;
+    for (let nl; (nl = tampon.indexOf('\n')) >= 0;) {
+      const s = tampon.slice(0, nl).trim();
+      tampon = tampon.slice(nl + 1);
+      if (s) process.stdout.write(calistir(s) + '\n');
+    }
+  });
+  process.stdin.on('end', () => {
+    const s = tampon.trim();
+    if (s) process.stdout.write(calistir(s) + '\n');
+  });
+} else {
+  let girdi = '';
+  process.stdin.on('data', d => { girdi += d; });
+  process.stdin.on('end', () => { process.stdout.write(calistir(girdi)); });
+}

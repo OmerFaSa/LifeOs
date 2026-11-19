@@ -129,6 +129,48 @@ dogru("Node yok: notlar dışarıda, nedeni «okunamadı»", r["dilimler"] == []
       and r["disarida"][0]["neden"].startswith("okunamadı"), r)
 os.environ.pop("LIFEOS_NODE")
 
+import copy  # noqa: E402
+
+
+def _ref_kirp(veri, sinir):
+    atilan = 0
+    while baglam.jeton(veri) > sinir:
+        l = baglam._en_uzun_liste(veri)
+        if not l:
+            return None, atilan
+        l.pop()
+        atilan += 1
+    return veri, atilan
+
+
+ornekler = [
+    ({"ogeler": [{"id": i, "metin": "kelime " * 5} for i in range(500)]}, (100000, 1500, 100, 5, 0, -1)),
+    ({"a": [{"x": i} for i in range(25)], "b": [{"y": i} for i in range(25)]}, (200, 50, 10, 0)),
+    ({"a": [{"ic": [1, 2, 3, 4]}, {"ic": [5, 6]}], "b": [1, 2, 3, 4]}, (30, 18, 8, 1)),
+    ({"tek": "kisa"}, (100, 1, 0)),
+]
+for idx, (ornek, sinirlar) in enumerate(ornekler):
+    for s_ in sinirlar:
+        beklenen = _ref_kirp(copy.deepcopy(ornek), s_)
+        gercek = baglam.kirp(copy.deepcopy(ornek), s_)
+        dogru("kirp eşdeğer (%d, sinir=%d)" % (idx, s_), gercek == beklenen, (gercek, beklenen))
+
+kopya_say = [0]
+eski_kopya = baglam.mcp.kopya_ac
+
+
+def _izli_kopya(*a, **k):
+    kopya_say[0] += 1
+    return eski_kopya(*a, **k)
+
+
+baglam.mcp.kopya_ac = _izli_kopya
+try:
+    baglam.derle("bugünün planı ne?")
+finally:
+    baglam.mcp.kopya_ac = eski_kopya
+dogru("derle() tek anlık SQLite kopyası açar (%d)" % kopya_say[0], kopya_say[0] == 1, kopya_say[0])
+
 shutil.rmtree(t, ignore_errors=True)
 print("\n%s · kırmızı %d" % ("YEŞİL" if not kirmizi else "KIRMIZI", kirmizi))
 sys.exit(1 if kirmizi else 0)

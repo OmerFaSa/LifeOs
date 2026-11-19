@@ -48,6 +48,12 @@ t('biçim: paragraf, satır sonu, madde, numaralı liste, kalın, kod ve tablo; 
   a.ok(!/<img|<script|href=/.test(k) && /&lt;img/.test(k) && /<strong>&lt;script&gt;<\/strong>/.test(k) && /&quot;q&quot;/.test(k), k);
   a.strictEqual(K.bicimle(null), '');
 });
+t('biçim: çitli kod bloğu güvenli kaçırılır, boş satırı korur ve kapanmasa da kırılmaz', () => {
+  const kod = K.bicimle('Önce\n```js\nconst x = a < b && "<script>";\n\nreturn x;\n```\nSonra');
+  a.strictEqual(kod, '<p>Önce</p><pre class="king-md-kod"><code>const x = a &lt; b &amp;&amp; &quot;&lt;script&gt;&quot;;\n\nreturn x;</code></pre><p>Sonra</p>');
+  const acik = K.bicimle('```python\nprint("<x>")');
+  a.strictEqual(acik, '<pre class="king-md-kod"><code>print(&quot;&lt;x&gt;&quot;)</code></pre>');
+});
 
 t('Divan: izinli beş hükümdar (Atatürk yok), her birine örnek sorular; hükümdar sunucuya gider, izinsizse kip ortak olur', () => {
   a.deepStrictEqual(Object.keys(K.HUKUMDAR), ['mete', 'attila', 'bilge', 'alparslan', 'fatih', 'osman', 'yavuz', 'kanuni', 'babur', 'timur', 'enver']);

@@ -36,7 +36,12 @@ from core import arastir, kaynakli, web, youtube  # noqa: E402  BAM/arastir'in k
 ROL = arastir.ROL                      # «bam.arastirma»: web izni ve model atamasi aynen
 BUTCE = {"ag": 8, "kaynak": 10, "sure": 40, "iddia": 4}
 ONBELLEK_SN = 600
+ONBELLEK_SINIR = 128
 ONBELLEK = {}                          # (kaynak, konu) -> (zaman, sonuc); not ve alan taramasi
+_ALAN_INDEKS = {}                      # abs_yol -> (mtime_ns, size, ad, taslak, [(yol, s, s_kucuk), ...])
+_MCP_MOD = None
+_KIMLIK_SADE_RE = re.compile(r"^[\w./-]+$")
+_KAPI_YOL_RE = re.compile(r"(?:^|\.)kapi\b")
 NOT_TETIK = re.compile(r"\bnot(?:lar)?(?:ım|um|umda|larımda|larım|umu)\b|\bdefter", re.I)
 YEREL_TETIK = re.compile(r"\b(?:yalnız|sadece) (?:notlar|yerel)", re.I)
 # Istek fiili konudan duser (sahada konuyu cagiran ayiklardi; motor kendisi yapar): «fotosentezi araştır» -> «fotosentezi»
@@ -87,10 +92,13 @@ def _kucuk(s):
     return youtube._kucuk(s)
 
 
-def _uyar(metin, terimler):
-    m = _kucuk(metin)
+def _uyar_kucuk(m, terimler):
     n = sum(t in m for t in terimler)
     return n >= (len(terimler) if len(terimler) <= 2 else (len(terimler) + 1) // 2)
+
+
+def _uyar(metin, terimler):
+    return _uyar_kucuk(_kucuk(metin), terimler)
 
 
 def _ozel_mi(n):
@@ -99,11 +107,14 @@ def _ozel_mi(n):
 
 def mcp_notlari(konu, sinir=10):
     """Varsayilan not kaynagi: king/mcp.py Not kapisi (kingOkur suzgecli, canli dosyanin kopyasi)."""
-    import importlib.util
-    sp = importlib.util.spec_from_file_location("king_mcp", os.path.join(KOD, "king", "mcp.py"))
-    m = importlib.util.module_from_spec(sp)
-    sp.loader.exec_module(m)
-    return m.t_notlar({"ara": konu, "sinir": sinir}).get("notlar") or []
+    global _MCP_MOD
+    if _MCP_MOD is None:
+        import importlib.util
+        sp = importlib.util.spec_from_file_location("king_mcp", os.path.join(KOD, "king", "mcp.py"))
+        m = importlib.util.module_from_spec(sp)
+        sp.loader.exec_module(m)
+        _MCP_MOD = m
+    return _MCP_MOD.t_notlar({"ara": konu, "sinir": sinir}).get("notlar") or []
 
 
 def not_kaynaklari(konu, terimler, notlar):
@@ -131,38 +142,84 @@ def _dizgeler(x, yol=""):
             yield from _dizgeler(v, "%s[%d]" % (yol, i))
 
 
+def _alan_ozet(d):
+    """Tek yuruyuste parcalari ve taslak («dogrulanmamis») bayragini cikarir; 2.5 MB dumps gerektirmez."""
+    parca, taslak = [], [False]
+
+    def gez(x, yol):
+        if isinstance(x, str):
+            if not taslak[0] and "dogrulanmamis" in x:
+                taslak[0] = True
+            if len(x) >= 30 and not _KIMLIK_SADE_RE.match(x) and not _KAPI_YOL_RE.search(yol):
+                parca.append((yol, x, _kucuk(x)))
+        elif isinstance(x, dict):
+            for k, v in x.items():
+                if not taslak[0] and isinstance(k, str) and "dogrulanmamis" in k:
+                    taslak[0] = True
+                gez(v, "%s.%s" % (yol, k) if yol else k)
+        elif isinstance(x, list):
+            for i, v in enumerate(x):
+                gez(v, "%s[%d]" % (yol, i))
+
+    gez(d, "")
+    baslik = d.get("ad") if isinstance(d, dict) else None
+    return baslik, taslak[0], parca
+
+
 def alan_kaynaklari(konu, terimler, kok=None):
     """alan/**/*.json icindeki metinler; konuya uyan her dosya bir kaynak (uyan alanlar metni olur)."""
     kok = kok or KOD
-    out = []
-    for yol in sorted(glob.glob(os.path.join(kok, "alan", "**", "*.json"), recursive=True)):
+    alan_koku = os.path.abspath(os.path.join(kok, "alan")) + os.sep
+    dosyalar = sorted(glob.glob(os.path.join(kok, "alan", "**", "*.json"), recursive=True))
+    aktif, out = set(), []
+    for yol in dosyalar:
         if os.path.basename(yol) == "harita.json":
             continue        # konu haritasi yalniz baslik iskeletidir, ders metni degil: kaynak sayilmaz
+        abs_yol = os.path.abspath(yol)
+        aktif.add(abs_yol)
         try:
-            with open(yol, encoding="utf-8") as f:
-                d = json.load(f)
-        except (OSError, ValueError):
+            st = os.stat(yol)
+        except OSError:
+            _ALAN_INDEKS.pop(abs_yol, None)
             continue
-        # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
-        parca = [(y, s) for y, s in _dizgeler(d) if len(s) >= 30 and not re.match(r"^[\w./-]+$", s)
-                 and not re.search(r"(?:^|\.)kapi\b", y)]
-        uyan = [(y, s) for y, s in parca if _uyar(s, terimler)]
+        onb = _ALAN_INDEKS.get(abs_yol)
+        if onb and onb[0] == st.st_mtime_ns and onb[1] == st.st_size:
+            _, _, baslik, taslak, parca = onb
+        else:
+            try:
+                with open(yol, encoding="utf-8") as f:
+                    d = json.load(f)
+            except (OSError, ValueError):
+                _ALAN_INDEKS.pop(abs_yol, None)
+                continue
+            # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
+            baslik, taslak, parca = _alan_ozet(d)
+            _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca)
+        uyan = [(y, s) for y, s, sk in parca if _uyar_kucuk(sk, terimler)]
         if not uyan:
             continue
         goreli = os.path.relpath(yol, kok).replace("\\", "/")
-        out.append({"tur": "alan", "baslik": d.get("ad") or goreli if isinstance(d, dict) else goreli,
+        out.append({"tur": "alan", "baslik": baslik or goreli,
                     "url": goreli, "alan": "alan/" + goreli.split("/")[1], "ozet": "",
                     "metin": "\n".join(s for _, s in uyan), "yerler": [y for y, _ in uyan][:10],
-                    "taslak": "dogrulanmamis" in json.dumps(d, ensure_ascii=False)})
+                    "taslak": taslak})
+    for sil in [k for k in _ALAN_INDEKS if k.startswith(alan_koku) and k not in aktif]:
+        del _ALAN_INDEKS[sil]
     return out
 
 
 def _onbellekli(onbellek, anahtar, fn):
+    simdi = time.time()
+    for sil in [k for k, v in onbellek.items() if simdi - v[0] >= ONBELLEK_SN]:
+        del onbellek[sil]
     var = onbellek.get(anahtar)
-    if var and time.time() - var[0] < ONBELLEK_SN:
+    if var:
         return [dict(k) for k in var[1]], True
     r = fn()
-    onbellek[anahtar] = (time.time(), [dict(k) for k in r])
+    onbellek[anahtar] = (simdi, [dict(k) for k in r])
+    while len(onbellek) > ONBELLEK_SINIR:
+        eski = min(onbellek.items(), key=lambda kv: kv[1][0])[0]
+        del onbellek[eski]
     return r, False
 
 

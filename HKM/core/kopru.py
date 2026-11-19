@@ -87,6 +87,8 @@ class _Durum:
 
 _DURUM = {ad: _Durum(t["es"], t["kuyruk"]) for ad, t in SAGLAYICI.items()}
 _HAL = {}                   # ad -> (t, acik, not)
+_HAL_KILIT = threading.Lock()
+_KONUSMA_KILIT = threading.Lock()
 _AG_SUNUCU = {"t": 0.0, "deger": None}
 _AG_KILIT = threading.Lock()
 
@@ -151,16 +153,18 @@ def hal(ad, tazele=False):
     """{acik, not}: uygulama simdi cagrilabilir mi. Ucuz; HAL_SN onbellekli."""
     if ad not in SAGLAYICI:
         return {"acik": False, "not": "Bilinmeyen köprü."}
-    son = _HAL.get(ad)
-    if son and not tazele and time.monotonic() - son[0] < HAL_SN:
-        return {"acik": son[1], "not": son[2]}
+    with _HAL_KILIT:
+        son = _HAL.get(ad)
+        if son and not tazele and time.monotonic() - son[0] < HAL_SN:
+            return {"acik": son[1], "not": son[2]}
     if ad == "claude":
         acik = bool(_claude_yolu())
         notu = "Claude Code hazır." if acik else "Claude Code (claude komutu) bu bilgisayarda bulunamadı."
     else:
         acik = bool(_ag_sunucu(tazele))
         notu = "Antigravity açık." if acik else "Antigravity açık değil; arka planda açık olması yeter."
-    _HAL[ad] = (time.monotonic(), acik, notu)
+    with _HAL_KILIT:
+        _HAL[ad] = (time.monotonic(), acik, notu)
     return {"acik": acik, "not": notu}
 
 
@@ -184,11 +188,12 @@ def gecmis_butcele(mesajlar, tam=TAM_TUR, kisa=KISA_HARF, butce=GECMIS_BUTCE):
         if k != str(m["content"]).strip():
             kisaltilan += 1
         l[i] = dict(m, content=k)
-    atilan = 0
-    while len(l) > 1 and sum(len(str(m["content"])) for m in l) > butce:
-        l.pop(0)
-        atilan += 1
-    return l, kisaltilan, atilan
+    toplam = sum(len(str(m["content"])) for m in l)
+    idx, n = 0, len(l)
+    while n - idx > 1 and toplam > butce:
+        toplam -= len(str(l[idx]["content"]))
+        idx += 1
+    return (l[idx:] if idx else l), kisaltilan, idx
 
 
 def istem(sistem, mesajlar, aracsiz=False):
@@ -220,7 +225,49 @@ KOTA_RE = re.compile(r"usage limit|rate limit|quota|limit reached|too many reque
 OTURUM_RE = re.compile(r"not logged in|please run /login|invalid api key|authentication", re.I)
 
 
-def _claude(model, sistem, mesajlar, sure):
+def _claude_iptalli(komut, girdi, sure, iptal):
+    """Popen + izleyici: iptal() True donerse ya da sure dolarsa sureci hemen keser."""
+    p = subprocess.Popen(komut, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         text=True, encoding="utf-8", errors="replace", cwd=tempfile.gettempdir(),
+                         creationflags=SESSIZ)
+    sonuc = {}
+    bitti = threading.Event()
+
+    def _oku():
+        try:
+            sonuc["out"], sonuc["err"] = p.communicate(input=girdi)
+        except Exception as e:  # noqa: BLE001
+            sonuc["exc"] = e
+        finally:
+            bitti.set()
+
+    threading.Thread(target=_oku, daemon=True).start()
+    son_an = time.monotonic() + sure
+    while not bitti.wait(0.15):
+        if callable(iptal) and iptal():
+            try:
+                p.terminate()
+                if not bitti.wait(0.5):
+                    p.kill()
+                    bitti.wait(0.5)
+            except OSError:
+                pass
+            raise TimeoutError("istemci gitti")
+        if time.monotonic() >= son_an:
+            try:
+                p.terminate()
+                if not bitti.wait(0.5):
+                    p.kill()
+                    bitti.wait(0.5)
+            except OSError:
+                pass
+            raise TimeoutError("Claude Code %d sn içinde cevap vermedi" % sure)
+    if "exc" in sonuc:
+        raise sonuc["exc"]
+    return p.returncode, sonuc.get("out") or "", sonuc.get("err") or ""
+
+
+def _claude(model, sistem, mesajlar, sure, iptal=None):
     yol = _claude_yolu()
     if not yol:
         raise Kapali("Claude Code (claude komutu) bu bilgisayarda bulunamadı.")
@@ -231,25 +278,32 @@ def _claude(model, sistem, mesajlar, sure):
         komut += ["--model", model]
     try:
         # Notr klasor: projenin CLAUDE.md'si istemi sisirmesin.
-        r = subprocess.run(komut, input=istem(sistem, mesajlar), capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=sure, cwd=tempfile.gettempdir(),
-                           creationflags=SESSIZ)
-    except subprocess.TimeoutExpired:
-        raise TimeoutError("Claude Code %d sn içinde cevap vermedi" % sure)
+        girdi = istem(sistem, mesajlar)
+        if callable(iptal):
+            rc, out, err = _claude_iptalli(komut, girdi, sure, iptal)
+        else:
+            r = subprocess.run(komut, input=girdi, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=sure, cwd=tempfile.gettempdir(),
+                               creationflags=SESSIZ)
+            rc, out, err = r.returncode, r.stdout, r.stderr
+    except (subprocess.TimeoutExpired, TimeoutError) as e:
+        if isinstance(e, subprocess.TimeoutExpired):
+            raise TimeoutError("Claude Code %d sn içinde cevap vermedi" % sure)
+        raise
     except OSError as e:
         raise Kapali("Claude Code başlatılamadı (%s)." % type(e).__name__)
     try:
-        y = json.loads(r.stdout or "{}")
+        y = json.loads(out or "{}")
     except ValueError:
         y = {}
     metin = str(y.get("result") or "")
-    if r.returncode != 0 or y.get("is_error") or not metin.strip():
-        ham = (metin or r.stderr or r.stdout or "")[:300]
+    if rc != 0 or y.get("is_error") or not metin.strip():
+        ham = (metin or err or out or "")[:300]
         if KOTA_RE.search(ham):
             raise RuntimeError("HTTP 429 — Claude kullanım sınırı: %s" % " ".join(ham.split())[:160])
         if OTURUM_RE.search(ham):
             raise Kapali("Claude Code oturumu açık değil: bir terminalde «claude» ile giriş yap.")
-        raise Gecici("Claude Code hata döndü (çıkış %s): %s" % (r.returncode, " ".join(ham.split())[:160]))
+        raise Gecici("Claude Code hata döndü (çıkış %s): %s" % (rc, " ".join(ham.split())[:160]))
     k = y.get("usage") or {}
     gir = k.get("input_tokens")
     if gir is not None:
@@ -284,6 +338,39 @@ def ag_cevap(satirlar):
     return False, None, None
 
 
+def _dokum_oku(kimlik, bayt_bas=0):
+    """transcript.jsonl'den yalniz `bayt_bas` sonrasindaki bitmis (\\n) satirlari okur: (satirlar, yeni_ofset)."""
+    yol = BEYIN / kimlik / ".system_generated" / "logs" / "transcript.jsonl"
+    try:
+        boy = yol.stat().st_size
+    except OSError:
+        return [], bayt_bas
+    if boy < bayt_bas:
+        bayt_bas = 0
+    if boy == bayt_bas:
+        return [], bayt_bas
+    try:
+        with open(yol, "rb") as f:
+            f.seek(bayt_bas)
+            ham = f.read()
+    except OSError:
+        return [], bayt_bas
+    son_nl = ham.rfind(b"\n")
+    if son_nl < 0:
+        return [], bayt_bas
+    tam_blok = ham[:son_nl + 1]
+    yeni_ofset = bayt_bas + son_nl + 1
+    out = []
+    for s in tam_blok.decode("utf-8", errors="replace").splitlines():
+        if not s:
+            continue
+        try:
+            out.append(json.loads(s))
+        except ValueError:          # yarim/bozuk satir
+            pass
+    return out, yeni_ofset
+
+
 def _dokum(kimlik):
     yol = BEYIN / kimlik / ".system_generated" / "logs" / "transcript.jsonl"
     out = []
@@ -297,6 +384,9 @@ def _dokum(kimlik):
     except OSError:
         pass
     return out
+
+
+_dokum_varsayilan = _dokum
 
 
 def ag_model(model):
@@ -323,6 +413,7 @@ def ag_devam_mi(kayit, mesajlar, simdi=None):
 
 
 DEVAM_ONEK = "(Araç kullanma; Başbuğ olarak yalnız düz metinle cevap ver.)\n\n"
+_AG_BEKLE = (0.15, 0.25, 0.5)
 
 
 def _antigravity(model, sistem, mesajlar, sure, iptal=None):
@@ -331,18 +422,23 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
         raise Kapali("Antigravity açık değil; arka planda açık olması yeter.")
     son_an = time.monotonic() + sure
     anahtar = ag_oturum_anahtari(OTURUM.get(), model)
-    kayit = _AG_KONUSMA.get(anahtar) if anahtar else None
+    with _KONUSMA_KILIT:
+        kayit = dict(_AG_KONUSMA[anahtar]) if anahtar and anahtar in _AG_KONUSMA else None
     soru = str((mesajlar or [{}])[-1].get("content") or "").strip()
-    kimlik, bas, y = None, 0, {}
+    artimli = _dokum is _dokum_varsayilan
+    kimlik, bas, bayt_bas, y = None, 0, 0, {}
     if ag_devam_mi(kayit, mesajlar):
         # Ayni konusmaya devam: yalniz yeni mesaj gider; cevap dokumun bu noktadan sonrasinda aranir
         # (oncekinin bitmis cevabi yeni cevap sanilmasin).
-        bas = len(_dokum(kayit["kimlik"]))
+        if artimli:
+            _, bayt_bas = _dokum_oku(kayit["kimlik"], kayit.get("ofset", 0))
+        else:
+            bas = len(_dokum(kayit["kimlik"]))
         y = _agentapi(s[0], s[1], ["send-message", kayit["kimlik"], DEVAM_ONEK + soru], min(60, sure))
         if (y.get("response") or {}).get("sendMessage"):
             kimlik = kayit["kimlik"]
     if not kimlik:
-        bas = 0
+        bas, bayt_bas = 0, 0
         y = _agentapi(s[0], s[1], ["new-conversation", "--model=" + ag_model(model), "--title=Başbuğ",
                                    istem(sistem, mesajlar, aracsiz=True)], min(60, sure))
         kimlik = ((y.get("response") or {}).get("newConversation") or {}).get("conversationId")
@@ -350,11 +446,19 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
         _ag_sunucu(tazele=True)         # sunucu kapanmis ya da port degismis olabilir
         raise Gecici("Antigravity konuşma açmadı: %s" % str(y.get("error") or "kimlik dönmedi")[:120])
     if anahtar:
-        _AG_KONUSMA.pop(anahtar, None)  # cevap gelmeden ikinci istek gelirse yarim konusmaya devam edilmez
-    while time.monotonic() < son_an:
+        with _KONUSMA_KILIT:
+            _AG_KONUSMA.pop(anahtar, None)  # cevap gelmeden ikinci istek gelirse yarim konusmaya devam edilmez
+    dokum_yeni, bekle_i = [], 0
+    while True:
         if callable(iptal) and iptal():
             raise TimeoutError("istemci gitti")
-        bitti, metin, hata = ag_cevap(_dokum(kimlik)[bas:])
+        if artimli:
+            yeni, bayt_bas = _dokum_oku(kimlik, bayt_bas)
+            if yeni:
+                dokum_yeni.extend(yeni)
+            bitti, metin, hata = ag_cevap(dokum_yeni)
+        else:
+            bitti, metin, hata = ag_cevap(_dokum(kimlik)[bas:])
         if bitti:
             if hata:
                 if KOTA_RE.search(hata):
@@ -362,11 +466,16 @@ def _antigravity(model, sistem, mesajlar, sure, iptal=None):
                 raise Gecici("Antigravity: %s" % hata)
             if anahtar:
                 simdi = time.monotonic()
-                for k in [k for k, v in _AG_KONUSMA.items() if simdi - v["t"] > AG_OTURUM_SN]:
-                    del _AG_KONUSMA[k]
-                _AG_KONUSMA[anahtar] = {"kimlik": kimlik, "soru": soru, "t": simdi}
+                with _KONUSMA_KILIT:
+                    for k in [k for k, v in _AG_KONUSMA.items() if simdi - v["t"] > AG_OTURUM_SN]:
+                        del _AG_KONUSMA[k]
+                    _AG_KONUSMA[anahtar] = {"kimlik": kimlik, "soru": soru, "t": simdi, "ofset": bayt_bas}
             return metin, None, None, False
-        time.sleep(0.5)
+        kalan_sn = son_an - time.monotonic()
+        if kalan_sn <= 0:
+            break
+        time.sleep(min(kalan_sn, _AG_BEKLE[min(bekle_i, len(_AG_BEKLE) - 1)]))
+        bekle_i += 1
     raise TimeoutError("Antigravity %d sn içinde cevap vermedi" % sure)
 
 
@@ -381,8 +490,11 @@ def cagir(ad, model, sistem, mesajlar, sure=None, iptal=None, _uygula=None):
         raise ValueError("bilinmeyen köprü: %s" % ad)
     d, tanim = _DURUM[ad], SAGLAYICI[ad]
     sure = int(sure or tanim["sure"])
-    uygula = _uygula or (_claude if ad == "claude" else
-                         lambda m, s, g, t: _antigravity(m, s, g, t, iptal))
+    uygula = _uygula or (
+        (lambda m, s, g, t: _claude(m, s, g, t, iptal=iptal))
+        if ad == "claude"
+        else (lambda m, s, g, t: _antigravity(m, s, g, t, iptal))
+    )
     with d.kilit:
         d.sayac["istek"] += 1
         if d.calisan >= d.es and d.bekleyen >= d.kuyruk_siniri:
@@ -422,7 +534,8 @@ def cagir(ad, model, sistem, mesajlar, sure=None, iptal=None, _uygula=None):
     except Kapali:
         with d.kilit:
             d.sayac["kapali"] += 1
-        _HAL[ad] = (time.monotonic(), False, SAGLAYICI[ad]["ad"] + " kapalı.")
+        with _HAL_KILIT:
+            _HAL[ad] = (time.monotonic(), False, SAGLAYICI[ad]["ad"] + " kapalı.")
         raise
     except TimeoutError:
         with d.kilit:

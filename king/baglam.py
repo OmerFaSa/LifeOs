@@ -62,15 +62,67 @@ def _en_uzun_liste(x):
     return en
 
 
+def _json_len(x):
+    return len(json.dumps(x, ensure_ascii=False, separators=(",", ":")))
+
+
+def _icinde_liste_var(x):
+    if isinstance(x, list):
+        return True
+    if isinstance(x, dict):
+        return any(_icinde_liste_var(v) for v in x.values())
+    return False
+
+
+def _en_uzun_liste_bilgi(x):
+    """_en_uzun_liste ile ayni DFS sirasinda (en_liste, dur_boy, guvenli) bulur."""
+    listeler = []
+
+    def gez(dugum):
+        for v in (dugum.values() if isinstance(dugum, dict) else dugum if isinstance(dugum, list) else ()):
+            if isinstance(v, list) and v:
+                listeler.append(v)
+            gez(v)
+
+    gez(x)
+    if not listeler:
+        return None, 0, False
+    en_i, en = 0, listeler[0]
+    for i, l in enumerate(listeler):
+        if len(l) > len(en):
+            en_i, en = i, l
+    en_id = id(en)
+    if sum(1 for l in listeler if id(l) == en_id) > 1 or any(_icinde_liste_var(e) for e in en):
+        return en, 0, False
+    onceki = max((len(l) for l in listeler[:en_i]), default=0)
+    sonraki = max((len(l) for l in listeler[en_i + 1:]), default=0)
+    dur = max(onceki, max(0, sonraki - 1), 0)
+    return en, dur, True
+
+
 def kirp(veri, sinir):
     """Sığana dek en uzun listenin sonundan atar (en yeni önce gelir). Sığmazsa None. Kırpılan adet de döner."""
+    if veri is None:
+        return (None, 0) if sinir < 0 else (veri, 0)
+    mevcut_len = _json_len(veri)
+    max_bayt = -1 if sinir < 0 else sinir * 3
     atilan = 0
-    while jeton(veri) > sinir:
-        l = _en_uzun_liste(veri)
+    while mevcut_len > max_bayt:
+        l, dur, guvenli = _en_uzun_liste_bilgi(veri)
         if not l:
             return None, atilan
-        l.pop()
-        atilan += 1
+        if not guvenli:
+            l.pop()
+            atilan += 1
+            mevcut_len = _json_len(veri)
+            continue
+        i = len(l) - 1
+        while i >= dur and mevcut_len > max_bayt:
+            mevcut_len -= _json_len(l[i]) + (1 if i > 0 else 0)
+            i -= 1
+        sil_bas = i + 1
+        atilan += len(l) - sil_bas
+        del l[sil_bas:]
     return veri, atilan
 
 
@@ -90,21 +142,22 @@ def derle(metin, butce=None, simdi=None):
     if ad == "kayit":
         sonuc["kayit"] = n["kayit"]
         return sonuc
-    for d in NIYET_DILIMLERI[ad]:
-        fn, arg, ne = DILIMLER[d]
-        try:
-            veri = ozelsiz(fn(dict(arg)))
-        except mcp.AracHatasi as e:
-            sonuc["disarida"].append({"ad": d, "neden": "okunamadı: %s" % e})
-            continue
-        kalan = butce - sonuc["jeton"]
-        veri, atilan = kirp(veri, kalan)
-        if veri is None:
-            sonuc["disarida"].append({"ad": d, "neden": "bütçe: %d jetonluk yer kaldı" % kalan})
-            continue
-        j = jeton(veri)
-        sonuc["dilimler"].append({"ad": d, "ne": ne, "jeton": j, "kirpilan": atilan, "veri": veri})
-        sonuc["jeton"] += j
+    with mcp.oturum_anlik():
+        for d in NIYET_DILIMLERI[ad]:
+            fn, arg, ne = DILIMLER[d]
+            try:
+                veri = ozelsiz(fn(dict(arg)))
+            except mcp.AracHatasi as e:
+                sonuc["disarida"].append({"ad": d, "neden": "okunamadı: %s" % e})
+                continue
+            kalan = butce - sonuc["jeton"]
+            veri, atilan = kirp(veri, kalan)
+            if veri is None:
+                sonuc["disarida"].append({"ad": d, "neden": "bütçe: %d jetonluk yer kaldı" % kalan})
+                continue
+            j = jeton(veri)
+            sonuc["dilimler"].append({"ad": d, "ne": ne, "jeton": j, "kirpilan": atilan, "veri": veri})
+            sonuc["jeton"] += j
     return sonuc
 
 

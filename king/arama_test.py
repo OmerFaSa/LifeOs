@@ -146,6 +146,45 @@ class AramaTest(unittest.TestCase):
         self.assertEqual(r["iddialar"], [])
         self.assertEqual(cagrildi, [])
 
+    def test_alan_indeks_ve_taslak_tazeleme(self):
+        dosya = os.path.join(self.kok, "alan", "matematik", "asama-1.json")
+        teri = ["zincir"]
+        eski_load = arama.json.load
+        sayac = [0]
+
+        def izli_load(*a, **k):
+            sayac[0] += 1
+            return eski_load(*a, **k)
+
+        arama.json.load = izli_load
+        try:
+            r1 = arama.alan_kaynaklari("zincir", teri, self.kok)
+            self.assertEqual(sayac[0], 1)
+            self.assertFalse(r1[0]["taslak"])
+            r2 = arama.alan_kaynaklari("zincir", teri, self.kok)
+            self.assertEqual(sayac[0], 1, "degismeyen alan dosyasi tekrar ayristirilmaz")
+            self.assertEqual(r1, r2)
+            # Dosya degisince (mtime + icerik) aninda tazelenir ve dogrulanmamis -> taslak True
+            yeni = {"ad": "Türev", "hedef": "Zincir kuralı ve yeni örnekler burada.", "kaynaklar": [{"dogrulama": "dogrulanmamis"}]}
+            with open(dosya, "w", encoding="utf-8") as f:
+                json.dump(yeni, f, ensure_ascii=False)
+            st = os.stat(dosya)
+            os.utime(dosya, ns=(st.st_atime_ns, st.st_mtime_ns + 2_000_000_000))
+            r3 = arama.alan_kaynaklari("zincir", teri, self.kok)
+            self.assertEqual(sayac[0], 2)
+            self.assertTrue(r3[0]["taslak"])
+            self.assertIn("yeni örnekler", r3[0]["metin"])
+            os.remove(dosya)
+            self.assertEqual(arama.alan_kaynaklari("zincir", teri, self.kok), [])
+        finally:
+            arama.json.load = eski_load
+
+    def test_onbellek_sinirli(self):
+        ob = {}
+        for i in range(160):
+            arama._onbellekli(ob, ("not", "sorgu-%d" % i), lambda i=i: [{"no": i}])
+        self.assertLessEqual(len(ob), arama.ONBELLEK_SINIR)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)
