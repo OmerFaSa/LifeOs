@@ -53,6 +53,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 
 ## Kabul testleri
 - `bilinc_kabul_test.py` — Bilinç haritası (`brand/ortak/bilinc.js`) kabul testi; temizlik, bağ ayrıştırma, ağ ve yerleşim.
+- `turk_tablo_kabul_test.py` — Görev 082 kabul testi; üç zafer tablosunun (Malazgirt, İstanbul, Çanakkale) `kabuk/ata.js` TABLO girişini, `kabuk/tablo.js` PNG boyutlarını ve renklerini, sahne tanımını ve millî gün eşlemesini sınar.
 - `ayar_esit_kabul_test.py` — Görev 081 kabul testi; ortak ayarların telefonla eşitlenmesini (son yazan kazanır, çakışma kaydı, mezar taşı, kapılar) sınar, CI'da koşulur.
 - `belge_dizin_kabul_test.py` — Görev 018 kabul testi; belgeler/DIZIN.md dizininin tamlığını ve bağlantılarını sınar.
 - `bilgisayar_kabul_test.py` — Görev 080 kabul testi; King'in bilgisayar araçlarının platform katmanını (sistem/bilgisayar.py) sahte çağrılarla sınar, CI'da koşulur.
