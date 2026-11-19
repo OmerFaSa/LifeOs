@@ -74,6 +74,13 @@
     king: { ne: 'Başbuğ\'un cevabı gelince (çok hafif)', oncelik: 2, db: 6.6, katman: [
       { tip: 'ton', nota: 'B5', t: 0, atak: 0.004, sure: 0.26, g: 0.048, tini: 'cam', yanki: 0.4 },
       { tip: 'ton', nota: 'F#6', t: 0.06, atak: 0.004, sure: 0.32, g: 0.0288, yanki: 0.5 }] },
+    // 2026-11-18 (sahip: «Başbuğ'a tıklayınca otağın ayrı bir sesi olsun»): kös vuruşu, keçe otağ kapısının hışırtısı, üç kopuz teli
+    otag: { ne: 'Başbuğ’un otağına girilince (Başbuğ sekmesi ya da bağlantısı): kös vuruşu, keçe kapı hışırtısı, kopuz', oncelik: 3, db: 4.5, katman: [
+      { tip: 'ton', nota: 'D4', egim: 500, t: 0, atak: 0.003, sure: 0.55, g: 0.2, yanki: 0.35 },
+      { tip: 'hisirti', f: 600, f2: 250, q: 0.7, t: 0.01, atak: 0.04, sure: 0.35, g: 0.12, yanki: 0.3 },
+      { tip: 'ton', nota: 'A4', t: 0.16, atak: 0.002, sure: 0.4, g: 0.07, tini: 'tahta', ayri: 3, yanki: 0.3 },
+      { tip: 'ton', nota: 'D5', t: 0.24, atak: 0.002, sure: 0.4, g: 0.07, tini: 'tahta', ayri: 3, yanki: 0.3 },
+      { tip: 'ton', nota: 'E5', t: 0.32, atak: 0.002, sure: 0.6, g: 0.075, tini: 'tahta', ayri: 3, yanki: 0.4 }] },
     bildirim: { ne: 'Bildirim (basbug-ses olayıyla; kullanıcı eylemi beklemez)', oncelik: 3, db: 3.6, katman: [
       { tip: 'ton', nota: 'D6', t: 0, atak: 0.003, sure: 0.34, g: 0.055, tini: 'cam', ayri: 2, yanki: 0.3 },
       { tip: 'ton', nota: 'A5', t: 0.12, atak: 0.003, sure: 0.46, g: 0.055, tini: 'cam', ayri: 2, yanki: 0.35 }] }
@@ -220,6 +227,7 @@
     tiklanan = e.isTrusted ? e.target : null; setTimeout(function () { tiklanan = null; }, 0);
     if (!e.isTrusted || !e.target.closest) return;
     var t = e.target;
+    if (t.closest('a[href="#/king"], a[href^="#/king?"]')) return cal('otag'); // otağın sesi; kabuk.js'in gezinme tıkı 60 ms içinde daha önemsiz olduğundan çalmaz
     if (gezinmeMi(t) || t.closest('a[href], [data-ac="okudum"], [data-ac="halka"], [aria-disabled="true"], :disabled')) return; // kabuk.js çalar ya da eylem yok
     var sik = t.closest('.b-soru[data-soru] [data-h]');
     if (sik) {

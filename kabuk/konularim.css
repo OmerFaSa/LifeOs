@@ -1,0 +1,54 @@
+/* Kendi başlıkların (kabuk/konularim.js): alan sayfasının sonunda kullanıcının başlık ve konuları; sohbetteki «Konuya kaydet».
+ * Yalnız kabuk.css jetonları; kenar çizgisi yok (ton + yumuşak gölge). Konu satırı konu haritasının .konu dilini kullanır. */
+.konularim--bos{ margin-top:var(--a6); }
+.konularim .b-bolum > .b-bolum__ust + *{ margin-top:0; }
+.konularim__baslik{ display:flex; flex-direction:column; gap:var(--a2); padding:var(--a3) var(--a4) var(--a4); background:var(--yuzey); border-radius:var(--kose); box-shadow:var(--golge-yumusak); }
+.konularim__baslik + .konularim__baslik, .konularim__baslik + .konularim__ekle{ margin-top:var(--a4); }
+.konularim__ust{ display:flex; align-items:center; gap:var(--a2); min-height:44px; }
+.konularim__ad{ flex:1 1 auto; min-width:0; margin:0; font-family:var(--baslik-serif, var(--govde)); font-size:var(--yz-h3); font-weight:600; overflow-wrap:anywhere; }
+.konularim__duzenle{ flex:none; display:inline-flex; align-items:center; gap:var(--a1); min-height:36px; padding:0 var(--a2); font-size:var(--yz-k); font-weight:600; color:var(--yazi-2);
+  text-decoration:none; border-radius:var(--kose-k); background:var(--yuzey-2); }
+.konularim__duzenle svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
+.konularim__duzenle:hover{ color:var(--vurgu); }
+.konularim__konular{ list-style:none; margin:0; padding:0; }
+/* konu satırı: ad · Başbuğ'la çalış · seçenekler */
+.konularim__konu > .konu{ display:grid; grid-template-columns:minmax(0,1fr) auto auto; grid-template-areas:"ad not menu"; align-items:center; margin:0; padding:var(--a1) 0; min-height:44px; }
+.konularim__konu > .konu .konu__ad{ grid-area:ad; }
+.konularim__konu > .konu .konu__not{ grid-area:not; }
+.konularim__konu > .konu .konularim__menu{ grid-area:menu; }
+@media (max-width:640px){
+  .konularim__konu > .konu{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"ad menu" "not menu"; padding-block:var(--a2); }
+  .konularim__konu > .konu .konu__not{ justify-self:start; }
+  .konularim__ust{ flex-wrap:wrap; }
+  .konularim__ad{ flex-basis:calc(100% - 52px); }
+  .konularim__duzenle{ order:3; }
+}
+/* seçenekler: yerel <details>, açılınca sağa yaslı küçük kutu */
+.konularim__menu{ position:relative; flex:none; }
+.konularim__menu > summary{ display:grid; place-items:center; width:40px; height:40px; list-style:none; cursor:pointer; color:var(--soluk); border-radius:var(--kose-k); font-size:var(--yz-h3); line-height:1; }
+.konularim__menu > summary::-webkit-details-marker{ display:none; }
+.konularim__menu > summary:hover, .konularim__menu[open] > summary{ color:var(--yazi); background:var(--yuzey-2); }
+.konularim__menu-ic{ position:absolute; z-index:5; right:0; top:calc(100% + var(--a1)); display:flex; flex-direction:column; align-items:stretch; min-width:12rem; padding:var(--a1);
+  background:var(--yuzey-ust); border-radius:var(--kose); box-shadow:var(--golge-orta); }
+.konularim__menu-ic .b-dugme{ justify-content:flex-start; width:100%; }
+.konularim__menu-ic .b-dugme[aria-disabled="true"]{ display:none; }
+/* ekleme ve ad düzeltme: tek satır */
+.konularim__ekle{ display:flex; align-items:center; gap:var(--a2); min-width:0; }
+.konularim__ekle .b-alan{ flex:1 1 auto; }
+.konularim__ekle .b-eylemler{ flex:none; flex-direction:row; flex-wrap:nowrap; gap:var(--a1); margin:0; }
+.konularim__ekle--konu .b-alan__giris{ background:transparent; }
+/* Başbuğ'un notu */
+.konularim__not{ margin:0 0 var(--a2); padding:var(--a2) var(--a3); background:var(--yuzey-2); border-radius:var(--kose-k); }
+.konularim__not > summary{ display:flex; align-items:center; gap:var(--a2); min-height:36px; cursor:pointer; list-style:none; font-size:var(--yz-k); font-weight:600; color:var(--yazi-2); }
+.konularim__not > summary::-webkit-details-marker{ display:none; }
+.konularim__not > summary::before{ content:""; width:6px; height:6px; box-shadow:inset -2px -2px 0 var(--altin); transform:rotate(-45deg); transition:transform var(--sure) ease; }
+.konularim__not[open] > summary::before{ transform:rotate(45deg); }
+.konularim__not-metin{ font-family:var(--okuma); font-size:var(--yz); line-height:1.7; color:var(--yazi); overflow-wrap:anywhere; }
+.konularim__not-metin > * + *{ margin-top:var(--a2); }
+.konularim__not-metin p, .konularim__not-metin ul, .konularim__not-metin ol{ margin-block:0; }
+.konularim__not > .b-dugme{ margin-top:var(--a2); }
+/* sohbette Başbuğ'un cevabının altında «Konuya kaydet» */
+.king-msj__kaydet{ display:inline-flex; align-items:center; min-height:32px; margin:var(--a1) var(--a1) 0; padding:0 var(--a2); border:0; font:inherit; font-size:var(--yz-k); font-weight:600;
+  color:var(--yazi-2); background:transparent; border-radius:var(--kose-k); cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--cizgi-guclu); }
+.king-msj__kaydet:hover{ color:var(--vurgu); }
+.king-msj__kaydet[aria-disabled="true"]{ color:var(--soluk); text-decoration:none; cursor:default; }

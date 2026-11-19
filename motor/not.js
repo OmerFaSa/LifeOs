@@ -553,9 +553,49 @@
     },
   };
 
+  /* ---------------------------------------------------------- klasörler */
+  /* KLASÖRLER (2026-11-18k, sahip: «notlar çok arttığında sıkıntı olacak»). Klasör ayrı bir kayıt değildir: notun `klasor`
+     alanıdır; henüz notu olmayan klasör adları çağıranın tuttuğu `bos` listesinde durur. Saf: zaman çağırandan gelir.
+       klasorler(notlar, ekler) → [{ ad, sayi }]: notlardaki ve ekler (boş klasörler, araç klasörleri) içindeki adlar, Türkçe
+         sıraya göre; sayi klasördeki ve alt klasörlerindeki not sayısı (Not.klasorde ile aynı kapsam).
+       klasorTasi({ notlar, bos, araclar, eski, yeni, zaman }) → { notlar, bos, degisen }: «eski» klasörü ve altını «yeni»ye
+         taşır (yeniden adlandırma); yeni boşsa klasör silinir, notları Klasörsüz'e düşer. NOT SİLMEZ. Bir aracın klasörüne
+         (ya da araç klasörü taşıyan bir üst klasöre) dokunmaz: Başbuğ'un okuma izni klasöre bağlıdır, araç sayfasından yönetilir. */
+  const kapsam = (k, ust) => k === ust || k.indexOf(ust + '/') === 0, ka = klasorAdi;
+  function klasorler(notlar, ekler){
+    const adlar = new Set();
+    (notlar || []).forEach(n => { if(n && n.klasor) adlar.add(n.klasor); });
+    (ekler || []).map(ka).filter(Boolean).forEach(k => adlar.add(k));
+    return Array.from(adlar).sort((a, b) => a.localeCompare(b, 'tr'))
+      .map(ad => ({ ad, sayi:(notlar || []).filter(n => n && n.klasor && kapsam(n.klasor, ad)).length }));
+  }
+  function klasorTasi(o){
+    const eski = ka(o.eski), yeni = ka(o.yeni), zaman = o.zaman;
+    if(!eski) throw new Error('Hangi klasör olduğu yazılmalı.');
+    if(!(Number.isInteger(zaman) && zaman >= 0)) throw new Error('Taşıma zamanı (ms) verilmeli.');
+    const arac = (o.araclar || []).find(a => a && a.klasor && (kapsam(a.klasor, eski) || kapsam(eski, a.klasor) || (yeni && kapsam(yeni, a.klasor))));
+    if(arac) throw new Error('«' + arac.klasor + '» «' + arac.ad + '» aracının klasörü; onu aracın sayfasından yönet.');
+    const cevir = k => {
+      if(!kapsam(k, eski)) return k;
+      if(!yeni) return '';
+      const y = yeni + k.slice(eski.length);
+      if(y.split('/').length > 3) throw new Error('Klasör en çok 3 kat olabilir; «' + y + '» olmaz.');
+      return y;
+    }
+    const degisen = [];
+    const notlar = (o.notlar || []).map(n => {
+      const k = cevir(n.klasor || '');
+      if(k === (n.klasor || '')) return n;
+      degisen.push(n.id);
+      return Object.assign({}, n, { klasor:k, guncelleme:Math.max(zaman, n.guncelleme) });
+    });
+    const bos = Array.from(new Set((o.bos || []).map(ka).filter(Boolean).map(cevir).filter(Boolean)));
+    return { notlar, bos, degisen };
+  }
+
   const Not = Object.freeze({ TURLER, DUSUNCE_TURLERI, SINIR, KAYIT_ALANLARI, dogrula, yeni, ad, kucuk, katla, klasorAdi,
     baglar, bagYaz, etiketleri, geriBaglar, yenidenAdlandir, ag, kingIzin, kingOkur, oneri, oneriUygula, ara, goc,
-    GORUNUMLER, ARAC_ALANLARI, aracDogrula, yeniArac, kingAraclar, klasorde:icinde });
+    GORUNUMLER, ARAC_ALANLARI, aracDogrula, yeniArac, kingAraclar, klasorde:icinde, klasorler, klasorTasi });
   kok.LIFEOS = kok.LIFEOS || {};
   kok.LIFEOS.Motor = kok.LIFEOS.Motor || {};
   kok.LIFEOS.Motor.Not = Not;
@@ -596,3 +636,4 @@
     return { notlar, rapor:r };
   };
 })(typeof window !== 'undefined' ? window : globalThis);
+

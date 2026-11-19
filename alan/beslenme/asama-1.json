@@ -142,6 +142,112 @@
       "bolum": "3.1 Gizli Şekerler, 3.2 Hidrojenize ve Trans Yağ",
       "satir": "50-99",
       "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k16",
+      "ad": "DSÖ Sağlıklı beslenme bilgi notu: denge, karbonhidrat, sebze-meyve, lif, serbest şeker ve tatlandırıcılar",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "healthy-diet",
+      "satir": "33-39",
+      "dogrulama": "kaynakli"
+    },
+    {
+      "id": "k17",
+      "ad": "DSÖ Sağlıklı beslenme bilgi notu: yağ (doymuş, trans), pişirme yolları ve protein",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "healthy-diet",
+      "satir": "40-46",
+      "dogrulama": "kaynakli"
+    },
+    {
+      "id": "k18",
+      "ad": "DSÖ Sağlıklı beslenme bilgi notu: tuz, potasyum, mikro besinler ve çeşitlilik",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "healthy-diet",
+      "satir": "47-56",
+      "dogrulama": "kaynakli"
+    },
+    {
+      "id": "k19",
+      "ad": "Türkiye Beslenme Rehberi (TÜBER) 2022: dört besin grubu",
+      "tur": "kurum",
+      "yol": "T.C. Sağlık Bakanlığı Halk Sağlığı Genel Müdürlüğü, Türkiye Beslenme Rehberi (TÜBER) 2022",
+      "dogrulama": "kaynakli"
+    },
+    {
+      "id": "k20",
+      "ad": "Türk mutfağı ve temel besinler: geleneksel çorbalar (tarhana, ezogelin, yayla)",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_mutfagi_ve_temel_besinler_kalori_makro.md",
+      "bolum": "Geleneksel Çorbalar",
+      "satir": "50-52",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k21",
+      "ad": "Türk mutfağı ve temel besinler: bulgur pilavları ve haşlanmış yeşil mercimek",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_mutfagi_ve_temel_besinler_kalori_makro.md",
+      "bolum": "Tahıllar & Baklagiller",
+      "satir": "104-109",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k22",
+      "ad": "Türk kahvaltılıkları ve içecekler: ayran ve yayık ayranı",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/turk_kahvaltiliklari_sokak_lezzetleri_tatlilar_ve_icecekler_150_kalori_makro_ve_glisemik_atlasi.md",
+      "bolum": "İçecekler",
+      "satir": "125-126",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k23",
+      "ad": "Hidrasyon indeksi: yayık ayranının sodyum içeriği",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/hidrasyon_indeksi_bhi_elektrolit_sivilar_ve_icecek_biyokimyasi.md",
+      "bolum": "İçecek tablosu",
+      "satir": "122",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k24",
+      "ad": "Sağlıklı atıştırmalıklar: kuru meyvede enerji yoğunluğu, kuru kayısı ve leblebi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/saglikli_atistirmaliklar_kuru_meyveler_cekirdekler_bitter_cikolatalar_ve_ev_yapimi_fit_tarifler_100_kalem_atlasi.md",
+      "bolum": "Kuru meyve yoğunluğu ve tablo",
+      "satir": "16-72",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k25",
+      "ad": "Tokluk indeksi: duyuya özgü tokluk ve çiğneme süresi",
+      "tur": "gemini",
+      "yol": "SPI/beslenme/tokluk_indeksi_satiety_index_hacimsel_beslenme_ve_duygusal_yeme_norobiyolojisi.md",
+      "bolum": "3.2 Duyuya Özgü Tokluk ve Doku Sertliği",
+      "satir": "109-110",
+      "dogrulama": "dogrulanmamis"
+    },
+    {
+      "id": "k26",
+      "ad": "DSÖ Tuz azaltma bilgi notu: dünya ortalaması ve öneri",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "salt-reduction",
+      "satir": "108-113",
+      "dogrulama": "kaynakli"
+    },
+    {
+      "id": "k27",
+      "ad": "DSÖ Obezite ve fazla kilo bilgi notu: 2024 sayıları",
+      "tur": "depo",
+      "yol": "veri/temiz/spi/who_rehberler.jsonl",
+      "bolum": "obesity-and-overweight",
+      "satir": "89-90",
+      "dogrulama": "kaynakli"
     }
   ],
   "kapi": {
@@ -338,14 +444,22 @@
           "yazan": "model",
           "kaynak": [
             "k1",
-            "k3"
+            "k3",
+            "k16",
+            "k17"
           ],
           "ozet": "Enerji veren üç ana besin öğesi karbonhidrat, protein ve yağdır; her birinin ayrı bir görevi vardır ve biri tamamen dışlanınca denge bozulur.",
           "metin": [
             "Besinlerde enerji veren üç ana öğe vardır: karbonhidrat, protein ve yağ. Bunlara makro besin denir, çünkü günde gramlarca alınırlar.",
+            "Dünya Sağlık Örgütü (DSÖ) dengeyi şöyle tanımlar: alınan toplam enerji harcanan enerjiyle dengelenir ve bu enerji üç ana kaynak, yani protein, yağ ve karbonhidrat arasında yeterli bir oranla paylaştırılır. Yani doğru soru «hangisini keseyim?» değil, «üçü de yerinde mi?» sorusudur.",
             "Karbonhidrat beynin ve kasların hızlı yakıtıdır; tam tahıl, baklagil, meyve ve sebzede bulunur. Protein kas, bağışıklık ve onarım için gereklidir; et, balık, yumurta, süt ürünleri ve baklagilden gelir. Yağ hormonlar ve yağda çözünen vitaminler için gereklidir; zeytinyağı, kuruyemiş ve balıkta bulunur.",
+            "Karbonhidrat: DSÖ'ye göre vücudun ana enerji kaynağıdır ve çoğu insan için günlük enerjinin yaklaşık %45-75'i çeşitli ve işlenmemiş karbonhidratlardan gelmelidir. Bulgur, tam buğday ekmeği, yulaf, kuru baklagil, sebze ve meyve bu türdendir; şekerli içecek ve beyaz unlu hamur işi bu türden değildir.",
+            "Protein: DSÖ'ye göre yetişkinlerin ihtiyacını genellikle günlük enerjinin %10-15'i karşılar; günde yaklaşık 2000 kcal alan sağlıklı kilodaki biri için bu kabaca 50-75 gramdır. Ergenlikte ve kas kütlesi kazanmaya çalışan sporcularda bu oran daha yüksek olabilir.",
+            "Yağ: DSÖ, bazı yağ asitlerinin (linoleik ve alfa-linolenik asit) yalnız besinden alınabildiğini, bu yüzden yetişkinlerde günlük enerjinin en az %15'inin yağdan gelmesi gerektiğini yazar. Toplam yağı %30 ve altında tutmak sağlıksız kilo alımını önlemeye yardım edebilir; doymuş yağ %10'u, trans yağ %1'i geçmemelidir.",
             "Kaynaklar gram başına enerjiyi şöyle verir: karbonhidrat ve protein 4 kcal, yağ 9 kcal. Yani yağ gram başına iki kattan fazla enerji taşır. Gemini kaynağı ayrıca diyet lifini 2 kcal/g sayar; bu yüzden lifli besinlerde lif, karbonhidratın geri kalanından ayrı hesaplanabilir.",
-            "Alkol de enerji verir (7 kcal/g) ama besin değeri yoktur; bu yüzden makro besinlerden sayılmaz."
+            "Alkol de enerji verir (7 kcal/g) ama besin değeri yoktur; bu yüzden makro besinlerden sayılmaz.",
+            "Türk sofrasında üçü çoğu zaman zaten bir aradadır. Bir kâse mercimek çorbası karbonhidrat ve protein verir, üstüne gezdirilen zeytinyağı yağ ekler, yanındaki yoğurt ya da ayran bir protein kaynağı daha katar. Dengeli beslenmek yeni bir mutfak öğrenmek değil, bilinen sofrayı oranıyla kurmaktır (modelin bağlantı notu).",
+            "Bu yüzdeler topluma verilen genel bir çerçevedir; kişinin kendi ihtiyacı yaşına, hareketine ve sağlık durumuna göre değişir. Böbrek hastalığı, şeker hastalığı gibi bir durumu ya da özel bir diyeti olan biri oranları değiştirmeden önce hekime ya da diyetisyene danışmalıdır."
           ],
           "alistirmalar": [
             {
@@ -401,6 +515,26 @@
               "kaynak": [
                 "k1"
               ]
+            },
+            {
+              "id": "beslenme.1.1.1.a4",
+              "tur": "secmeli",
+              "soru": "DSÖ'ye göre yetişkinlerde trans yağ günlük enerjinin en fazla yüzde kaçı olmalıdır?",
+              "sec": [
+                "%1",
+                "%30",
+                "%15",
+                "%10"
+              ],
+              "dogru": "A",
+              "cozum": [
+                "DSÖ trans yağı %1'in altında, doymuş yağı %10'un altında tutmayı önerir; %30 toplam yağın üst sınırıdır."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
             }
           ]
         },
@@ -415,13 +549,22 @@
           "kaynak": [
             "k1",
             "k2",
-            "k3"
+            "k3",
+            "k20",
+            "k21",
+            "k22",
+            "k24"
           ],
           "ozet": "Etiketteki «kalori» aslında kilokaloridir; bir besinin enerjisi içindeki karbonhidrat, protein ve yağ gramından hesaplanır.",
           "metin": [
             "Besin etiketlerinde «kalori» diye yazan sayı aslında kilokaloridir (kcal). Bir besinin enerjisi, içindeki makro besinlerin gramı ile gram başına enerjilerinin çarpılıp toplanmasıyla bulunur.",
             "Örnek: 30 g karbonhidrat, 20 g protein ve 10 g yağ içeren bir öğün. Karbonhidrat 30 × 4 = 120 kcal, protein 20 × 4 = 80 kcal, yağ 10 × 9 = 90 kcal; toplam yaklaşık 290 kcal.",
-            "Bu hesap bir kavram aracıdır: kişiye kaç kalori yemesi gerektiğini söylemez. Kişisel hedefler ileri aşamaların ve SPİ'nin kendi hesaplarının işidir."
+            "Gerçek bir yemekle bakalım. Kaynağın tablosunda bir su bardağı dolusu (180 g) haşlanmış yeşil mercimek yaklaşık 16 g protein, 36 g karbonhidrat ve 0,7 g yağ taşır ve yaklaşık 209 kcal olarak verilir; bir kâse (250 g) ezogelin çorbası 170 kcal'dir. Tablo değerleri 4-4-9 hesabından biraz sapabilir, çünkü lif gibi ayrıntıları ayrıca hesaba katar.",
+            "Aynı hesap içecekler için de geçerlidir. Kaynakta 250 ml tam yağlı ayran yaklaşık 95 kcal'dir ve 5 g protein taşır. Şekerli gazlı bir içeceğin enerjisinin neredeyse tamamı şekerden gelir; ayranın enerjisi ise protein, yağ ve süt şekeri arasında paylaşılır (son cümle: modelin bağlantı notu).",
+            "Enerji yoğunluğundaki fark en çok kuru meyvede görülür. Kaynağa göre meyvenin suyu uçunca şekeri yoğunlaşır: 100 g taze incir yaklaşık 74 kcal iken 100 g kuru incir yaklaşık 250-260 kcal taşır. Bu yüzden kuru kayısı, incir ve üzüm avuçla değil adetle yenir; kaynağa göre üç kuru kayısı (30 g) yaklaşık 76 kcal'dir.",
+            "Gram bilmenin pratik yolları vardır. Paketli üründe etiketteki «100 g'da» ve «porsiyonda» sütunları ayrı okunur, çünkü bir paket çoğu zaman birden fazla porsiyondur. Ev yemeğinde ise kâse, su bardağı ve yemek kaşığı gibi sabit ölçüler bir kez tartılıp sonra gözle kullanılabilir (modelin bağlantı notu).",
+            "Bu hesap bir kavram aracıdır: kişiye kaç kalori yemesi gerektiğini söylemez. Kişisel hedefler ileri aşamaların ve SPİ'nin kendi hesaplarının işidir.",
+            "Kalori sayısı bir besinin değerini tek başına anlatmaz. 95 kcal'lik bir bardak ayran ile 95 kcal'lik şekerli bir atıştırmalık aynı enerjiyi verir, ama biri protein ve kalsiyum taşırken öteki neredeyse yalnız şekerdir. Bu aşamanın sonraki dersleri bu yüzden enerjiye ek olarak besin grubuna, tokluğa ve işlenme derecesine bakar (modelin bağlantı notu)."
           ],
           "alistirmalar": [
             {
@@ -467,6 +610,26 @@
               "kaynak": [
                 "k1"
               ]
+            },
+            {
+              "id": "beslenme.1.1.2.a3",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre 100 g kuru incirin enerjisi 100 g taze incirle karşılaştırıldığında nasıldır?",
+              "sec": [
+                "Yaklaşık aynı",
+                "Yaklaşık üç-dört kat fazla",
+                "Yarısı kadar",
+                "Kuru meyve enerji taşımaz"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "Su uçunca şeker yoğunlaşır: taze incir yaklaşık 74 kcal, kuru incir yaklaşık 250-260 kcal."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k24"
+              ]
             }
           ]
         },
@@ -480,14 +643,21 @@
           "yazan": "model",
           "kaynak": [
             "k2",
-            "k4"
+            "k4",
+            "k16",
+            "k27"
           ],
           "ozet": "Vücut dinlenirken de enerji harcar (bazal metabolizma); üzerine hareket, egzersiz ve sindirim eklenince günlük toplam harcama çıkar. Alınan ve harcanan arasındaki fark enerji dengesidir.",
           "metin": [
             "Vücudun dinlenirken yaşamak için harcadığı enerjiye bazal metabolizma denir; günlük harcamanın en büyük kısmıdır. Üzerine günlük hareket, egzersiz ve sindirim eklenince günlük toplam harcama çıkar.",
             "Sindirim de enerji ister: kaynak buna besinlerin termik etkisi der ve proteinin sindiriminin karbonhidrat ve yağdan daha çok enerji harcattığını yazar.",
+            "Kaynak termik etkiyi oranla da verir: protein enerjisinin yaklaşık %20-30'u, karbonhidratın %5-10'u, yağın ise %0-3'ü sindirim ve işlenmesinde harcanır. Bu fark gerçektir ama günlük toplam içinde küçüktür; tek başına kilo değiştiren bir «hile» gibi görülmemelidir (son cümle: modelin bağlantı notu).",
+            "Günlük harcamanın en oynak kısmı harekettir; kaynak egzersizi ve egzersiz dışı günlük hareketi (yürümek, merdiven çıkmak, ayakta iş, ev işi) toplam harcamanın ayrı parçaları olarak yazar. Masa başında çalışan biriyle gün boyu ayakta çalışan birinin harcaması bu yüzden belirgin biçimde ayrılır.",
             "Harcanandan az enerji alınırsa enerji açığı oluşur ve vücut depolarını kullanır; fazlası alınırsa depolar. Bazal metabolizmayı tahmin eden denklemler (ör. Mifflin–St Jeor) bir ortalama verir; aynı boy ve kilodaki iki kişinin gerçek harcaması yüzlerce kcal farklı olabilir. Bu yüzden bu hesaplar pusuladır, kesin takvim değildir.",
-            "Tartı gün içinde su, tuz ve sindirimle oynar; tek bir güne değil haftalık ortalamaya bakmak daha doğrudur."
+            "DSÖ dengeyi sağlıklı beslenmenin ilk ilkesi sayar: alınan toplam enerji harcananla dengelenmelidir. DSÖ'ye göre 2024'te dünyada 2,6 milyar yetişkin fazla kiloluydu, bunların 940 milyonu obezite ile yaşıyordu. Denge çoğu zaman bir günde değil, küçük farkların aylarca birikmesiyle bozulur (son cümle: modelin bağlantı notu).",
+            "Tartı gün içinde su, tuz ve sindirimle oynar; tek bir güne değil haftalık ortalamaya bakmak daha doğrudur.",
+            "Haftalık ortalama için her sabah aynı koşulda (tuvaletten sonra, kahvaltıdan önce) tartılıp yedi değer toplanır ve yediye bölünür. İki ardışık haftanın ortalamasını karşılaştırmak, tek günlük inişlere ve çıkışlara takılmaktan çok daha fazla şey söyler (modelin bağlantı notu).",
+            "Hızlı ve büyük kilo değişimi, iştahta açıklanamayan bir değişiklik ya da yorgunlukla birlikte gelen istemsiz kilo kaybı bir beslenme hesabı değil, hekime danışılacak bir durumdur. Bu ders bir zayıflama programı vermez; enerji dengesinin nasıl işlediğini anlatır."
           ],
           "alistirmalar": [
             {
@@ -525,6 +695,26 @@
               "yazan": "model",
               "kaynak": [
                 "k2"
+              ]
+            },
+            {
+              "id": "beslenme.1.1.3.a3",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre sindirimi ve işlenmesi en çok enerji harcatan makro besin hangisidir?",
+              "sec": [
+                "Yağ",
+                "Karbonhidrat",
+                "Protein",
+                "Üçü de eşittir"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Kaynağa göre termik etki proteinde %20-30, karbonhidratta %5-10, yağda %0-3'tür."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k4"
               ]
             }
           ]
@@ -626,12 +816,22 @@
           "yazan": "model",
           "kaynak": [
             "k1",
-            "k13"
+            "k13",
+            "k16",
+            "k18",
+            "k19",
+            "k20"
           ],
           "ozet": "Sofradaki yiyecekler birkaç gruba ayrılır: sebze ve meyve, tahıllar, protein kaynakları ve sağlıklı yağlar. Dengeli beslenme bu grupların haftanın toplamında yer almasıdır.",
           "metin": [
             "Sağlıklı beslenme tek bir mucize besin ya da yasaklı bir liste değil, haftanın toplamındaki dengedir. Bu dengeyi kurmanın ilk adımı yiyecekleri gruplara ayırmaktır.",
+            "T.C. Sağlık Bakanlığı'nın Türkiye Beslenme Rehberi (TÜBER) besinleri dört grupta toplar: süt ve süt ürünleri; et, tavuk, balık, yumurta, kurubaklagiller ve yağlı tohumlar; taze sebze ve meyveler; ekmek ve tahıllar. Rehberin temel mesajı her gün her gruptan yeterli miktarda yemektir.",
             "Sebze ve meyve: tabağın en büyük kısmı; lif ve bitki bileşiklerinin kaynağıdır. Tahıllar: bulgur, pirinç, yulaf, ekmek gibi; tam tahıllı olanı tercih edilir. Protein kaynakları: et, tavuk, balık, yumurta, süt ürünleri ve kuru baklagiller (mercimek, nohut, fasulye). Sağlıklı yağlar: zeytinyağı, kuruyemiş, yağlı balık.",
+            "Bu derste kullanılan başlıklar tabak modeline göre kurulmuştur; TÜBER ise süt ürünlerini ayrı bir grup sayar. İki ayrım çelişmez: yoğurt, ayran ve peynir hem kendi grubundadır hem de tabakta protein çeyreğine katkı verir (modelin bağlantı notu).",
+            "Kaynak tarhanayı yoğurt ve buğdayın birlikte fermente edilmesiyle yapılan bir çorba, yayla çorbasını da yoğurt temelli bir çorba olarak tanımlar. Süt grubu Türk mutfağında en kolay tamamlanan gruptur: yoğurt sözcüğü Türkçedir ve dünya dillerine Türkçeden geçmiştir; ayran, cacık ve haydari aynı mirasın parçalarıdır (son iki cümle: modelin bağlantı notu).",
+            "DSÖ çeşitliliği ayrıca vurgular: hem gruplar arasında hem de grubun içinde farklı besinlerle kurulan bir beslenme, vitamin ve mineral ihtiyacının karşılanma olasılığını artırır. Örneğin hafta boyunca yalnız pirinç yerine bulgur, yulaf, tam buğday ekmeği ve pirinç dönüşümlü kullanılabilir; protein grubunda tavuk, balık, yumurta, mercimek ve nohut sırayla gelebilir.",
+            "DSÖ'ye göre 10 yaşından büyük herkes günde en az 400 g sebze ve meyve hedeflemelidir. Bu kabaca 80 gramlık beş porsiyondur: kahvaltıda domates ve salatalık, öğlen bir kâse salata, akşam bir tabak zeytinyağlı sebze ve araya iki meyve bu hedefi karşılar (örnek: modelin bağlantı notu).",
+            "Vitamin ve mineraller de gruplardan gelir. DSÖ örnek verir: demir için kuru baklagil ya da yağsız et, A vitamini için koyu yeşil yapraklı sebzeler, iyot eksikliğini önlemek için iyotlu tuz. Bir grubun hiç girmediği bir hafta, o gruba özgü besin öğelerinin de eksik kalması demektir.",
             "Kaynak ayrıca yiyecekleri işlenme derecesine göre de ayırır. En az işlenmiş grubun örnekleri (taze sebze-meyve, et, tavuk, balık, yumurta, süt, sade yoğurt, kuru baklagil, pirinç, yulaf, çiğ kuruyemiş) aynı zamanda besin gruplarının temel taşlarıdır. İşlenme konusu 3. ünitede ayrıca işlenir."
           ],
           "alistirmalar": [
@@ -669,6 +869,26 @@
                 "k1",
                 "k13"
               ]
+            },
+            {
+              "id": "beslenme.1.2.1.a3",
+              "tur": "secmeli",
+              "soru": "TÜBER'in dört besin grubundan biri hangisidir?",
+              "sec": [
+                "Tatlılar ve şekerli içecekler",
+                "Hazır yemekler",
+                "Takviyeler",
+                "Süt ve süt ürünleri"
+              ],
+              "dogru": "D",
+              "cozum": [
+                "TÜBER'in grupları: süt ve ürünleri; et-tavuk-balık-yumurta-kurubaklagil-yağlı tohum; taze sebze ve meyve; ekmek ve tahıllar."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k19"
+              ]
             }
           ]
         },
@@ -681,14 +901,21 @@
           "durum": "taslak",
           "yazan": "model",
           "kaynak": [
-            "k1"
+            "k1",
+            "k18",
+            "k23"
           ],
           "ozet": "Ölçmeden pratik bir denge için tabak gözle bölünür: yarısı sebze ve meyve, dörtte biri tam tahıl, dörtte biri protein; yanında su ve az miktarda sağlıklı yağ.",
           "metin": [
             "Her öğünü tartmak gerekmez. Tabak modeli, gözle uygulanan bir denge kuralıdır: tabağın yarısı sebze ve meyve, dörtte biri tam tahıl, dörtte biri protein. Yanına su ve az miktarda sağlıklı yağ eklenir.",
+            "Tabağın yarısı neden sebze ve meyve? Çünkü bu grup az enerjiyle çok hacim, lif, potasyum ve bitki bileşiği verir. DSÖ potasyumun yüksek tuzun kan basıncına etkisini hafifletebildiğini ve potasyum alımının taze sebze ve meyveyle artırılabildiğini yazar.",
             "Örnek: büyük bir tabak makarna ve yanında biraz salata. Makarna tabağın dörtte birine iner ve tam tahıllı olabilir; salata ve sebze yarıya çıkar; kalan dörtte birlik yere tavuk, balık, yumurta ya da nohut gibi bir protein eklenir.",
+            "Türk sofrasından bir akşam örneği: bir tabak kuru fasulye (protein çeyreği), bir avuç bulgur pilavı (tahıl çeyreği), büyük bir kâse çoban salatası (sebze yarısı) ve bir bardak ayran. Kuru fasulye ile pilav zaten tahılla baklagili buluşturur; çoğu zaman eksik olan yalnız sebze yarısıdır (modelin bağlantı notu).",
+            "Kahvaltıda da aynı mantık çalışır: iki dilim tam buğday ekmeği (tahıl), bir yumurta ya da bir dilim beyaz peynir (protein), bol domates, salatalık, biber ve yeşillik (sebze yarısı) ve birkaç zeytin. Reçel, bal ve börek tabağın bir çeyreği değil, ara sıra eklenen bir tattır (modelin bağlantı notu).",
             "Su: ihtiyacın bir kısmı yiyeceklerden gelir. Kaynak, Avrupa Gıda Güvenliği Otoritesi'nin toplam su için kadınlarda yaklaşık 2,0 L, erkeklerde 2,5 L referansını aktarır; sıcakta ve terlerken ihtiyaç artar. İdrarın açık renkte olması pratik bir işarettir.",
-            "Tabak modeli bir başlangıç aracıdır; porsiyon ölçmek, öğünü hedefe göre ayarlamak sonraki aşamaların konusudur."
+            "En iyi içecek sudur; ayran da sıvıya katkı verir ama tuzu unutulmamalıdır. Kaynağa göre 250 ml hafif tuzlu ayran yaklaşık 450 mg sodyum taşır; bu, DSÖ'nün yetişkinler için günlük 2000 mg sodyum sınırının beşte birinden fazlasıdır. Ayranı evde az tuzlu yapmak ve tuzlu yemeklerin yanında tuzluk kullanmamak bu yükü azaltır.",
+            "Tabak modeli bir başlangıç aracıdır; porsiyon ölçmek, öğünü hedefe göre ayarlamak sonraki aşamaların konusudur.",
+            "Tabak modeli herkese aynı ölçüyü vermez. Çocuklar, gebeler, ileri yaştakiler ve böbrek, karaciğer ya da şeker hastalığı gibi bir durumu olanlar için oranlar farklı olabilir; bu kişiler hekime ya da diyetisyene danışmalıdır."
           ],
           "alistirmalar": [
             {
@@ -742,6 +969,27 @@
               "kaynak": [
                 "k1"
               ]
+            },
+            {
+              "id": "beslenme.1.2.2.a4",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre 250 ml hafif tuzlu ayranın sodyumu, DSÖ'nün günlük 2000 mg sodyum sınırının yaklaşık ne kadarıdır?",
+              "sec": [
+                "Beşte birinden biraz fazlası",
+                "Yarısından fazlası",
+                "İki katı",
+                "Hiç sodyum içermez"
+              ],
+              "dogru": "A",
+              "cozum": [
+                "450 mg, 2000 mg'ın yaklaşık %22'sidir."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k23",
+                "k18"
+              ]
             }
           ]
         },
@@ -756,13 +1004,21 @@
           "kaynak": [
             "k5",
             "k6",
-            "k7"
+            "k7",
+            "k17",
+            "k24"
           ],
           "ozet": "Tabağın sebze-meyve yarısında çeşitlilik önemlidir: farklı renkler farklı bitki bileşiklerini taşır; mevsiminde ürün seçmek çeşitliliği kendiliğinden artırır.",
           "metin": [
             "Kaynak sebze ve meyveleri renk gruplarına ayırır: kırmızı (domates gibi, likopen), turuncu-sarı (havuç, turunçgiller, karotenoidler), yeşil ve turpgiller (brokoli, lahana), mor-mavi-siyah (patlıcan kabuğu, böğürtlen, antosiyaninler), beyaz ve kükürtlü (sarımsak, soğan). Her grup ayrı bileşikler taşıdığı için haftaya birkaç renk yaymak tek renge bağlı kalmaktan iyidir.",
+            "Türk mutfağında her renk tanıdık bir yemekte bulunur: kırmızı için domates ve kırmızı biber (menemen, salça), turuncu için havuç ve bal kabağı, yeşil için ıspanak, pazı ve semizotu, mor için patlıcan ve mor lahana, beyaz için soğan, sarımsak ve pırasa. Yeni bir ürün aramak gerekmez; bilinenleri haftaya yaymak yeter (modelin bağlantı notu).",
             "Hazırlama da önemlidir. Kaynak, domatesin zeytinyağıyla pişirildiğinde (salça, menemen, sos) likopenin daha kolay emildiğini yazar. Turunçgillerde lifli beyaz zar ve dilim zarları meyvenin lifini taşır; bu yüzden meyvenin bütün yenmesi, sıkma suyuna tercih edilir.",
-            "Mevsim takvimi çeşitliliğin pratik yoludur: örneğin kışın pırasa, ıspanak, lahana, portakal ve mandalina; yazın domates, biber, patlıcan, kiraz ve karpuz. Takvimi izleyen biri yıl içinde kendiliğinden birçok renge uğrar."
+            "Pişirme yöntemi de önemlidir. DSÖ yağı, özellikle doymuş yağı azaltmak için kızartma yerine buharda pişirmeyi ya da haşlamayı önerir. Türk mutfağının zeytinyağlıları (taze fasulye, enginar, barbunya) sebzeyi bitkisel yağla ve kendi suyunda pişirdiği için bu öneriye yakın bir gelenektir (son cümle: modelin bağlantı notu).",
+            "Mevsim takvimi çeşitliliğin pratik yoludur: örneğin kışın pırasa, ıspanak, lahana, portakal ve mandalina; yazın domates, biber, patlıcan, kiraz ve karpuz. Takvimi izleyen biri yıl içinde kendiliğinden birçok renge uğrar.",
+            "Kaynağın takvimine göre Kasım'da brokoli, karnabahar, pırasa, kereviz, ıspanak, mor lahana, şalgam ve turp; meyvede portakal, mandalina, nar, ayva, Trabzon hurması ve kivi mevsimindedir. Temmuz'da ise tarla domatesi, biber, patlıcan, bamya ve barbunya; karpuz, kavun, şeftali, kayısı ve vişne öne çıkar.",
+            "Kışın taze ürün azaldığında Anadolu'nun eski saklama yolları devreye girer: kurutulmuş patlıcan ve biber, kuru fasulye, kuru kayısı ve incir. Kaynağa göre kurutma suyu uçurduğu için şekeri ve enerjiyi yoğunlaştırır; bu yüzden kuru meyve taze meyveden daha küçük porsiyonla, adetle yenir (ilk cümle: modelin bağlantı notu).",
+            "Dondurulmuş sebze ve meyve de bir seçenektir; çoğu hasattan kısa süre sonra dondurulur ve besin değerinin büyük kısmını korur. Önemli olan kış aylarında tabağın sebze yarısının boş kalmamasıdır (modelin bağlantı notu).",
+            "Pratik kural: her alışverişte sepete en az üç farklı renk koymak ve hafta sonunda hangi rengin hiç girmediğini not etmek. Bu, çeşitliliği ölçmenin en basit yoludur (modelin bağlantı notu)."
           ],
           "not": "Kaynakta «meyve suyu sadece fruktoz ve sitrik asit içerir» (satır 40) yanlış bir genellemedir ve sağlık iddiaları («antikanserojen», «vasküler geçirgenliği onarır», emilimin «3-4 katına» çıkması) doğrulanamadı; derse alınmadı.",
           "alistirmalar": [
@@ -816,6 +1072,26 @@
                 "k6",
                 "k7"
               ]
+            },
+            {
+              "id": "beslenme.1.2.3.a4",
+              "tur": "secmeli",
+              "soru": "DSÖ yağı azaltmak için hangi pişirme yolunu önerir?",
+              "sec": [
+                "Derin yağda kızartma",
+                "Buharda pişirme ya da haşlama",
+                "Tereyağında kavurma",
+                "Margarinle kızartma"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "DSÖ kızartma yerine buharda pişirme ya da haşlamayı önerir."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k17"
+              ]
             }
           ]
         },
@@ -829,13 +1105,23 @@
           "yazan": "model",
           "kaynak": [
             "k8",
-            "k9"
+            "k9",
+            "k16",
+            "k17",
+            "k18",
+            "k21"
           ],
           "ozet": "Bitkisel proteinler eksik değildir ama amino asit oranları farklıdır; tahıl ile baklagil aynı öğünde ya da gün içinde birlikte yenince birbirini tamamlar.",
           "metin": [
             "Kaynağa göre bitkisel proteinler sanıldığı gibi «eksik» değildir; yalnız bazı amino asitlerin oranı hayvansal proteinlerden düşüktür.",
             "Tahıllar (buğday, pirinç, bulgur, mısır, yulaf) lizin bakımından fakir, metiyonin bakımından zengindir. Baklagiller (mercimek, nohut, kuru fasulye) tam tersine metiyonin bakımından fakir, lizin bakımından zengindir. İkisi aynı öğünde ya da gün içinde yenince birbirinin eksiğini tamamlar.",
-            "Türk mutfağı bunu zaten yapar: kuru fasulye ile pilav, mercimek çorbası ile tam buğday ekmeği, nohut ile tahinden yapılan humus, yeşil mercimek ile bulgurdan mücendra. Bitkisel bir öğünde tabağın protein çeyreğini baklagil, tahıl çeyreğini tahıl doldurursa eşleşme kendiliğinden kurulur."
+            "Türk mutfağı bunu zaten yapar: kuru fasulye ile pilav, mercimek çorbası ile tam buğday ekmeği, nohut ile tahinden yapılan humus, yeşil mercimek ile bulgurdan mücendra. Bitkisel bir öğünde tabağın protein çeyreğini baklagil, tahıl çeyreğini tahıl doldurursa eşleşme kendiliğinden kurulur.",
+            "Kaynağın tablosu bu eşleşmelerin bir öğünde ne kadar protein verdiğini de hesaplar: kuru fasulye (150 g) ile pilav (180 g) yaklaşık 18,5 g; bir kâse yeşil mercimek çorbası ile iki ince dilim tam buğday ekmeği yaklaşık 20 g; mercimek ile bulgurdan mücendra yaklaşık 19 g protein verir.",
+            "Eşleşmenin aynı tabakta olması şart değildir. Kaynak tamamlamanın aynı öğünde ya da gün içinde olabileceğini yazar; sabah tam buğday ekmeği, akşam mercimek yemeği de birbirini tamamlar.",
+            "DSÖ proteinin hayvansal ve bitkisel kaynakların karışımından gelebileceğini ve birçok yetişkin için protein kaynaklarının, özellikle kırmızı etten, bitkisel kaynaklara doğru kaymasının sağlığa yarar sağlayabileceğini yazar. Aynı kaynak çocuklar, gebeler ve emziren kadınlar için hayvansal besinlerin hâlâ önemli olabildiğini de belirtir.",
+            "Baklagilin bir başka kazancı liftir. Kaynağın tablosunda bir su bardağı (180 g) haşlanmış yeşil mercimek yaklaşık 14 g lif taşır; bu, DSÖ'nün yetişkinler için günde en az 25 g lif hedefinin yarısından fazlasıdır.",
+            "Baklagil bazı kişilerde şişkinlik yapabilir. Bunu azaltmanın geleneksel yolları vardır: kuru baklagili bir gece suda bekletip suyunu dökmek, iyice pişirmek ve miktarı birkaç haftada yavaş yavaş artırmak (modelin bağlantı notu). Bağırsak hastalığı olan biri baklagili artırmadan önce hekimine danışmalıdır.",
+            "Tamamen bitkisel beslenen biri için protein dışında B12 vitamini gibi doğal olarak yalnız hayvansal besinlerde bulunan öğeler de gündeme gelir. Bu bir hekim ve diyetisyen konusudur; bu derste takviye önerilmez (modelin bağlantı notu)."
           ],
           "not": "Kaynağın aynı bölümündeki «anabolik lösin eşiği» ve öğün başına gram hedefleri (satır 18-19, tablodaki eşik sütunu) ileri ve kişiye özgü hedeflerdir; bu aşamaya alınmadı.",
           "alistirmalar": [
@@ -871,6 +1157,27 @@
               "yazan": "model",
               "kaynak": [
                 "k9"
+              ]
+            },
+            {
+              "id": "beslenme.1.2.4.a3",
+              "tur": "secmeli",
+              "soru": "Kaynağın tablosuna göre bir su bardağı haşlanmış yeşil mercimek yaklaşık ne kadar lif taşır?",
+              "sec": [
+                "1 g",
+                "50 g",
+                "14 g",
+                "Hiç lif taşımaz"
+              ],
+              "dogru": "C",
+              "cozum": [
+                "Tabloda 180 g haşlanmış yeşil mercimek 14,2 g lifle verilir; DSÖ'nün 25 g hedefinin yarısından fazlası."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k21",
+                "k16"
               ]
             }
           ]
@@ -972,14 +1279,20 @@
           "kaynak": [
             "k10",
             "k11",
-            "k12"
+            "k12",
+            "k25"
           ],
           "ozet": "Bazı besinler aynı enerjiyle çok daha uzun tok tutar. Su, lif ve protein oranı yüksek, enerji yoğunluğu düşük besinler mideyi daha çok doldurur.",
           "metin": [
             "Kaynak, Holt ve arkadaşlarının (1995) tokluk indeksini aktarır: eşit enerjili (240 kcal) besinler yedirilmiş ve sonraki iki saatteki tokluk ölçülmüştür. Beyaz ekmek 100 sayıldığında haşlanmış patates en yüksek (323), kruvasan en düşük (47) çıkmıştır. Aynı enerji için çok daha fazla patates gerekir; patatesin suyu mideyi doldurur.",
             "Bunun arkasındaki kavram enerji yoğunluğudur: bir gram besindeki kalori. Kaynak dört kategori verir: çok düşük (gram başına 0,6 kcal altı; çiğ sebze, yeşillik, sebze çorbası), düşük (0,6–1,5; haşlanmış patates, pişmiş baklagil, taze meyve, yulaf lapası, yağsız beyaz balık), orta (1,5–4; tam buğday ekmeği, peynir, kuru meyve), yüksek (4–9; kraker, cips, çikolata, kuruyemiş, yağlar).",
             "Pratik sonuç: tabağın yarısının sebze-meyve olması yalnız vitamin için değil tokluk için de işe yarar. Mide hacmi doldurur, kaloriyi saymaz.",
-            "Açlığın iki yüzü vardır. Kaynak, yavaş gelen, midede hissedilen ve sade bir yemekle geçen fiziksel açlık ile aniden gelen, belirli bir yiyeceğe kilitlenen, doyunca da sürebilen duygusal açlığı ayırır. Hangisini yaşadığını fark etmek, seçimi bilinçli yapmanın ilk adımıdır."
+            "Hacimli başlamak tokluğu kolaylaştırır. Öğüne bir kâse sebze çorbası ya da büyük bir salatayla başlamak, kaynağın «çok düşük» enerji yoğunluğu grubundan bir başlangıçtır; mide az enerjiyle dolmaya başlar. Pişmiş baklagil ve taze meyve de kaynağın «düşük» grubundadır (ilk cümle: modelin bağlantı notu).",
+            "Çiğnemek de tokluğun parçasıdır. Kaynağa göre hızlı yutulan yemekler ve sıvı kaloriler ağızda kısa kalır; sert ve lifli dokulu besinler çiğneme sayısını artırır ve bu, tokluk sinyallerine zaman tanır. Pratikte bu, meyveyi suyu yerine bütün yemek ve lokmalar arasında çatalı bırakmak demektir (son cümle: modelin bağlantı notu).",
+            "Kaynak bir tuzağı daha anlatır: duyuya özgü tokluk. Tuzlu ve yağlı bir yemekten sonra doymuş hisseden biri, masaya tatlı gelince yeniden iştah duyabilir; çeşitlilik arttıkça yenen miktar da artar. Açık büfede ve çok çeşitli sofralarda tabağı bir kez doldurmak bu yüzden işe yarar (son cümle: modelin bağlantı notu).",
+            "Açlığın iki yüzü vardır. Kaynak, yavaş gelen, midede hissedilen ve sade bir yemekle geçen fiziksel açlık ile aniden gelen, belirli bir yiyeceğe kilitlenen, doyunca da sürebilen duygusal açlığı ayırır. Hangisini yaşadığını fark etmek, seçimi bilinçli yapmanın ilk adımıdır.",
+            "Duygusal açlık bir başarısızlık değildir; herkes zaman zaman stres, can sıkıntısı ya da yorgunlukla yer. Fark etmek için kısa bir duraklama yeter: «Şu an midem mi aç, yoksa başka bir şey mi istiyorum?» Gerçek açlıksa sade bir öğün, değilse kısa bir yürüyüş, bir bardak su ya da biriyle konuşmak denenebilir (modelin bağlantı notu).",
+            "Yemek karşısında kontrol kaybı sık tekrarlıyorsa, yemekten sonra yoğun suçluluk, kusma ya da aşırı kısıtlama gibi davranışlar varsa bu bir beslenme ipucu konusu değildir; bir hekime ya da ruh sağlığı uzmanına danışılmalıdır."
           ],
           "not": "Kaynaktaki 38 gıdalık tablonun bazı satırları (tofu, haşlanmış tavuk göğsü, «soğutulmuş» patates gibi) özgün çalışmada olmayabilir, mercimek değeri farklı olabilir; tablonun tamamı derse alınmadı, yalnız patates-kruvasan uçları aktarıldı. «Reaktif hipoglisemi», ön yüklemenin «%20» etkisi, açlık tablosunun «tanı matrisi» adı ve «brokoli testi kesin kanıttır» ifadesi alınmadı.",
           "alistirmalar": [
@@ -1016,6 +1329,26 @@
               "kaynak": [
                 "k10"
               ]
+            },
+            {
+              "id": "beslenme.1.3.1.a3",
+              "tur": "secmeli",
+              "soru": "Kaynağa göre doyduktan sonra masaya tatlı gelince iştahın yeniden açılmasına ne denir?",
+              "sec": [
+                "Termik etki",
+                "Bazal metabolizma",
+                "Enerji açığı",
+                "Duyuya özgü tokluk"
+              ],
+              "dogru": "D",
+              "cozum": [
+                "Kaynak bunu duyuya özgü tokluk olarak anlatır: o tada özgü tokluk sıfırlanır, çeşitlilik arttıkça yenen miktar artar."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k25"
+              ]
             }
           ]
         },
@@ -1034,9 +1367,14 @@
           "ozet": "NOVA, gıdaları besin öğelerine göre değil işlenme derecesine göre dört gruba ayırır; ultra-işlenmiş ürünler kolay ve hızlı yenir, fazla yemeye yatkınlaştırır.",
           "metin": [
             "Carlos Monteiro ve ekibinin NOVA sınıflandırması dört grup tanımlar. Grup 1, işlenmemiş ya da en az işlenmiş gıdalardır (taze sebze-meyve, et, balık, yumurta, süt, sade yoğurt, kuru baklagil, pirinç, yulaf). Grup 2, mutfakta kullanılan işlenmiş malzemelerdir (zeytinyağı, tereyağı, tuz, şeker, sirke, bal). Grup 3, Grup 1 gıdalarına tuz, yağ ya da şeker eklenerek yapılan geleneksel işlenmiş gıdalardır (konserve baklagil, peynir, mayalı ekmek). Grup 4, ev mutfağında bulunmayan katkılarla formüle edilen ultra-işlenmiş ürünlerdir (gazlı içecek, paketli bisküvi ve kek, hazır noodle, nugget, aromalı yoğurt).",
+            "NOVA'yı Türk mutfağına uygulamak kolaydır. Kuru fasulye, bulgur, yumurta, süt ve taze sebze Grup 1'dir. Zeytinyağı, tereyağı, tuz ve bal Grup 2'dir. Beyaz peynir, mayalı ekmek ve konserve nohut Grup 3'tür. Hazır paket çorbalar, aromalı sütlü tatlılar, paketli kek ve gazlı içecekler ise çoğunlukla Grup 4'tür (son cümle: modelin bağlantı notu).",
+            "Grup 3 kötü demek değildir: peynir, salamura zeytin, turşu ve tarhana gibi geleneksel işlenmiş besinler Anadolu'da yüzyıllardır yiyeceği saklamanın yoluydu. Dikkat edilecek nokta tuzdur; peynir, zeytin ve turşu sofradaki tuzun önemli kaynaklarındandır (modelin bağlantı notu).",
             "Kaynak, Kevin Hall ve arkadaşlarının (NIH, 2019) çalışmasını aktarır: 20 yetişkin iki hafta ultra-işlenmiş, iki hafta işlenmemiş ağırlıklı beslenmiş ve istedikleri kadar yemiştir. Sunulan öğünler kalori, makro besin, şeker, tuz ve lif bakımından eşleştirilmiştir. Ultra-işlenmiş dönemde katılımcılar günde ortalama yaklaşık 500 kcal daha fazla yemiş ve kilo almıştır.",
+            "Hall çalışması küçüktür (20 kişi) ve kısa sürmüştür; tek başına her şeyi kanıtlamaz. Ama kalori ve besin öğeleri eşlenmiş öğünlerle bile farkın çıkması, işlenme derecesinin ayrı bir etken olabileceğini düşündürür (modelin bağlantı notu).",
             "Kaynağa göre bunun bir nedeni yeme hızıdır: ultra-işlenmiş ürünler az çiğneme ister, hızlı yenir ve tokluk sinyali gelmeden fazlası yenmiş olur. Öteki nedeni enerji yoğunluğudur (önceki ders).",
-            "Pratik sonuç: tabağın çoğunu Grup 1 gıdalardan kurmak, Grup 2 malzemeleri ölçülü kullanmak ve Grup 4 ürünleri ara sıra yemek."
+            "Kaynağa göre Grup 4 ürünler ev mutfağında bulunmayan maddelerle formüle edilir: hidrojene yağlar, izole proteinler, modifiye nişastalar, invert şekerler ve emülgatör, kıvam artırıcı gibi katkılar. İçindekiler listesinde bu adlar görünüyorsa ürün büyük olasılıkla ultra-işlenmiştir; bir sonraki ders bu listeyi okumayı anlatır.",
+            "Pratik sonuç: tabağın çoğunu Grup 1 gıdalardan kurmak, Grup 2 malzemeleri ölçülü kullanmak ve Grup 4 ürünleri ara sıra yemek.",
+            "Gerçekçi hedef hiç Grup 4 yememek değildir. Kahvaltıyı ve ana öğünleri Grup 1-3'ten kurup Grup 4 ürünleri ara sıra ve bilerek seçmek sürdürülebilir bir yoldur. Evde pişen bir mercimek çorbası, hazır paket çorbadan hem daha az katkı hem genellikle daha az tuz içerir (modelin bağlantı notu)."
           ],
           "not": "Kaynaktaki «%100 birebir eşitlenmiş» ifadesi yalnız sunulan öğünler için geçerlidir; yenen miktar farklıdır. Dakikadaki gram/kcal hızları ve «Bliss Point» oranları (satır 44-46) doğrulanamadı, alınmadı.",
           "alistirmalar": [
@@ -1088,6 +1426,26 @@
               "kaynak": [
                 "k13"
               ]
+            },
+            {
+              "id": "beslenme.1.3.2.a4",
+              "tur": "secmeli",
+              "soru": "Hall çalışmasıyla ilgili hangisi doğrudur?",
+              "sec": [
+                "Sunulan öğünler kalori ve besin öğeleri bakımından eşleştirilmişti",
+                "Katılımcılar yalnız su içti",
+                "Binlerce kişiyle on yıl sürdü",
+                "Katılımcılara yiyecek miktarı zorla verildi"
+              ],
+              "dogru": "A",
+              "cozum": [
+                "Öğünler eşleştirilmişti; katılımcılar istedikleri kadar yedi ve ultra-işlenmiş dönemde günde yaklaşık 500 kcal fazla yediler."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k14"
+              ]
             }
           ]
         },
@@ -1101,14 +1459,25 @@
           "yazan": "model",
           "kaynak": [
             "k15",
-            "k1"
+            "k1",
+            "k16",
+            "k17",
+            "k18",
+            "k26"
           ],
           "ozet": "İçindekiler listesi ürünün gerçek bileşimini söyler: şeker birçok farklı adla yazılabilir, «hidrojenize» kelimesi trans yağ işaretidir; tuz, eklenmiş şeker ve lif için genel öneriler seçimi kolaylaştırır.",
           "metin": [
             "Ürünün ön yüzü pazarlamadır; içindekiler listesi bileşimdir. Kaynak, şekerin etikette onlarca farklı adla geçebildiğini gösterir: glikoz şurubu, früktoz şurubu, yüksek früktozlu mısır şurubu, invert şeker, dekstroz, maltodekstrin, malt şurubu, meyve suyu konsantresi, agave ya da pirinç şurubu. Listede bu adlardan biri varsa ürüne şeker eklenmiştir; «şeker ilavesiz» yazısı tek başına yeterli değildir.",
+            "Şekerde asıl ölçü «serbest şeker»dir. DSÖ'ye göre serbest şeker günlük enerjinin %10'undan az olmalıdır; bu, günde yaklaşık 2000 kcal alan biri için 50 g, yani yaklaşık 12 silme çay kaşığıdır ve %5'in altına inmek ek fayda sağlayabilir. Eklenen şekerin yanında bal, pekmez, şurup ve meyve suyu da serbest şekere girer; bütün meyvedeki şeker girmez (son cümle: modelin bağlantı notu).",
+            "DSÖ şekeri azaltmanın şekersiz tatlandırıcılarla yapılmamasını da önerir ve örnek olarak aspartam, sakarin, sukraloz ve steviyayı sayar. Yani «şekersiz ama tatlandırıcılı» içecek önerilen yol değildir; önerilen yol tatlı içeceği su, sade ayran ya da şekersiz çayla değiştirmektir (son cümle: modelin bağlantı notu).",
             "Yağ tarafında kaynak, «kısmi hidrojenize» ya da «hidrojenize bitkisel yağ» ifadesinin trans yağ işareti olduğunu yazar. Porsiyondaki trans yağ belli bir eşiğin altındaysa etikette «0 g» yazılabildiği için, içindekiler listesine bakmak sayıya bakmaktan daha güvenlidir.",
+            "DSÖ endüstriyel trans yağların sağlıklı beslenmenin parçası olmadığını ve kaçınılması gerektiğini yazar; bu yağlar paketli kek, bisküvi, gofret ve kızartmalarda bulunabilir. Doymuş yağın yerine zeytinyağı gibi bitkisel kaynaklı doymamış yağlar ya da tam tahıl, baklagil ve sebze gibi lifli besinler konabilir.",
             "Genel öneriler: Dünya Sağlık Örgütü tuzu günde 5 g'ın altında, eklenmiş şekeri günlük enerjinin %10'undan az (mümkünse %5) tutmayı önerir; lif için yetişkinlerde günde 25 g ve üzeri önerilir ve tam tahıl, baklagil, sebze ve meyveden gelir. Tuzun çoğu tuzluktan değil; ekmek, peynir, hazır çorba, işlenmiş et ve atıştırmalıklardan gelir.",
-            "Bu öneriler toplum için genel çerçevedir; kişiye özel bir hedef değildir."
+            "DSÖ'ye göre 2021'de yetişkinlerin dünya ortalaması günde yaklaşık 11 g tuzdu; önerinin iki katından fazla. Etikette sodyum yazıyorsa tuza çevirmek için yaklaşık 2,5 ile çarpılır: 2000 mg sodyum yaklaşık 5 g, 400 mg sodyum yaklaşık 1 g tuzdur.",
+            "DSÖ tuzu azaltmanın yollarını da sayar: pişirirken tuzu ve bulyon gibi tuzlu çeşnileri azaltmak, sofraya tuzluk koymamak, tuzlu atıştırmalıkları sınırlamak ve daha az sodyumlu ürünü seçmek. Tuz azalınca nane, kekik, pul biber, sumak, limon ve sarımsak lezzeti taşır (son cümle: modelin bağlantı notu).",
+            "Etiketi okumanın bir sırası vardır: önce porsiyon ve paketteki porsiyon sayısı, sonra enerji, sonra şeker, doymuş yağ ve tuz, en son içindekiler listesi. İçindekiler çoktan aza doğru sıralanır; listenin ilk üç maddesi ürünün çoğunu anlatır (modelin bağlantı notu).",
+            "Bu öneriler toplum için genel çerçevedir; kişiye özel bir hedef değildir.",
+            "Yüksek tansiyonu, böbrek hastalığı ya da şeker hastalığı olan biri için tuz, potasyum ve şeker sınırları farklı olabilir; bu kişiler hekimlerinin önerisine uymalıdır. DSÖ de potasyumlu tuz ikamelerinin yalnız kan potasyumu yükselme riski olmayan kişilere uygun olduğunu yazar."
           ],
           "not": "Kaynaktaki şeker tablosunda her ada verilen metabolik yorumlar («glisemik yük bombası», agave için «HFCS'den daha zararlı»), trans yağ için «ölümcül» nitelemesi, «mono ve digliseritler»in trans yağ terimi sayılması ve emülgatörlerin «geçirgen bağırsak», otoimmün hastalık ve karaciğer yağlanmasına yol açtığı iddiası (satır 102-105), tatlandırıcı tablosundaki mikrobiyom yüzdeleri derse alınmadı.",
           "alistirmalar": [
@@ -1161,6 +1530,26 @@
               "kaynak": [
                 "k15",
                 "k1"
+              ]
+            },
+            {
+              "id": "beslenme.1.3.3.a4",
+              "tur": "secmeli",
+              "soru": "Bir etikette porsiyon başına 800 mg sodyum yazıyor. Bu yaklaşık kaç gram tuzdur?",
+              "sec": [
+                "0,8 g",
+                "2 g",
+                "8 g",
+                "20 g"
+              ],
+              "dogru": "B",
+              "cozum": [
+                "Sodyum × 2,5 ≈ tuz: 800 mg × 2,5 = 2000 mg, yani yaklaşık 2 g tuz."
+              ],
+              "durum": "taslak",
+              "yazan": "model",
+              "kaynak": [
+                "k26"
               ]
             }
           ]

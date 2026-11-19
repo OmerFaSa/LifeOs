@@ -1114,6 +1114,12 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .tdev__bugun > span:first-child{ margin-right:var(--a2); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
 .tdev__yil, .tdev__han{ margin-left:var(--a2); color:var(--soluk); }
 .tdev__han::before{ content:"· "; }
+.turk-muhur{ max-width:var(--sayfa); margin:var(--a7) auto var(--a6); padding:var(--a5) var(--a4) 0; text-align:center; }
+.turk-muhur__yildiz{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; color:var(--altin); }
+.turk-muhur__yildiz svg{ width:12px; height:12px; fill:currentColor; opacity:.8; }
+.turk-muhur__yildiz svg:nth-child(8n+1){ color:var(--ana); opacity:1; }
+.turk-muhur__soz{ margin:var(--a3) 0 0; font:italic 600 var(--yz)/1.4 var(--okuma); letter-spacing:.02em; color:var(--yazi); }
+.turk-muhur__runik{ margin:var(--a1) 0 0; font:1.1rem/1 "Segoe UI Historic","Noto Sans Old Turkic",sans-serif; letter-spacing:.3em; color:var(--altin); }
 .miras{ margin:0 0 var(--a5); padding:var(--a4) var(--a5); border-radius:var(--kose); background:var(--yuzey-ust); }
 .miras__etiket{ margin:0; font-size:var(--yz-k); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
 .miras__ad{ margin:var(--a1) 0 0; font:600 var(--yz-h3)/1.3 var(--okuma); color:var(--yazi); }
@@ -1124,3 +1130,56 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 .ders__atasozu span{ font-style:normal; font-size:var(--yz-k); color:var(--soluk); }
 .ust__bayrak{ flex:none; width:21px; height:14px; border-radius:2px; box-shadow:0 1px 2px rgb(0 0 0 / .25); }
 @media (max-width:640px){ .soz{ padding:var(--a4); } }
+
+/* Notlar: klasörler ve yazma (2026-11-18k) — kabuk/araclar.js klasorCubugu, klasorEylemleri, notyaz; kenar çizgisi yok, ton + yumuşak gölge */
+.klasorler{ margin-top:var(--a5); }
+.klasorler__liste{ display:flex; flex-wrap:wrap; gap:var(--a2); margin:0; padding:0; list-style:none; }
+.klasorler__liste > li{ min-width:0; max-width:100%; }
+.klasorler__liste > li:has(> .klasor-yeni[open]){ flex-basis:100%; }
+.klasor-cip{ display:inline-flex; align-items:center; gap:var(--a2); max-width:100%; min-height:36px; padding:0 var(--a3); border-radius:var(--kose-tam);
+  font-size:var(--yz-k); color:var(--yazi-2); text-decoration:none; background:var(--yuzey-2); cursor:pointer; transition:background var(--sure), color var(--sure); }
+.klasor-cip:hover{ background:color-mix(in srgb, var(--ana) 12%, var(--yuzey-2)); color:var(--yazi); }
+.klasor-cip__ad{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.klasor-cip__ust{ color:var(--soluk); }
+.klasor-cip__sayi{ font-variant-numeric:tabular-nums; color:var(--soluk); }
+.klasor-cip[aria-current="page"]{ color:var(--dugme-ana-yazi); background:var(--dugme-ana); }
+.klasor-cip[aria-current="page"] :is(.klasor-cip__sayi, .klasor-cip__ust){ color:inherit; opacity:.72; }
+.klasor-cip--arac .klasor-cip__ad::before{ content:""; display:inline-block; width:6px; height:6px; margin-right:var(--a2); vertical-align:middle; border-radius:50%; background:var(--altin); }
+.klasor-cip--sakin:not([aria-current]){ background:transparent; }
+.klasor-cip--ekle{ list-style:none; color:var(--soluk); background:transparent; }
+.klasor-cip--ekle::-webkit-details-marker{ display:none; }
+.klasor-yeni[open] > .klasor-cip--ekle{ color:var(--yazi); }
+:is(.klasor-yeni, .klasor-adlandir) .klasorform{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:var(--a2); margin-top:var(--a2); padding:var(--a3) var(--a4) var(--a4);
+  border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak); }
+.klasorform .b-alan{ flex:1 1 220px; }
+.klasorform .b-eylemler{ margin:0; }
+.klasor-bas{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--a2) var(--a3); margin:0 0 var(--a3); }
+.klasor-bas > p{ margin:0; font-size:var(--yz-k); }
+.klasor-bas .b-uyari{ flex-basis:100%; }
+.klasor-adlandir > summary{ list-style:none; }
+.klasor-adlandir > summary::-webkit-details-marker{ display:none; }
+.klasor-adlandir[open]{ flex-basis:100%; order:9; }
+.notsatir__klasor{ padding:0 var(--a2); border-radius:var(--kose-tam); font-size:var(--yz-k); line-height:1.6; color:var(--altin);
+  background:color-mix(in srgb, var(--altin) 12%, transparent); }
+/* Yazma ekranı: başlık + metin tek kâğıt yaprağı, altında ayar satırı */
+.notyaz__kagit{ display:grid; gap:var(--a2); padding:var(--a5) var(--a6) var(--a4); border-radius:var(--kose); background:var(--yuzey); box-shadow:var(--golge-yumusak);
+  transition:box-shadow var(--sure); }
+.notyaz__kagit:focus-within{ box-shadow:0 0 0 2px color-mix(in srgb, var(--vurgu) 45%, transparent), var(--golge-orta); }
+:root form.notform.notyaz .notyaz__kagit input[name=baslik]{ padding:0; font-size:calc(var(--yz-h2) * 1.25); line-height:1.25; box-shadow:none; }
+:root form.notform.notyaz .notyaz__kagit input[name=baslik]:focus{ box-shadow:none; }
+:root form.notform.notyaz .notyaz__kagit textarea[name=govde]{ height:auto; min-height:18rem; padding:0; resize:none; overflow:hidden; field-sizing:content;
+  font-size:var(--yz-h3); line-height:1.75; background:transparent; box-shadow:none; border-radius:0; }
+:root form.notform.notyaz .notyaz__kagit textarea[name=govde]:focus{ box-shadow:none; }
+.notyaz__kagit .b-alan__ipucu{ margin:0; font-size:var(--yz-k); color:var(--soluk); }
+.notyaz__ayar{ display:flex; flex-wrap:wrap; align-items:flex-start; gap:var(--a3) var(--a5); margin-top:var(--a4); }
+.notyaz__ayar > .b-alan, .notyaz__klasor{ flex:1 1 220px; min-width:0; }
+.notyaz__klasor > p{ margin:0; }
+.notyaz__onaylar{ display:flex; flex-wrap:wrap; gap:0 var(--a4); padding-top:calc(var(--yz-k) * 1.5 + var(--a1)); } /* etiketin altındaki giriş hizasında */
+.notyaz > .b-eylemler{ align-items:center; margin-top:var(--a4); }
+.notyaz > .b-eylemler .b-eylemler__yazi{ font-size:var(--yz-k); color:var(--soluk); }
+@media (max-width:640px){
+  .notyaz__kagit{ padding:var(--a4); }
+  :root form.notform.notyaz .notyaz__kagit input[name=baslik]{ font-size:var(--yz-h2); }
+  .notyaz > .b-eylemler .b-eylemler__yazi{ display:none; } /* telefonda klavye kısayolu yok */
+  .notyaz__onaylar{ padding-top:0; }
+}

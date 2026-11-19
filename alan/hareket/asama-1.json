@@ -25,7 +25,14 @@
     { "id": "k15", "ad": "Aşamalı yüklenme yöntemleri", "tur": "gemini", "yol": "SPI/hareket/egzersiz_biyomekanigi_ve_antrenman.md", "bolum": "1.2 Progresif Aşırı Yüklenme Yöntemleri", "satir": "18-23", "dogrulama": "dogrulanmamis" },
     { "id": "k16", "ad": "RPE ve RIR (kalan tekrar) ölçeği", "tur": "gemini", "yol": "SPI/hareket/egzersiz_biyomekanigi_ve_antrenman.md", "bolum": "1.3 RPE ve RIR Ölçeği", "satir": "25-35", "dogrulama": "dogrulanmamis" },
     { "id": "k17", "ad": "Toparlanma: gecikmiş kas ağrısı", "tur": "gemini", "yol": "SPI/hareket/egzersiz_biyomekanigi_ve_antrenman.md", "bolum": "1.4 Toparlanma Fizyolojisi", "satir": "39-40", "dogrulama": "dogrulanmamis" },
-    { "id": "k18", "ad": "Kas ile tendonun farklı hızda uyumu", "tur": "gemini", "yol": "SPI/hareket/kalistenik_ilerleme_ve_dayaniklilik_sporlari_biyomekanigi.md", "bolum": "1.2 Bağ ve Tendon Adaptasyon Biyolojisi", "satir": "26-35", "dogrulama": "dogrulanmamis" }
+    { "id": "k18", "ad": "Kas ile tendonun farklı hızda uyumu", "tur": "gemini", "yol": "SPI/hareket/kalistenik_ilerleme_ve_dayaniklilik_sporlari_biyomekanigi.md", "bolum": "1.2 Bağ ve Tendon Adaptasyon Biyolojisi", "satir": "26-35", "dogrulama": "dogrulanmamis" },
+    { "id": "k19", "ad": "DSÖ Fiziksel aktivite bilgi notu: faydalar, hareketsizlik riski ve rehberin ilkeleri", "tur": "depo", "yol": "veri/temiz/spi/who_rehberler.jsonl", "bolum": "physical-activity", "satir": "5-14", "dogrulama": "kaynakli" },
+    { "id": "k20", "ad": "DSÖ Fiziksel aktivite bilgi notu: dünyada öneriyi karşılamayan yetişkinler", "tur": "depo", "yol": "veri/temiz/spi/who_rehberler.jsonl", "bolum": "physical-activity", "satir": "17-18", "dogrulama": "kaynakli" },
+    { "id": "k21", "ad": "DSÖ fiziksel aktivite ve hareketsiz davranış rehberi (2020)", "tur": "kurum", "yol": "Dünya Sağlık Örgütü, WHO guidelines on physical activity and sedentary behaviour, 2020", "dogrulama": "kaynakli" },
+    { "id": "k22", "ad": "ACSM egzersiz testi ve reçetesi rehberi: ısınma, kuvvet ve esneklik önerileri", "tur": "kurum", "yol": "American College of Sports Medicine, ACSM's Guidelines for Exercise Testing and Prescription, 11. baskı, Wolters Kluwer, 2021", "dogrulama": "kaynakli" },
+    { "id": "k23", "ad": "UNESCO Somut Olmayan Kültürel Miras Temsili Listesi: Kırkpınar Yağlı Güreş Festivali (2010), Geleneksel Türk okçuluğu (2019)", "tur": "kurum", "yol": "UNESCO, Representative List of the Intangible Cultural Heritage of Humanity", "dogrulama": "kaynakli" },
+    { "id": "k24", "ad": "SPİ egzersiz ve kalistenik rehberi (el yazısı taslak veri: şınav, barfiks, squat, plank formu)", "tur": "depo", "yol": "veri/taslak/spi/egzersiz_kalistenik_rehberi.jsonl", "satir": "1-17", "dogrulama": "dogrulanmamis" },
+    { "id": "k25", "ad": "Toparlanma bilimi: toparlanma piramidinin tabanı (uyku)", "tur": "gemini", "yol": "SPI/hareket/toparlanma_bilimi_doms_kas_hasari_uyku_masaj_kompresyon_ve_deload_mimarisi_atlasi.md", "bolum": "3. Toparlanma Piramidi", "satir": "72-74", "dogrulama": "dogrulanmamis" }
   ],
   "kapi": {
     "esik": 0.8,
@@ -59,18 +66,24 @@
           "onKosul": [],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k1"],
+          "kaynak": ["k1", "k19", "k20", "k21", "k23"],
           "ozet": "Her hareket fiziksel aktivitedir; planlı ve tekrarlanan olanı egzersiz, kurallı olanı spordur. Şiddet konuşma testiyle anlaşılır; sağlık için haftanın toplamı önemlidir.",
           "metin": [
             "Merdiven çıkmak, bahçe işi ya da yürüyerek işe gitmek fiziksel aktivitedir. Belirli bir amaçla planlanan ve tekrarlanan hareket egzersizdir; kuralları ve çoğu zaman bir rakibi olan egzersiz ise spordur. Spor yapmamak hareketsiz olmak demek değildir.",
             "Şiddeti anlamanın en kolay yolu konuşma testidir: rahatça şarkı söyleyebiliyorsan hafif, konuşabiliyor ama şarkı söyleyemiyorsan orta, birkaç kelimeden fazlasını söyleyemiyorsan yüksek şiddettesin.",
             "Kaynak, Dünya Sağlık Örgütü'nün yetişkinler için haftada 150–300 dakika orta ya da 75–150 dakika yüksek şiddette aerobik aktivite ve haftada en az 2 gün kas güçlendirme önerisini aktarır. Faydanın büyük kısmı hiç hareket etmeyen birinin biraz hareket etmeye başlamasıyla gelir; mükemmel program beklemek gerekmez.",
+            "DSÖ hareketsizliği bulaşıcı olmayan hastalıklardan ölümün önde gelen risk etkenlerinden sayar: yeterince hareket etmeyenlerin ölüm riski yeterince hareket edenlere göre %20-30 daha yüksektir. Düzenli hareket yetişkinlerde kalp-damar hastalığı, yüksek tansiyon, tip 2 diyabet ve bazı kanserlerin daha az görülmesiyle, ruh sağlığının, düşünme becerilerinin ve uykunun iyileşmesiyle ilişkilidir.",
+            "DSÖ'ye göre dünyadaki yetişkinlerin yaklaşık üçte biri (%31, 1,8 milyar kişi) haftada en az 150 dakika orta şiddette etkinlik önerisini karşılamıyor; kadınlar erkeklerden ortalama 5 puan daha az hareketli. Yani öneriye ulaşmak birçok insan için gerçek bir adımdır, sıradan bir varsayım değil.",
+            "DSÖ rehberi dört ilkeyi öne çıkarır: hiç yoktan biraz hareket iyidir, her hareket sayılır, her yaş grubu oturarak geçen süreyi sınırlamalıdır ve kas güçlendirme herkese yarar. Uzun oturmayı her saat birkaç dakika kalkıp yürüyerek bölmek bu ilkenin en basit uygulamasıdır (son cümle: modelin bağlantı notu).",
+            "150 dakika büyük görünse de bölünebilir: haftada beş gün 30 dakika tempolu yürüyüş ya da günde 10'ar dakikalık üç kısa yürüyüş. DSÖ'nün 2020 rehberi 65 yaş üstüne ayrıca haftada en az 3 gün dengeyi ve kuvveti birlikte çalıştıran çok bileşenli etkinlik önerir.",
+            "Türk geleneğinde hareket hem spor hem kültürdür: UNESCO, Kırkpınar Yağlı Güreş Festivali'ni 2010'da, geleneksel Türk okçuluğunu 2019'da Somut Olmayan Kültürel Miras listesine almıştır. Gündelik hayat da hareketliydi: yaylaya göç, bağ-bahçe işi, su ve odun taşımak (son cümle: modelin bağlantı notu).",
             "Güvenlik sınırı: göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır. Kronik bir hastalık, gebelik, düzenli ilaç ya da geçmeyen bir ağrı varsa başlamadan önce hekimle konuşulur."
           ],
           "alistirmalar": [
             { "id": "hareket.1.1.1.a1", "tur": "secmeli", "soru": "Haftada üç gün planlı 30 dakikalık tempolu yürüyüş hangisidir?", "sec": ["Egzersiz", "Spor", "Hareketsizlik", "Toparlanma"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
             { "id": "hareket.1.1.1.a2", "tur": "secmeli", "soru": "Birkaç kelimeden fazlasını söyleyemediğin bir tempo hangi şiddettir?", "sec": ["Hafif", "Orta", "Yüksek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
-            { "id": "hareket.1.1.1.a3", "tur": "acik", "soru": "Geçen haftanı yaz: hangi günler, kaç dakika, hangi şiddette hareket ettin? Kas güçlendirme günü var mıydı?", "dogru": "Örnek: Pazartesi ve Perşembe 30'ar dakika tempolu yürüyüş (orta), Cumartesi 20 dakika bisiklet (orta); kas güçlendirme günü yok.", "olcut": ["Her gün için süre ve şiddet yazıldı", "Kas güçlendirme ayrıca değerlendirildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k1"] }
+            { "id": "hareket.1.1.1.a3", "tur": "acik", "soru": "Geçen haftanı yaz: hangi günler, kaç dakika, hangi şiddette hareket ettin? Kas güçlendirme günü var mıydı?", "dogru": "Örnek: Pazartesi ve Perşembe 30'ar dakika tempolu yürüyüş (orta), Cumartesi 20 dakika bisiklet (orta); kas güçlendirme günü yok.", "olcut": ["Her gün için süre ve şiddet yazıldı", "Kas güçlendirme ayrıca değerlendirildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k1"] },
+            { "id": "hareket.1.1.1.a4", "tur": "secmeli", "soru": "DSÖ'nün fiziksel aktivite rehberine göre hangisi doğrudur?", "sec": ["Hiç yoktan biraz hareket iyidir; her hareket sayılır", "Yalnız 30 dakikadan uzun etkinlik sayılır", "Kas güçlendirme yalnız sporculara yarar", "Oturarak geçen sürenin önemi yoktur"], "dogru": "A", "cozum": ["Rehberin ilkeleri: biraz hareket hiç yoktan iyidir, her hareket sayılır, oturma süresi sınırlanır, kas güçlendirme herkese yarar."], "durum": "taslak", "yazan": "model", "kaynak": ["k19"] }
           ]
         },
         {
@@ -79,17 +92,25 @@
           "onKosul": ["hareket.1.1.1"],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k6", "k5"],
+          "kaynak": ["k6", "k5", "k22"],
           "ozet": "İyi bir ısınma vücudu hafifçe ısıtır, sonra ana harekette kullanılacak kasları ve eklemleri hareketle hazırlar. Kuvvetten hemen önce uzun statik germe performansı düşürebilir.",
           "metin": [
             "Kaynak, Ian Jeffreys'in RAMP yöntemini aktarır: önce yükselt (hafif tempoyla vücut ve kas sıcaklığını artır, hafif terleme), sonra aktive et ve mobilize et (ana harekette çalışacak kasları uyandır, eklemleri hareket açıklığında dinamik olarak gezdir), en son ana harekete yaklaşan hazırlık setleri.",
+            "Isınmanın ilk işi yükseltmektir: kaynak hedefi hafif terlemeye kadar vücut ve kas sıcaklığını artırmak diye koyar. Pratikte bu birkaç dakika hafif tempolu yürüyüş, yerinde hafif koşu, ip atlama ya da bisiklettir; nefes hızlanır ama konuşmak rahattır (örnekler: modelin bağlantı notu).",
+            "ACSM de antrenmandan önce hafif-orta şiddette 5-10 dakikalık bir ısınma önerir. Soğuk havada, sabah erken saatte ya da uzun bir aradan sonra ısınma biraz uzatılabilir (son cümle: modelin bağlantı notu).",
             "Örneğin çömelme gününde kaynak ayak bileği ve kalçayı hareketlendiren dinamik hareketler, kalça kaslarını uyandıran bir köprü ve dipte birkaç saniye bekleyen hafif bir goblet squat önerir. Isınma, o günün ana hareketine benzer olmalıdır.",
-            "Kaynak, Kay ve Blazevich'in derlemesine dayanarak, en yüksek kuvvet ya da sürat işinden hemen önce bir kasın 60 saniyeden uzun statik germesinin performansı düşürebildiğini yazar. Bu yüzden antrenman öncesi uzun germe yerine dinamik ısınma tercih edilir."
+            "Kaynağın squat günü için verdiği beş dakikalık dizilim şöyledir: ayak bileğini duvara karşı ileri-geri hareketlendirmek (bacak başına 10 tekrar), kalçayı iç ve dış dönüşle gezdirmek, lastik bantla yana yürüyüş ve köprüyle kalça kaslarını uyandırmak, sonra dipte üç saniye bekleyen beş goblet squat.",
+            "Hazırlık setleri ısınmanın son basamağıdır: o günün ana hareketi önce çok hafif, sonra biraz daha ağır yapılır. Örneğin 3 × 10 diz şınavı yapılacaksa önce duvar şınavından 8-10, sonra masa şınavından 5-6 tekrar yeterli bir köprü kurar (modelin bağlantı notu).",
+            "Kaynak, Kay ve Blazevich'in derlemesine dayanarak, en yüksek kuvvet ya da sürat işinden hemen önce bir kasın 60 saniyeden uzun statik germesinin performansı düşürebildiğini yazar. Bu yüzden antrenman öncesi uzun germe yerine dinamik ısınma tercih edilir.",
+            "Germe yine de gereksiz değildir; yalnız yeri değişir. ACSM esneklik için haftada en az 2-3 gün, gerginlik hissedilen noktada 10-30 saniye tutulan germeyi önerir. Bu germe antrenmanın sonunda ya da ayrı bir zamanda, kaslar ısınmışken yapılabilir.",
+            "Yağlı güreşte pehlivanların müsabaka öncesi peşrevi de bir hazırlıktır: ritimle yürünür, eller dizlere ve yere vurulur, beden harekete ısınır. Kaynaktaki bilimsel yöntemle aynı şey değildir, ama ana hareketten önce bedeni hareketle hazırlama fikri ortaktır (modelin bağlantı notu).",
+            "Isınmada baş dönmesi, göğüste baskı ya da olağan dışı nefes darlığı olursa antrenmana geçilmez; durulur ve hekime danışılır. Isınma yorgunluk yaratmamalı, hazırlamalıdır (son cümle: modelin bağlantı notu)."
           ],
           "not": "Kaynaktaki «eklem kıkırdak sürtünmesini sıfıra yaklaştırır», «her 1°C sinir iletimini %2-5 hızlandırır» ve germe kaybının kesin yüzdeleri (%4,5-8,5) doğrulanamadı, alınmadı. Potansiyalizasyon ve piramit ısınma matematiği ileri konudur, alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.1.2.a1", "tur": "secmeli", "soru": "RAMP'ın doğru sırası hangisidir?", "sec": ["Yükselt → aktive et ve mobilize et → hazırlık setleri", "Hazırlık setleri → yükselt → germe", "Germe → dinlen → ağır set", "Sıra önemsizdir"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k6"] },
-            { "id": "hareket.1.1.2.a2", "tur": "secmeli", "soru": "Ağır bir squat setinden hemen önce bir kası 90 saniye statik germek için kaynak ne der?", "sec": ["Kuvveti artırır", "Performansı düşürebilir; dinamik ısınma tercih edilir", "Hiç etkisi yoktur", "Zorunludur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] }
+            { "id": "hareket.1.1.2.a2", "tur": "secmeli", "soru": "Ağır bir squat setinden hemen önce bir kası 90 saniye statik germek için kaynak ne der?", "sec": ["Kuvveti artırır", "Performansı düşürebilir; dinamik ısınma tercih edilir", "Hiç etkisi yoktur", "Zorunludur"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k5"] },
+            { "id": "hareket.1.1.2.a3", "tur": "secmeli", "soru": "ACSM'ye göre statik germe nasıl yapılır?", "sec": ["Ağrı hissedilene kadar 2 dakika", "Gerginlik hissedilen noktada 10-30 saniye", "Yalnız ağır setten hemen önce", "Hiç yapılmaz"], "dogru": "B", "cozum": ["ACSM esneklik için gerginlik noktasında 10-30 saniyelik germeyi, haftada en az 2-3 gün önerir."], "durum": "taslak", "yazan": "model", "kaynak": ["k22"] }
           ]
         },
         {
@@ -104,13 +125,20 @@
             "Kaynak gövdeyi dört duvarlı bir silindire benzetir: tavanda diyafram, yanlarda ve önde karın kasları, arkada omurga kasları, altta pelvik taban. Nefes alınırken diyafram aşağı iner ve bu silindirin içindeki basınç omurgayı destekler.",
             "Kaynak iki yaklaşımı ayırır: göbeği omurgaya doğru içeri çekmek ve karın, yan bel ve sırtı her yöne doğru germek (360 derece destekleme). Ağır kaldırmada ve kalisteniğe hazırlıkta önerilen ikincisidir; nefesi alıp gövdeyi her yönden gererek hareket boyunca korumak.",
             "Kaynak, Stuart McGill'in yaklaşımını aktarır: karın kaslarının asıl görevi omurgayı sabit tutmak, istenmeyen bükülme, geriye kavislenme ve dönmeye direnmektir. Bu yüzden gövde için kuş-köpek (dört ayak üzerinde zıt kol ve bacak uzatma), yan köprü ve plank gibi omurganın sabit kaldığı hareketler kullanılır.",
-            "Plankta sık hata, beli çukurlaştırıp pasif biçimde dakikalarca beklemek ve nefesi tamamen tutmaktır. Kısa, gergin ve nefesi sürdüren bir duruş tercih edilir."
+            "Kaynak McGill'in «üçlüsünü» (Big 3) şöyle verir: değiştirilmiş mekik (eller bel boşluğunun altında, bir bacak bükülü, bir bacak düz; yalnız baş ve omuzlar yerden birkaç santim kalkar), yan köprü ve kuş-köpek. Üçünde de omurga hareket etmez; kaslar onu sabit tutmak için çalışır.",
+            "Kuş-köpek için ipuçları: dört ayak üzerinde eller omuzların, dizler kalçanın altında; bir kol ve karşı bacak yavaşça uzatılır, bel ne çukurlaşır ne kamburlaşır, birkaç saniye beklenip geri gelinir. Sırtın üstüne bir bardak su konmuş gibi düşünmek gövdeyi sabit tutmaya yardım eder (son cümle: modelin bağlantı notu).",
+            "Plankta sık hata, beli çukurlaştırıp pasif biçimde dakikalarca beklemek ve nefesi tamamen tutmaktır. Kısa, gergin ve nefesi sürdüren bir duruş tercih edilir.",
+            "Kaynak plank için kısa ve gergin bir duruş tarif eder: dirsekler omuz altında, yumruklar sıkılı, kalça ve uyluk kasları kilitli, kısa ve kontrollü nefesler. Başlangıçta 10 saniyelik birkaç tekrar, iki dakikalık sarkık bir plank denemesinden daha değerlidir (son cümle: modelin bağlantı notu).",
+            "Destekleme nefesi tutmak demek değildir. Hafif yükte nefes hareket boyunca sürdürülür; kısa nefes alıp verirken gövde gergin kalır. Kaynak plankta nefesi tamamen tutmayı sık hata sayar.",
+            "Gövde kasları günlük hayatta da çalışır: ağır bir tencereyi taşırken, otobüste ayakta dengede dururken, çocuğu kucağa alırken. Bu derste öğrenilen sabitleme, ilerideki bütün kalıpların (çömelme, menteşe, taşıma) ortak temelidir (modelin bağlantı notu).",
+            "Yüksek tansiyonu, kalp hastalığı ya da fıtığı olan veya gebe olan biri nefesi tutarak zorlanan ve karın içi basıncı artıran çalışmalardan önce hekimine danışmalıdır. Bel ağrısı bacağa yayılıyorsa ya da uyuşmayla birlikteyse bu hareketler bir tedavi değildir; değerlendirme hekimin işidir."
           ],
           "not": "Kaynaktaki basınç değerleri (mmHg), «disk kompresyonunu %40-50 azaltır», «McGill bel ağrısının temel nedenini kanıtlamıştır» ve «binlerce mekik diski fıtıklaştırır» ifadeleri (omurga atlası satır 60-62) kesinlik dili ve doğrulanamayan sayılardır; derse alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.1.3.a1", "tur": "secmeli", "soru": "Kaynakta gövde silindirinin tavanı hangi kastır?", "sec": ["Diyafram", "Pelvik taban", "Ön kol", "Baldır"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
             { "id": "hareket.1.1.3.a2", "tur": "secmeli", "soru": "Hangisi omurganın sabit kaldığı bir gövde hareketidir?", "sec": ["Kuş-köpek", "Hızlı ve çok tekrarlı mekik", "Gövdeyi yükle döndürmek", "Belden öne eğilip zıplamak"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k8"] },
-            { "id": "hareket.1.1.3.a3", "tur": "acik", "soru": "Ayakta dur, burundan nefes al ve karnını, yan belini ve sırtını her yöne gerer gibi destekle. Ne hissettin, nefesi tutmadan bunu kaç saniye koruyabildin?", "dogru": "Örnek: belin çevresinde bir kemer sıkılmış gibi hissettim; kısa nefeslerle yaklaşık 10 saniye korudum.", "olcut": ["Gövdenin her yönden gerildiği fark edildi", "Nefes tamamen tutulmadı"], "durum": "taslak", "yazan": "model", "kaynak": ["k7"] }
+            { "id": "hareket.1.1.3.a3", "tur": "acik", "soru": "Ayakta dur, burundan nefes al ve karnını, yan belini ve sırtını her yöne gerer gibi destekle. Ne hissettin, nefesi tutmadan bunu kaç saniye koruyabildin?", "dogru": "Örnek: belin çevresinde bir kemer sıkılmış gibi hissettim; kısa nefeslerle yaklaşık 10 saniye korudum.", "olcut": ["Gövdenin her yönden gerildiği fark edildi", "Nefes tamamen tutulmadı"], "durum": "taslak", "yazan": "model", "kaynak": ["k7"] },
+            { "id": "hareket.1.1.3.a4", "tur": "secmeli", "soru": "Kaynağa göre McGill'in üçlüsünde hangisi yer alır?", "sec": ["Hızlı ve çok tekrarlı mekik", "Yükle gövde döndürme", "Yan köprü", "Belden öne eğilip zıplama"], "dogru": "C", "cozum": ["Üçlü: değiştirilmiş mekik, yan köprü ve kuş-köpek; üçünde de omurga sabit kalır."], "durum": "taslak", "yazan": "model", "kaynak": ["k8"] }
           ]
         }
       ]
@@ -136,16 +164,23 @@
           "onKosul": [],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k3", "k10", "k11", "k12", "k13"],
+          "kaynak": ["k3", "k10", "k11", "k12", "k13", "k22", "k24", "k8"],
           "ozet": "Sayısız hareket birkaç temel kalıba indirgenir: çömelme, kalça menteşesi, itme, çekme, taşıma ve gövdeyi sabitleme. Dengeli bir program her kalıptan en az bir hareket içerir.",
           "metin": [
             "Kaynak (SPİ anlatımı) dengeli bir programın her kalıptan en az bir hareket içerdiğini yazar: itme (şınav, dips), çekme (barfiks, ters kürek), bacak (squat, lunge, bulgar split squat) ve gövde (plank, yan plank, ölü böcek).",
             "Gemini egzersiz kataloğu bacak işini iki kalıba ayırır: dizin öne çıktığı çömelme (squat, örneğin goblet squat) ve kalçanın geriye gittiği menteşe (örneğin Romanian deadlift). Katalog ayrıca taşımayı ayrı bir kalıp sayar (örneğin çiftçi yürüyüşü) ve çekmeyi yatay (ters kürek) ve dikey (barfiks) diye ayırır.",
-            "Bu aşamada kullanılan harita: çömelme, menteşe, itme, çekme, taşıma ve gövde. Her yeni hareketi öğrenirken ilk soru «bu hangi kalıp?» olur; böylece bir programda eksik kalan kalıp kolayca görülür."
+            "SPİ'nin egzersiz rehberi hareketleri aynı mantıkla sınıflar: klasik, eğimli ve elmas şınav ile dips «itiş»; barfiks ve Avustralya barfiksi «çekiş»; squat, lunge ve bulgar split squat «bacak»; plank ve hollow body «core» kategorisindedir.",
+            "Bu aşamada kullanılan harita: çömelme, menteşe, itme, çekme, taşıma ve gövde. Her yeni hareketi öğrenirken ilk soru «bu hangi kalıp?» olur; böylece bir programda eksik kalan kalıp kolayca görülür.",
+            "Kalıpları tanımak bir programı denetlemenin en hızlı yoludur. Örneğin her antrenmanda şınav, mekik ve squat yapan biri itmeyi, gövdeyi ve çömelmeyi çalışır ama çekmeyi, menteşeyi ve taşımayı atlar. Böyle bir programda sırt ve arka bacak kasları göğüs ve ön bacağa göre geride kalabilir (modelin bağlantı notu).",
+            "ACSM kuvvet çalışmasında her büyük kas grubunun haftada 2-3 gün çalıştırılmasını ve aynı kas grubu için iki seans arasında en az 48 saat bırakılmasını önerir. Altı kalıbı içeren bir tam vücut antrenmanı bu öneriyi tek seansta karşılar (son cümle: modelin bağlantı notu).",
+            "Gündelik hayat da kalıplardan oluşur: sandalyeden kalkmak çömelme, yerden poşet almak menteşe, bavulu üst rafa kaldırmak itme, ağır bir kapıyı açmak çekme, pazardan torba taşımak taşımadır. Kalıpları çalışmak bu işleri ileri yaşta da kolay yapabilmenin hazırlığıdır (modelin bağlantı notu).",
+            "Geleneksel sporlarımız da bu kalıpları kullanır: güreşte rakibi kavrayıp çekmek ve kalçadan kaldırmak, okçulukta yayı çekip tutmak. Spor seçimi kişiye kalmıştır; önemli olan haftanın toplamında altı kalıbın da bir yerden çalışmasıdır (modelin bağlantı notu).",
+            "Bir kalıp ağrı yapıyorsa program o kalıbı tamamen atmaz, önce kolay aşamaya iner; ağrı sürüyorsa hekime ya da fizyoterapiste danışılır (modelin bağlantı notu)."
           ],
           "alistirmalar": [
             { "id": "hareket.1.2.1.a1", "tur": "secmeli", "soru": "Şınav hangi kalıptadır?", "sec": ["İtme", "Çekme", "Menteşe", "Taşıma"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
-            { "id": "hareket.1.2.1.a2", "tur": "secmeli", "soru": "Bir programda goblet squat, şınav ve plank var. Hangi kalıplar eksiktir?", "sec": ["Menteşe, çekme ve taşıma", "Yalnız itme", "Çömelme", "Hiçbiri"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11", "k12", "k13"] }
+            { "id": "hareket.1.2.1.a2", "tur": "secmeli", "soru": "Bir programda goblet squat, şınav ve plank var. Hangi kalıplar eksiktir?", "sec": ["Menteşe, çekme ve taşıma", "Yalnız itme", "Çömelme", "Hiçbiri"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k11", "k12", "k13"] },
+            { "id": "hareket.1.2.1.a3", "tur": "secmeli", "soru": "Yerden bir koli almak hangi kalıba en yakındır?", "sec": ["İtme", "Taşıma", "Gövde sabitleme", "Kalça menteşesi"], "dogru": "D", "cozum": ["Yerden yük almak kalçadan eğilip doğrulmaktır; bu menteşedir."], "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k11"] }
           ]
         },
         {
@@ -154,18 +189,25 @@
           "onKosul": ["hareket.1.2.1"],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k10", "k9", "k3"],
+          "kaynak": ["k10", "k9", "k3", "k24"],
           "ozet": "Çömelmede kalça ve diz birlikte bükülür. Başlangıç için sandalyeye otur-kalk ve göğüste ağırlıkla goblet squat uygundur; dizler ayak uçlarıyla aynı yöne bakar, topuklar yerde kalır.",
           "metin": [
             "Kaynak (SPİ anlatımı) çömelmede kolaydan zora sırayı şöyle verir: sandalyeye otur-kalk, tam squat, bulgar split squat.",
+            "SPİ rehberi vücut ağırlığı squatını şöyle tarif eder: ayaklar omuz genişliğinde, dizler ayak parmak uçları doğrultusunda bükülür, kalça diz hizasının biraz altına iner; ağırlık bütün ayak tabanına eşit dağılır ve dizlerin içe çökmesine izin verilmez.",
             "Goblet squatta ağırlık göğüs önünde tutulur. Kaynağa göre bu ağırlık karşı ağırlık görevi görür ve kalçanın topukların arasına rahatça inmesini kolaylaştırır. Form ipuçları: göğüs dik, dirsekler aşağıda dizlerin iç kısmına hafifçe değecek kadar derin. Sık hatalar: ağırlığı göğüsten uzaklaştırmak ve topukları yerden kaldırmak.",
-            "Dizler ayak uçlarıyla aynı yöne bakmalıdır. Kaynak, dizin içe çökmesini (dinamik diz valgusu) bir diz sorunundan çok kalça kontrolü sorunu olarak açıklar: kalça kasları yeterince çalışmadığında uyluk içe döner. Bu yüzden çömelirken dizleri hafifçe dışa, ayak uçlarının yönüne itmek ipucu olarak kullanılır."
+            "Dizler ayak uçlarıyla aynı yöne bakmalıdır. Kaynak, dizin içe çökmesini (dinamik diz valgusu) bir diz sorunundan çok kalça kontrolü sorunu olarak açıklar: kalça kasları yeterince çalışmadığında uyluk içe döner. Bu yüzden çömelirken dizleri hafifçe dışa, ayak uçlarının yönüne itmek ipucu olarak kullanılır.",
+            "Bir haftalık deneme: her gün iki set 8-10 sandalyeye otur-kalk; üçüncü günden sonra sandalyeye yalnız dokunup hemen kalkmak, hafta sonunda sandalyeye hiç oturmadan dokunup kalkmak. Böylece aynı kalıp yükseklik değiştirmeden zorlaşır (modelin bağlantı notu).",
+            "Derinlik kişiye göredir. Ayak bileği ya da kalça hareketliliği yetmiyorsa topuklar kalkar ya da bel yuvarlanır; o gün için doğru derinlik bu belirtiler başlamadan önceki noktadır. Sandalyeye otur-kalkta yükseklik, oturağa minder eklenerek ayarlanabilir (modelin bağlantı notu).",
+            "Tempo öğrenmeye yardım eder: iniş üç saniye, dipte kısa bir duruş, kalkış kontrollü. Yavaş iniş hem formu görmeyi kolaylaştırır hem aynı tekrar sayısında işi zorlaştırır; tempo bir yüklenme yolu olarak 3. ünitede yeniden geçer (modelin bağlantı notu).",
+            "Çömelme insanın en eski çalışma ve dinlenme duruşlarındandır; Anadolu'da tandır başında, bahçede ya da tarlada çömelerek iş görmek yakın zamana kadar sıradandı. Bu, çömelmenin doğru öğretildiğinde doğal bir kalıp olduğunu hatırlatır (modelin bağlantı notu).",
+            "Dizde şişlik, kilitlenme, boşalma hissi ya da her çömelmede tekrarlayan keskin ağrı varsa hareket bırakılır ve hekime ya da fizyoterapiste danışılır. Bu belirtiler bir form ipucuyla çözülecek şeyler değildir."
           ],
           "not": "Kaynaktaki «ACL kopma riski geometrik olarak fırlar» (kalça atlası satır 49) ve aşırı pronasyon zinciri bir yaralanma mekanizması iddiasıdır, doğrulanmadı; derse alınmadı. Kalça yapısı (FAI, anteversiyon) ileri ve klinik konudur, alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.2.2.a1", "tur": "secmeli", "soru": "Çömelmede dizler hangi yöne bakmalıdır?", "sec": ["Ayak uçlarıyla aynı yöne", "İçe, birbirine doğru", "Tamamen dışa, ayaktan bağımsız", "Fark etmez"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k9"] },
             { "id": "hareket.1.2.2.a2", "tur": "secmeli", "soru": "Kaynağa göre çömelmenin en kolay başlangıç aşaması hangisidir?", "sec": ["Sandalyeye otur-kalk", "Bulgar split squat", "Tek bacak squat", "Ağır sırt squat"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
-            { "id": "hareket.1.2.2.a3", "tur": "acik", "soru": "Aynanın karşısında ya da telefonla kaydederek 5 otur-kalk yap. Dizlerin, topukların ve göğsün nasıldı?", "dogru": "Örnek: dizler ayak uçlarıyla aynı yöndeydi, son iki tekrarda sağ diz hafif içe kaydı; topuklar yerde, göğüs dik.", "olcut": ["Diz yönü gözlendi", "Topuk ve göğüs gözlendi", "Bir düzeltme fark edildi ya da her şey yerinde dendi"], "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k9", "k10"] }
+            { "id": "hareket.1.2.2.a3", "tur": "acik", "soru": "Aynanın karşısında ya da telefonla kaydederek 5 otur-kalk yap. Dizlerin, topukların ve göğsün nasıldı?", "dogru": "Örnek: dizler ayak uçlarıyla aynı yöndeydi, son iki tekrarda sağ diz hafif içe kaydı; topuklar yerde, göğüs dik.", "olcut": ["Diz yönü gözlendi", "Topuk ve göğüs gözlendi", "Bir düzeltme fark edildi ya da her şey yerinde dendi"], "durum": "taslak", "yazan": "model", "kaynak": ["k3", "k9", "k10"] },
+            { "id": "hareket.1.2.2.a4", "tur": "secmeli", "soru": "SPİ rehberine göre squatta vücut ağırlığı ayakta nasıl dağılır?", "sec": ["Bütün ayak tabanına eşit", "Yalnız parmak uçlarına", "Yalnız topuklara", "Tek ayağa"], "dogru": "A", "cozum": ["Rehber ağırlığın bütün ayak tabanına eşit dağıtılmasını ve dizlerin içe çökmemesini ister."], "durum": "taslak", "yazan": "model", "kaynak": ["k24"] }
           ]
         },
         {
@@ -179,12 +221,19 @@
           "metin": [
             "Kaynak kalça menteşesini, yerden bir şey alırken beli bükmek yerine kalça ekleminden eğilmek diye tanımlar; böylece yük beldeki yapılardan büyük kalça kaslarına aktarılır.",
             "Romanian deadlift bu kalıbın örneğidir. Kaynağa göre dizler hafif bükülü kalır ve hareket boyunca aynı açıda tutulur; iniş kalçayı geriye itmekle olur. İpucu: düşünce ağırlığı yere indirmek değil, kalçayı arkandaki duvara değdirmektir. Arka bacakta gerilim bittiği an iniş durur ve kalça sıkılarak doğrulunur.",
-            "Kaynağın verdiği iki sık hata: dizleri bükerek hareketi çömelmeye çevirmek ve esneklik bittiği hâlde daha aşağı inmek için beli bükmek."
+            "Kaynağa göre bu kalıp en çok arka bacak kaslarını ve kalçayı çalıştırır; bel kasları ise omurgayı sabit tutmak için devrededir. Başlangıçta hafif bir dambıl ya da su dolu bir bidon yeterli bir yüktür (son cümle: modelin bağlantı notu).",
+            "Menteşeyi öğrenmenin kolay yolu duvar denemesidir: duvara sırtını dönüp bir ayak boyu önünde dur, dizleri hafifçe bük, kalçanı geriye itip duvara değdirmeye çalış. Kalça duvara değerken sırt düz, göğüs açık kalmalıdır; sonra kalçayı sıkarak doğrul. Bu, kaynağın «kalçayı arkandaki duvara değdir» ipucunun alıştırmaya çevrilmiş hâlidir (modelin bağlantı notu).",
+            "Bir sopa (süpürge sapı) ile denetim: sopa sırtın arkasında başa, sırtın üst kısmına ve kuyruk sokumuna değecek biçimde tutulur. Eğilirken bu üç nokta sopadan ayrılmıyorsa bel düz kalmış, hareket kalçadan olmuştur (modelin bağlantı notu).",
+            "Kaynağın verdiği iki sık hata: dizleri bükerek hareketi çömelmeye çevirmek ve esneklik bittiği hâlde daha aşağı inmek için beli bükmek.",
+            "Gündelik hayattaki karşılığı açıktır: yerden çocuk, koli ya da çuval almak. Yük vücuda yakın tutulur, kalça geriye gider, sırt düz kalır; çok ağır yük ise önce çömelip yükü dizlerin arasına alarak kaldırılır. Köyde un çuvalını ya da güğümü yerden alanların ustalıkla yaptığı şey budur (modelin bağlantı notu).",
+            "Menteşe ile çömelme karıştırılmamalıdır: çömelmede diz ve kalça birlikte çok bükülür, menteşede diz az bükülür ve sabit kalır, hareketin çoğu kalçadan gelir. Bir programda ikisi de ayrı ayrı yer alır (modelin bağlantı notu).",
+            "Bel ağrısı geçmişi olan, ağrısı bacağa yayılan ya da yeni bir bel sakatlığı yaşayan biri menteşe çalışmasına başlamadan önce hekime ya da fizyoterapiste danışmalıdır."
           ],
           "not": "Disk beslenmesi (imbibisyon) ve «sabah ilk 60 dakika bel bükmek fıtık riskini %300 artırır» uyarısı (omurga atlası satır 25-37, 73) doğrulanamayan, abartılı bir sayı ve tedavi imasıdır; derse alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.2.3.a1", "tur": "secmeli", "soru": "Menteşede hareket ağırlıkla hangi eklemde olur?", "sec": ["Kalça", "Dirsek", "Ayak bileği", "Boyun"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k8", "k11"] },
-            { "id": "hareket.1.2.3.a2", "tur": "secmeli", "soru": "Romanian deadliftte iniş ne zaman durur?", "sec": ["Ağırlık yere değince, bel bükülse bile", "Arka bacakta gerilim bittiği an", "Dizler tamamen bükülünce", "Hiç durmaz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] }
+            { "id": "hareket.1.2.3.a2", "tur": "secmeli", "soru": "Romanian deadliftte iniş ne zaman durur?", "sec": ["Ağırlık yere değince, bel bükülse bile", "Arka bacakta gerilim bittiği an", "Dizler tamamen bükülünce", "Hiç durmaz"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k11"] },
+            { "id": "hareket.1.2.3.a3", "tur": "secmeli", "soru": "Duvar denemesinde amaç nedir?", "sec": ["Dizleri tamamen bükmek", "Kalçayı geriye itip duvara değdirirken sırtı düz tutmak", "Başı duvara değdirmek", "Belden öne kamburlaşmak"], "dogru": "B", "cozum": ["Duvar denemesi kalçadan eğilmeyi öğretir: kalça geriye gider, sırt düz kalır."], "durum": "taslak", "yazan": "model", "kaynak": ["k11"] }
           ]
         },
         {
@@ -193,17 +242,24 @@
           "onKosul": ["hareket.1.2.2"],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k3", "k12", "k13"],
+          "kaynak": ["k3", "k12", "k13", "k24"],
           "ozet": "İtmede, çekmede ve taşımada ortak kural gövdenin düz ve gergin kalmasıdır: şınavda ve ters kürekte vücut baştan topuğa bir tahta gibi, taşımada omuzlar geride ve aşağıda.",
           "metin": [
             "İtme: kaynak (SPİ anlatımı) şınavda kolaydan zora sırayı duvar, eğimli (masa), diz, tam ve ayak yükseltilmiş şınav diye verir. Gövde düz bir tahta gibi kalır; kalçası düşük ya da beli çukurlaşmış şınav sayıyı artırır ama hareketi bozar ve beli zorlar.",
+            "SPİ rehberi şınav formunu ayrıntılı verir: vücut baştan topuğa düz, dirsekler gövdeye yaklaşık 45 derece açıyla bükülür, göğüs yere birkaç santim kalana kadar iner, boyun nötrdür. Eğimli şınavda eller bir sehpaya ya da tezgâha konur; bu, tam şınava geçişin kuvvet tabanıdır.",
             "Çekme: ters kürekte (Avustralya barfiksi) bir bara asılıp göğüs bara yaklaşır. Kaynağa göre vücut açısı zorluğu belirler: gövde dikleştikçe kolaylaşır. Vücut baştan topuğa gergin bir sopa gibidir ve kürek kemikleri geriye toplanır. Sık hatalar: kalçayı düşürmek ve bara ulaşmak için boynu öne uzatmak. Barfikste sıra asılı durma, negatif (yavaş iniş), bantlı ve tam barfikstir.",
-            "Taşıma: çiftçi yürüyüşünde iki elde ağırlıkla yürünür. İpuçları: omuzlar geride ve aşağıda, göğüs açık, kısa ve kontrollü adımlar. Sık hatalar: omuzları öne düşürmek ve tökezleyecek kadar hızlı yürümek. Taşıma, kavrama gücünü ve gövdenin dik kalmasını birlikte çalıştırır."
+            "Barfikste rehber sallanarak ivme kazanmamayı ve inişi yavaş, kontrollü yapmayı ister; kürek kemikleri önce aşağı ve geriye çekilir, sonra çene bara çıkar. Tam barfiks yapamayan biri için asılı durma ve yavaş iniş ilk haftaların asıl işidir.",
+            "Çekme hareketleri çoğu programda itmeye göre eksik kalır. Ters kürek için evde sağlam bir masanın altına yatıp kenarından tutarak başlanabilir; yükü taşıyacak kadar sağlam olduğundan emin olunmayan masa, sandalye ya da sopa kullanılmaz (modelin bağlantı notu).",
+            "Taşıma: çiftçi yürüyüşünde iki elde ağırlıkla yürünür. İpuçları: omuzlar geride ve aşağıda, göğüs açık, kısa ve kontrollü adımlar. Sık hatalar: omuzları öne düşürmek ve tökezleyecek kadar hızlı yürümek. Taşıma, kavrama gücünü ve gövdenin dik kalmasını birlikte çalıştırır.",
+            "Taşıma için ekipman şart değildir: iki elde su dolu bidon ya da alışveriş torbası, 20-30 metre yürüyüş, kısa dinlenme. Su güğümü, odun ve ekin demeti taşımak köy hayatının gündelik işiydi; bugün salonda «çiftçi yürüyüşü» adıyla çalışılan şey budur (modelin bağlantı notu).",
+            "Haftalık denge için basit bir ölçü: her itme setine karşılık bir çekme seti. Böylece omuzun önü ve arkası birlikte güçlenir (modelin bağlantı notu).",
+            "Omuzda ağrı, kola yayılan ağrı ya da uyuşma varsa itme ve çekme hareketleri bırakılır ve hekime danışılır. Dirsekte ağrı olursa rehber elleri hafifçe açmayı önerir; ağrı sürerse yük azaltılır ve uzmana danışılır."
           ],
           "alistirmalar": [
             { "id": "hareket.1.2.4.a1", "tur": "secmeli", "soru": "Ters kürekte hareketi kolaylaştırmanın yolu hangisidir?", "sec": ["Gövdeyi daha dik tutmak", "Ayakları yükseltmek", "Kalçayı düşürmek", "Boynu öne uzatmak"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k12"] },
             { "id": "hareket.1.2.4.a2", "tur": "secmeli", "soru": "Şınavda hangisi form hatasıdır?", "sec": ["Gövdenin tahta gibi düz kalması", "Kalçanın düşmesi ve belin çukurlaşması", "Kontrollü iniş", "Eğimli yüzeyde başlamak"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
-            { "id": "hareket.1.2.4.a3", "tur": "acik", "soru": "Şınav aşamalarından hangisinde 3 set 8-10 temiz tekrar yapabildiğini dene ve yaz. Formda neye dikkat ettin?", "dogru": "Örnek: duvar şınavı kolaydı, masada eğimli şınavda 3 × 10 temiz yaptım; kalçanın düşmemesine dikkat ettim.", "olcut": ["Bir aşama seçildi ve sonuç yazıldı", "En az bir form noktası belirtildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k3"] }
+            { "id": "hareket.1.2.4.a3", "tur": "acik", "soru": "Şınav aşamalarından hangisinde 3 set 8-10 temiz tekrar yapabildiğini dene ve yaz. Formda neye dikkat ettin?", "dogru": "Örnek: duvar şınavı kolaydı, masada eğimli şınavda 3 × 10 temiz yaptım; kalçanın düşmemesine dikkat ettim.", "olcut": ["Bir aşama seçildi ve sonuç yazıldı", "En az bir form noktası belirtildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k3"] },
+            { "id": "hareket.1.2.4.a4", "tur": "secmeli", "soru": "SPİ rehberine göre klasik şınavda dirsekler gövdeye yaklaşık kaç derece açıyla bükülür?", "sec": ["90", "0", "45", "180"], "dogru": "C", "cozum": ["Rehber dirseklerin gövdeye yaklaşık 45 derece açıyla bükülmesini ister."], "durum": "taslak", "yazan": "model", "kaynak": ["k24"] }
           ]
         }
       ]
@@ -229,18 +285,25 @@
           "onKosul": [],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k4", "k16"],
+          "kaynak": ["k4", "k16", "k22"],
           "ozet": "Bir hareketin bir kez yapılması tekrar, ara vermeden yapılan tekrar grubu settir. Setin ne kadar zor olduğunu «kaç tekrar daha yapabilirdim?» sorusu anlatır.",
           "metin": [
             "Bir hareketin bir kez yapılması tekrar, ara vermeden yapılan tekrar grubu settir. Yük, kullanılan dış ağırlıktır ve ekipmanla birlikte yazılır: iki adet 8 kg dambılla yapılan iş «her el 8 kg (toplam 16 kg)» diye kaydedilir.",
             "Zorluğu ölçmenin pratik yolu kalan tekrardır (İngilizce RIR): «bu setten sonra kaç tekrar daha yapabilirdim?». 0 kalan setin tükenişe kadar gittiğini, 1–3 kalan zor ama kontrollü bir seti, 4 ve üzeri kalan ısınma ya da hafif seti gösterir. Kaynak bunu RPE (algılanan zorluk, 10 üzerinden) ölçeğiyle eşleştirir: 10 tükeniş, 8 yaklaşık 2 tekrar kala.",
-            "Çoğu set tükenmeden, 1–3 tekrar kala bitirilir. Setler arasında çok eklemli hareketlerde 2–3 dakika, küçük hareketlerde 1–2 dakika dinlenmek yaygındır."
+            "Çoğu set tükenmeden, 1–3 tekrar kala bitirilir. Setler arasında çok eklemli hareketlerde 2–3 dakika, küçük hareketlerde 1–2 dakika dinlenmek yaygındır.",
+            "ACSM çoğu yetişkin için kuvvette her harekette 8-12 tekrarlık 2-4 set önerir; ileri yaştakiler ya da uzun süredir hareketsiz olanlar daha hafif bir yükle 10-15 tekrarla başlayabilir. Yeni başlayan biri için tek set bile kazanç sağlar.",
+            "Kayıt için bir defter ya da Başbuğ'daki not yeter; önemli olan her antrenmanda aynı biçimde yazmaktır. Yük yazılırken ekipman da yazılır: «sırt çantasında iki şişe su (yaklaşık 3 kg)» bile ölçülebilir bir yüktür (modelin bağlantı notu).",
+            "Örnek bir kayıt: «Diz şınavı, vücut ağırlığı, 3 × 10, kalan tekrar 3-2-1». Son setlerde kalan tekrarın düşmesi normaldir, çünkü yorgunluk birikir. Bir sonraki antrenmanda üç seti de 3 kalanla bitirebiliyorsan ilerleme zamanı gelmiştir (modelin bağlantı notu).",
+            "Kalan tekrarı doğru tahmin etmek zamanla öğrenilir. Yeni başlayanlar zorluğu çoğu zaman olduğundan yüksek sanır; «2 kaldı» denen sette aslında daha fazla tekrar olabilir. Bu yüzden ilk haftalarda kalan tekrar bir tahmin olarak yazılır, kesin ölçüm sayılmaz (modelin bağlantı notu).",
+            "Tükenişe kadar gitmenin bedeli çoğu zaman formdur: son tekrarlarda bel çukurlaşır, dizler içe kayar, hareket kısalır. Kalan tekrarla çalışmak hem güvenliği hem bir sonraki sete kalan gücü korur (modelin bağlantı notu).",
+            "Set arası dinlenmede nefesin sakinleşmesi iyi bir işarettir. Dinlenirken gerinmek ya da yavaşça yürümek yeterlidir; saat tutmak dinlenmenin uzayıp antrenmanın dağılmasını önler (modelin bağlantı notu)."
           ],
           "not": "Kaynak tablosundaki «optimal hipertrofi eşiği», merkezi sinir sistemi yorgunluğu yorumları ve «bilimsel kural» diye verilen hipertrofi aralığı (satır 32-37) ileri aşamanın (kas gelişimi ilkeleri) konusudur; alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.3.1.a1", "tur": "secmeli", "soru": "3 set 12 tekrar toplam kaç tekrardır?", "sec": ["15", "36", "24", "12"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
             { "id": "hareket.1.3.1.a2", "tur": "secmeli", "soru": "Hiç tekrar kalmadan bitirilen set hangisidir?", "sec": ["Tükenişe kadar giden set (0 kalan)", "Isınma seti", "Hafif set", "Dinlenme"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k16"] },
-            { "id": "hareket.1.3.1.a3", "tur": "acik", "soru": "Son antrenmanından bir hareketi set, tekrar, yük ve kalan tekrarıyla birlikte doğru biçimde yaz.", "dogru": "Örnek: Goblet squat, tek kettlebell 12 kg, 3 set × 10 tekrar, son set 2 tekrar kala.", "olcut": ["Set ve tekrar ayrı yazıldı", "Yük ekipmanla yazıldı", "Kalan tekrar belirtildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k4"] }
+            { "id": "hareket.1.3.1.a3", "tur": "acik", "soru": "Son antrenmanından bir hareketi set, tekrar, yük ve kalan tekrarıyla birlikte doğru biçimde yaz.", "dogru": "Örnek: Goblet squat, tek kettlebell 12 kg, 3 set × 10 tekrar, son set 2 tekrar kala.", "olcut": ["Set ve tekrar ayrı yazıldı", "Yük ekipmanla yazıldı", "Kalan tekrar belirtildi"], "durum": "taslak", "yazan": "model", "kaynak": ["k4"] },
+            { "id": "hareket.1.3.1.a4", "tur": "secmeli", "soru": "ACSM'ye göre çoğu yetişkin için kuvvet çalışmasında önerilen tekrar aralığı hangisidir?", "sec": ["1-2", "30-50", "100 ve üzeri", "8-12"], "dogru": "D", "cozum": ["ACSM çoğu yetişkin için 8-12 tekrarlık 2-4 seti önerir."], "durum": "taslak", "yazan": "model", "kaynak": ["k22"] }
           ]
         },
         {
@@ -253,14 +316,20 @@
           "ozet": "Gelişmek için zamanla biraz daha fazlası istenir: bir tekrar, bir set, biraz yük ya da daha zor bir aşama. Kas hızlı, tendon yavaş uyum sağladığı için artış küçük adımlarla olur.",
           "metin": [
             "Vücut kendisinden istenen işe uyum sağlar. Gelişmeye devam etmek için zamanla biraz daha fazlası istenir; buna aşamalı yüklenme denir. Kaynaklar yollarını sayar: dış yükü artırmak, tekrar ya da set eklemek, inişi yavaşlatmak (tempo), hareket açıklığını genişletmek ve vücut ağırlığıyla çalışırken daha zor bir aşamaya geçmek.",
+            "Kaynak yolları ayrıntılı sayar: dış yük eklemek, tekrar ya da set sayısını artırmak, inişi yavaşlatmak (örneğin üç saniyelik iniş), hareket açıklığını genişletmek ve ileri düzeyde set arası dinlenmeyi kısaltmak. Bu aşamada önerilen sıra: önce tekrar, sonra set, sonra zor aşama ya da yük; aynı anda yalnız bir değişken artırılır (son cümle: modelin bağlantı notu).",
             "Kalistenikte yük açı ve kaldıraçla ayarlanır. Bir aşamada temiz formla belirlenen tekrarı rahatça yapabildiğinde bir sonraki aşamaya geçilir; örneğin diz şınavında 3 set 15 temiz tekrar yapan biri tam şınava geçer ve orada tekrarın düşmesi beklenen bir durumdur.",
+            "Pratik bir kural: bir hareketin hedefi «3 set 8-12 tekrar» ise, üç setin hepsinde 12 temiz tekrar yapılınca bir sonraki aşamaya ya da biraz daha ağır yüke geçilir ve orada yeniden 8 tekrardan başlanır. Bu, «çift ilerleme» denen basit ve güvenli bir yoldur (modelin bağlantı notu).",
             "Her antrenmanda yük artırmak gerekmez; formu bozmadan bir tekrar fazlası da ilerlemedir.",
-            "Neden küçük adımlar? Kaynaklara göre kas kuvveti, tendon ve bağ dokusunun yük taşıma kapasitesinden daha hızlı gelişir. Yük çok hızlı artarsa kas kaldırabilir ama tendon ve kemik henüz hazır olmayabilir. Ara verdikten sonra yeniden başlayan biri eski yükünden değil daha hafif bir yerden başlar."
+            "Neden küçük adımlar? Kaynaklara göre kas kuvveti, tendon ve bağ dokusunun yük taşıma kapasitesinden daha hızlı gelişir. Yük çok hızlı artarsa kas kaldırabilir ama tendon ve kemik henüz hazır olmayabilir. Ara verdikten sonra yeniden başlayan biri eski yükünden değil daha hafif bir yerden başlar.",
+            "Kaynağın tablosu bu farkın nedenini de gösterir: kas iyi damarlanır ve hızlı yenilenir; tendon ve bağlar ise az damarlı ve yavaş yenilenen dokulardır. Bu yüzden ilk haftalardaki hızlı güç artışı, eklem ve tendonun da aynı hızda hazır olduğu anlamına gelmez.",
+            "İlerlemeyi görmek için kayıt şarttır: tarih, hareket, yük, set × tekrar ve kalan tekrar. Hafızaya güvenen biri ya yerinde sayar ya da gereğinden hızlı artırır (modelin bağlantı notu).",
+            "Ağrıyla gelen ilerleme ilerleme değildir. Bir artıştan sonra eklemde ya da tendonda ertesi güne kalan ağrı varsa bir önceki düzeye dönülür; ağrı birkaç gün içinde geçmiyorsa bir sağlık uzmanına danışılır."
           ],
           "not": "Kaynaktaki uyum süreleri (kas 4-8, tendon 12-24 hafta) ve «hayati risk» sütunundaki yaralanma adları (kalistenik atlası satır 31-32) doğrulanmadı, alınmadı; yalnız «tendon kastan yavaş uyum sağlar» ilkesi iki kaynakta da geçtiği için alındı. Set arası dinlenmeyi kısaltmak gibi ileri yöntemler bu aşamada öğretilmedi.",
           "alistirmalar": [
             { "id": "hareket.1.3.2.a1", "tur": "secmeli", "soru": "Hangisi aşamalı yüklenme değildir?", "sec": ["Bir tekrar eklemek", "Daha zor bir aşamaya geçmek", "Formu bozarak yükü ikiye katlamak", "Bir set eklemek"], "dogru": "C", "durum": "taslak", "yazan": "model", "kaynak": ["k4", "k15"] },
-            { "id": "hareket.1.3.2.a2", "tur": "secmeli", "soru": "İki ay ara veren biri antrenmana nasıl döner?", "sec": ["Eski en ağır yüküyle", "Daha hafif bir yerden başlayıp yükü küçük adımlarla artırarak", "Hiç ısınmadan", "Yalnız tükeniş setleriyle"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k18"] }
+            { "id": "hareket.1.3.2.a2", "tur": "secmeli", "soru": "İki ay ara veren biri antrenmana nasıl döner?", "sec": ["Eski en ağır yüküyle", "Daha hafif bir yerden başlayıp yükü küçük adımlarla artırarak", "Hiç ısınmadan", "Yalnız tükeniş setleriyle"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2", "k18"] },
+            { "id": "hareket.1.3.2.a3", "tur": "secmeli", "soru": "Kaynağa göre tendonun kastan yavaş uyum sağlamasının nedeni nedir?", "sec": ["Az damarlanması ve yavaş yenilenmesi", "Kastan daha çok damarlanması", "Hiç yük almaması", "Kemikten yapılmış olması"], "dogru": "A", "cozum": ["Kaynağın tablosuna göre tendonun damarlanması ve yenilenme hızı düşüktür; bu yüzden kastan yavaş uyum sağlar."], "durum": "taslak", "yazan": "model", "kaynak": ["k18"] }
           ]
         },
         {
@@ -269,18 +338,25 @@
           "onKosul": ["hareket.1.3.2"],
           "durum": "taslak",
           "yazan": "model",
-          "kaynak": ["k2", "k3", "k4", "k17", "k1"],
+          "kaynak": ["k2", "k3", "k4", "k17", "k1", "k25"],
           "ozet": "Kaslarda yaygın ve bir iki günde geçen gerginlik olağandır; bir noktaya sabitlenen, hareketle artan ya da topallatan ağrı uyarıdır. Gelişme antrenmandan sonra, toparlanırken olur.",
           "metin": [
             "Antrenmandan bir iki gün sonra kaslarda yaygın bir gerginlik hissedilebilir; kaynak buna gecikmiş kas ağrısı der ve kas gelişiminin zorunlu bir göstergesi olmadığını yazar. Bu olağan yorgunluk bir iki günde geçer.",
+            "Kaynağa göre gecikmiş kas ağrısı kas liflerindeki küçük hasar ve antrenmandan 24-48 saat sonra salınan iltihap aracılarıyla ilişkilidir. Yeni bir harekete başlandığında ya da inişi ağır çalışmalardan sonra daha belirgindir ve aynı hareket düzenli yapıldıkça azalır (son cümle: modelin bağlantı notu).",
             "Bir noktaya sabitlenen, hareket ettikçe artan ya da topallatan ağrı ise uyarıdır: o hareket ya da yük kesilir. Ağrıyla devam etmek küçük bir sorunu haftalarca süren bir sakatlığa çevirebilir. Geçmeyen ağrıda bir sağlık uzmanına danışılır.",
+            "Kaba bir yol gösterici: ağrıyı 0 (hiç) ile 10 (dayanılmaz) arasında puanla. Antrenman sırasında düşük kalan, ertesi gün artmayan ve hareketi bozmayan bir his çoğu zaman sorun değildir; keskin, batıcı ya da giderek artan ağrıda o hareket bırakılır (modelin bağlantı notu).",
             "Asıl gelişme antrenmandan sonra, uyku ve beslenmeyle birlikte toparlanırken olur. Yeni başlayan biri için haftada 2–3 gün tam vücut antrenmanı yeterlidir; aynı kas grubunu ertesi gün yeniden yüklemeden önce toparlanmaya zaman tanınır.",
-            "Önceki derslerdeki sınır geçerlidir: göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır."
+            "Kaynağın toparlanma piramidinin tabanında uyku vardır ve 7-9 saatlik gece uykusu yazılıdır; masaj ya da kompresyon gibi yöntemler bunun üstüne gelir. Yetersiz uyku, aynı antrenmanın ertesi gün daha zor gelmesinin en sık nedenlerindendir (son cümle: modelin bağlantı notu).",
+            "Ağrılı bir günde tamamen hareketsiz kalmak gerekmez: hafif yürüyüş, rahat bir bisiklet turu ya da ağrımayan bölgeleri çalışmak toparlanmayı engellemez. Bu «aktif dinlenme» konuşma testine göre hafif şiddette tutulur (modelin bağlantı notu).",
+            "Örnek bir hafta: Pazartesi ve Perşembe tam vücut kuvvet, Salı ve Cumartesi 30 dakika tempolu yürüyüş, kalan günler hafif hareket. Böylece aynı kas grubu iki kuvvet günü arasında en az iki gün dinlenir (modelin bağlantı notu).",
+            "Önceki derslerdeki sınır geçerlidir: göğüs ağrısı, nefes darlığı, baş dönmesi ya da çarpıntı egzersizde normal değildir; durulur ve hekime danışılır.",
+            "Düşme ya da burkulmadan sonra şişlik, morarma ya da yük verememe varsa antrenman bırakılır ve hekime başvurulur. Göğüs ağrısı, bayılma ya da ani nefes darlığı gibi acil belirtilerde 112 aranır."
           ],
           "not": "Kaynaktaki kalp hızı değişkenliği ve süperkompansasyon saatleri (satır 41-42) ileri konudur; ağrı nörobilimi, PEACE & LOVE ve sakatlık sonrası yükleme protokolleri (`sakatlik_onleme_…`) klinik alana girdiği için bu aşamaya alınmadı.",
           "alistirmalar": [
             { "id": "hareket.1.3.3.a1", "tur": "secmeli", "soru": "Hangisi kaynağa göre uyarı ağrısıdır?", "sec": ["İki gün sonra uyluklarda yaygın gerginlik", "Dizin bir noktasında, hareket ettikçe artan ağrı", "Setin sonunda kasta yanma ve yorgunluk", "Antrenman sonrası genel yorgunluk"], "dogru": "B", "durum": "taslak", "yazan": "model", "kaynak": ["k2"] },
-            { "id": "hareket.1.3.3.a2", "tur": "secmeli", "soru": "Gecikmiş kas ağrısı için kaynak ne der?", "sec": ["Kas gelişiminin zorunlu göstergesi değildir", "Yoksa antrenman boşa gitmiştir", "Her zaman sakatlıktır", "Yalnız koşuda olur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] }
+            { "id": "hareket.1.3.3.a2", "tur": "secmeli", "soru": "Gecikmiş kas ağrısı için kaynak ne der?", "sec": ["Kas gelişiminin zorunlu göstergesi değildir", "Yoksa antrenman boşa gitmiştir", "Her zaman sakatlıktır", "Yalnız koşuda olur"], "dogru": "A", "durum": "taslak", "yazan": "model", "kaynak": ["k17"] },
+            { "id": "hareket.1.3.3.a3", "tur": "secmeli", "soru": "Kaynağın toparlanma piramidinin tabanında ne vardır?", "sec": ["Masaj", "Uyku", "Takviye", "Kompresyon"], "dogru": "B", "cozum": ["Piramidin tabanı gece uykusudur; öteki yöntemler onun üstüne kurulur."], "durum": "taslak", "yazan": "model", "kaynak": ["k25"] }
           ]
         }
       ]

@@ -57,12 +57,15 @@
   function baglamGecerli(b) {
     if (b && b.tur === 'konu') {
       var ad = String(b.ad || '').replace(/\s+/g, ' ').trim().slice(0, 120);
-      return ad && /^[a-z]+$/.test(String(b.alan || '')) ? { tur: 'konu', alan: b.alan, ad: ad } : null;
+      if (!ad || !/^[a-z]+$/.test(String(b.alan || ''))) return null;
+      var k = { tur: 'konu', alan: b.alan, ad: ad };
+      if (typeof b.kid === 'string' && /^[a-z0-9]{1,24}$/.test(b.kid)) k.kid = b.kid; // kullanıcının kendi konusu (kabuk/konularim.js): «Konuya kaydet» buna yazar, sunucuya gitmez
+      return k;
     }
     var m = b && b.tur === 'ders' && /^([a-z]+)\.\d{1,2}(\.\d{1,3}){1,3}$/.exec(String(b.id || ''));
     return m ? { tur: 'ders', alan: m[1], id: String(b.id), ad: String(b.ad || '').slice(0, 120) } : null;
   }
-  function ayniBaglam(a, b) { return !!a && !!b && a.tur === b.tur && a.alan === b.alan && (a.tur === 'ders' ? a.id === b.id : a.ad === b.ad); }
+  function ayniBaglam(a, b) { return !!a && !!b && a.tur === b.tur && a.alan === b.alan && (a.tur === 'ders' ? a.id === b.id : a.ad === b.ad && (a.kid || '') === (b.kid || '')); }
   // Yerel ISO zaman (sunucu ambarı created_at ile aynı biçim): «yeni konuşma» sunucuda da buradan başlar.
   function yerelIso(t) {
     var d = new Date(t), p = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -77,7 +80,7 @@
       if (g.kip === 'divan') { if (h) g.hukumdar = h; else g.kip = 'ortak'; } // hükümdarsız Divan yok
       if (o.baslangic) g.baslangic = o.baslangic;
       var b = baglamGecerli(o.baglam);
-      if (b) g.baglam = b.tur === 'konu' ? b : { tur: b.tur, alan: b.alan, id: b.id };
+      if (b) g.baglam = b.tur === 'konu' ? { tur: 'konu', alan: b.alan, ad: b.ad } : { tur: b.tur, alan: b.alan, id: b.id };
     }
     return g;
   }
@@ -99,7 +102,7 @@
       baslangic: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v.baslangic) ? v.baslangic : bos.baslangic,
       kip: kipGecerli(v.kip), hukumdar: hukumdarGecerli(v.hukumdar), baglam: baglamGecerli(v.baglam),
       mesajlar: v.mesajlar.filter(function (m) { return m && (m.kim === 'ben' || m.kim === 'king') && typeof m.metin === 'string'; })
-        .map(function (m) { return { kim: m.kim, metin: m.metin.slice(0, EN_UZUN), alt: Array.isArray(m.alt) ? m.alt.filter(function (x) { return typeof x === 'string' && !/^Kaynak: /.test(x); }).slice(0, 3) : [] }; })
+        .map(function (m) { return { kim: m.kim, metin: m.metin.slice(0, EN_UZUN), kayit: m.kayit === 'tamam' ? 'tamam' : undefined, alt: Array.isArray(m.alt) ? m.alt.filter(function (x) { return typeof x === 'string' && !/^Kaynak: /.test(x); }).slice(0, 3) : [] }; })
         .slice(-EN_COK)
     };
   }
@@ -153,10 +156,12 @@
 
   // Başbuğ'un sözü adla başlar (Divan'da hükümdarın)
   function kimHtml(ad) { return '<p class="king-kim"><svg aria-hidden="true"><use href="#i-king"/></svg>' + kac(ad) + '</p>'; }
-  function mesajHtml(m, ad) {
+  // kaydet: kendi konusuyla açılmış sohbette Başbuğ'un cevabının altında «Konuya kaydet» (i = mesajın sırası)
+  function mesajHtml(m, ad, i, kaydet) {
     if (m.kim === 'ben') return '<li class="king-msj king-msj--ben"><div class="king-balon">' + bicimle(m.metin) + '</div></li>';
     return '<li class="king-msj king-msj--king">' + kimHtml(ad) + '<div class="king-balon">' + bicimle(m.metin) + '</div>' +
-      (m.alt.length ? '<p class="king-msj__alt">' + m.alt.map(kac).join(' · ') + '</p>' : '') + '</li>';
+      (m.alt.length ? '<p class="king-msj__alt">' + m.alt.map(kac).join(' · ') + '</p>' : '') +
+      (kaydet ? '<button type="button" class="king-msj__kaydet" data-king-kaydet="' + i + '"' + (m.kayit ? ' aria-disabled="true">' + (m.kayit === 'tamam' ? 'Konuya kaydedildi' : 'Konu listende yok, kaydedilemedi') : '>Konuya kaydet') + '</button>' : '') + '</li>';
   }
   function html(B) {
     var s = d.s, bos = !s.mesajlar.length && !d.bekliyor;
@@ -181,7 +186,7 @@
       (sorular.length ? '<div class="king-oneri" aria-label="Örnek sorular">' + sorular.map(function (q) {
         return '<button type="button" class="king-oneri__oge" data-king-oneri="' + kac(q) + '">' + kac(q) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '';
     ust += secim;
-    var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(function (m) { return mesajHtml(m, ad); }).join('') +
+    var akis = bos ? '' : '<ol class="king-akis" aria-label="Konuşma" aria-live="polite">' + s.mesajlar.map(function (m, i) { return mesajHtml(m, ad, i, !!(s.baglam && s.baglam.kid && Kabuk.Konularim)); }).join('') +
       (d.bekliyor ? '<li class="king-yaziyor" role="status"><span class="gizli">Başbuğ yazıyor…</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></li>' : '') + '</ol>';
     var hata = d.hata ? B.uyari({ tur: 'hata', metin: d.hata, alt: 'Yazdığın kutuda duruyor.', eylem: { metin: 'Tekrar dene', tur: 'sade', veri: { 'king-tekrar': '' } } }) : '';
     var form = '<form class="king-yaz" data-king-sohbet novalidate>' +
@@ -242,8 +247,9 @@
   // Alan sayfasında dersi yazılmamış konunun «Başbuğ'la çalış» bağlantısı (kabuk.js çizer; href="#/king" gezinmeyi kendisi yapar):
   // o konu bağlamıyla Öğretmen kipinde; başka konudan geliyorsa yeni konuşma.
   function konuylaCalis(a) {
-    var b = baglamGecerli({ tur: 'konu', alan: a.getAttribute('data-alan'), ad: a.getAttribute('data-king-konu') });
+    var b = baglamGecerli({ tur: 'konu', alan: a.getAttribute('data-alan'), ad: a.getAttribute('data-king-konu'), kid: a.getAttribute('data-king-kid') }), ist = a.getAttribute('data-king-istem');
     if (!b) return;
+    if (ist) depoYaz(TASLAK, ist.slice(0, 8000)); // «Başbuğ düzenlesin» (konularim.js): hazır istek yazma kutusuna gelir, gönderen kişidir
     if (!ayniBaglam(d.s.baglam, b)) yeniKonusma('ogretmen', b);
     else if (d.s.kip !== 'ogretmen') { d.s.kip = 'ogretmen'; kaydet(); }
     if (bolumEl()) ciz();
@@ -268,6 +274,12 @@
       if ((b = t.closest('[data-king-calis]'))) { e.preventDefault(); return dersleCalis(b.getAttribute('data-king-calis')); }
       if ((b = t.closest('[data-king-konu]'))) return konuylaCalis(b);
       if (!f) return;
+      if ((b = t.closest('[data-king-kaydet]'))) { // kendi konusuna not (konularim.js); konu silindiyse uyarı
+        var mk = d.s.mesajlar[+b.getAttribute('data-king-kaydet')], kb = d.s.baglam;
+        if (!mk || mk.kim !== 'king' || mk.kayit || !kb || !kb.kid || !Kabuk.Konularim) return;
+        mk.kayit = Kabuk.Konularim.notKaydet(kb.alan, kb.kid, mk.metin) ? 'tamam' : 'yok'; kaydet();
+        ciz(); var kd = kok.document.querySelector('[data-king-kaydet="' + d.s.mesajlar.indexOf(mk) + '"]'); return kd && kd.focus();
+      }
       if ((b = t.closest('[data-king-hukumdar]'))) { // başka hükümdar = başka konuşma (geçmiş karışmasın)
         var h = hukumdarGecerli(b.getAttribute('data-king-hukumdar'));
         if (!h || d.bekliyor) return;

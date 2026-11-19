@@ -43,7 +43,7 @@
     { id: 'not', ad: 'Not', katman: 'motor', dal: 'motorlar', yol: '#/motor/not', ikon: 'not', halka: 4, durum: 'yeni', aciklama: 'Her yerden açılan defter' },
     { id: 'arama', ad: 'Arama', katman: 'motor', dal: 'motorlar', yol: '#/motor/arama', ikon: 'buyutec', durum: 'yeni', aciklama: 'Her şeyde arama' },
     // Başbuğ
-    { id: 'king', ad: 'Başbuğ', katman: 'king', dal: 'king', yol: '#/king', ikon: 'tac', halka: 5, durum: 'yeni', aciklama: 'Düşünce ortağı' }
+    { id: 'king', ad: 'Başbuğ', katman: 'king', dal: 'king', yol: '#/king', ikon: 'tug', halka: 5, durum: 'yeni', aciklama: 'Düşünce ortağı' }
   ];
 
   var DALLAR = [

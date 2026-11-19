@@ -77,6 +77,15 @@ t('konu bağlamı: alan [a-z]+, ad tek satır ≤120 harf; sunucuya alan + ad gi
   a.ok(K.ayniBaglam({ tur: 'ders', alan: 'felsefe', id: 'felsefe.1.1.1' }, { tur: 'ders', alan: 'felsefe', id: 'felsefe.1.1.1', ad: 'x' }));
   a.strictEqual(K.sohbetOku(JSON.stringify({ baglam: k, mesajlar: [] }), 0).baglam.ad, 'Malazgirt');
 });
+t('kendi konusu (konularim.js): kid ekranda kalır, sunucuya gitmez; aynı ad başka kid başka konuşma; «kaydedildi» yenilemede kalır', () => {
+  const k = K.baglamGecerli({ tur: 'konu', alan: 'tarih', ad: 'Göktürk ordusu › Onlu düzen', kid: 'kabc12' });
+  a.deepStrictEqual(k, { tur: 'konu', alan: 'tarih', ad: 'Göktürk ordusu › Onlu düzen', kid: 'kabc12' });
+  a.strictEqual(K.baglamGecerli({ tur: 'konu', alan: 'tarih', ad: 'x', kid: '../a' }).kid, undefined);
+  a.deepStrictEqual(K.istekGovdesi('x', 'oto', { kip: 'ogretmen', baglam: k }).baglam, { tur: 'konu', alan: 'tarih', ad: 'Göktürk ordusu › Onlu düzen' });
+  a.ok(!K.ayniBaglam(k, Object.assign({}, k, { kid: 'kzzz' })) && K.ayniBaglam(k, Object.assign({}, k)));
+  const s = K.sohbetOku(JSON.stringify({ baglam: k, mesajlar: [{ kim: 'king', metin: 'a', kayit: 'tamam' }, { kim: 'king', metin: 'b', kayit: 'yok' }] }), 0);
+  a.deepStrictEqual([s.baglam.kid, s.mesajlar[0].kayit, s.mesajlar[1].kayit], ['kabc12', 'tamam', undefined]);
+});
 
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

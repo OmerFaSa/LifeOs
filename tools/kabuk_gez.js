@@ -207,6 +207,39 @@ async function goruntu(p, ad, sec = {}) {
       }
       dene('çubuklar: 320…1440 px, varsayılan ve piksel + en büyük yazıda üst/alt çubukta kesişme, taşma yok', bulgu.length === 0, bulgu.slice(0, 6).join(' | '));
     }
+    // ---- Kendi başlıkların (kabuk/konularim.js, 2026-11-18): başlık + konu ekleme, «Başbuğ'la çalış», «Konuya kaydet»; ayrı bağlamda, 390 px ----
+    {
+      const kc = await b.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light' }), kp = await kc.newPage();
+      kp.on('pageerror', e => hata.push('konularim: ' + e.message));
+      await kp.route('**/api/kabuk/king', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ mode: 'model', text: 'Onlu düzen ordunun temelidir.' }) }));
+      await kp.goto(T + '/kabuk/#/alan/tarih');
+      await kp.waitForSelector('.konularim--bos [data-km-form="baslik"] input');
+      dene('kendi başlıkların: boşken tek davetkâr satır', (await kp.locator('.konularim--bos form').count()) === 1 && (await kp.getAttribute('.konularim--bos input', 'placeholder')) === 'Kendi başlığını ekle');
+      await kp.fill('[data-km-form="baslik"] input', 'Göktürk ordusu'); await kp.press('[data-km-form="baslik"] input', 'Enter');
+      await kp.waitForSelector('.konularim__baslik [data-km-form="konu"] input:focus');
+      await kp.keyboard.type('Onlu düzen'); await kp.keyboard.press('Enter');
+      await kp.waitForSelector('.konularim__konu a[data-king-konu]');
+      const ka = await kp.$eval('.konularim__konu a[data-king-konu]', a => [a.getAttribute('href'), a.getAttribute('data-king-konu'), a.getAttribute('data-alan'), /^[a-z0-9]+$/.test(a.getAttribute('data-king-kid') || '')]);
+      dene('kendi başlıkların: başlık ve konu eklenir, kaydedilir; konuda başlıkla birlikte «Başbuğ’la çalış» bağlantısı; 390 px taşma yok',
+        JSON.stringify(ka) === JSON.stringify(['#/king', 'Göktürk ordusu › Onlu düzen', 'tarih', true]) && (await kp.textContent('.konularim__ad')) === 'Göktürk ordusu'
+        && JSON.parse(await kp.evaluate(() => LIFEOS.Kabuk.Depo.getItem('lifeos.not.konularim'))).tarih[0].konular[0].ad === 'Onlu düzen'
+        && !(await kp.evaluate(() => document.documentElement.scrollWidth > innerWidth)), JSON.stringify(ka));
+      await kp.click('.konularim__konu a[data-king-konu]');
+      await kp.waitForSelector('form[data-king-sohbet]');
+      dene('kendi başlıkların: «Başbuğ’la çalış» sohbeti konu bağlamıyla Öğretmen kipinde açar', /Göktürk ordusu › Onlu düzen/.test(await kp.textContent('.king-baglam__ad'))
+        && (await kp.getAttribute('[data-king-kip="ogretmen"]', 'aria-pressed')) === 'true');
+      await kp.fill('form[data-king-sohbet] [name="metin"]', 'Anlat'); await kp.press('form[data-king-sohbet] [name="metin"]', 'Enter');
+      await kp.waitForSelector('[data-king-kaydet]'); await kp.click('[data-king-kaydet]');
+      await kp.waitForSelector('[data-king-kaydet][aria-disabled="true"]');
+      await kp.goto(T + '/kabuk/#/alan/tarih'); await kp.waitForSelector('.konularim__not');
+      dene('kendi başlıkların: «Konuya kaydet» cevabı konunun altına «Başbuğ’un notu» olarak koyar', /Başbuğ’un notu/.test(await kp.textContent('.konularim__not summary'))
+        && /Onlu düzen ordunun temelidir/.test(await kp.textContent('.konularim__not-metin')));
+      await kp.click('.konularim__duzenle'); await kp.waitForSelector('form[data-king-sohbet]');
+      const ist = await kp.inputValue('form[data-king-sohbet] [name="metin"]');
+      dene('kendi başlıkların: «Başbuğ düzenlesin» başlığı ve konuları içeren isteği yazma kutusuna koyar (göndermez)', /«Göktürk ordusu»/.test(ist) && /1\. Onlu düzen/.test(ist)
+        && /Konu: Göktürk ordusu/.test(await kp.textContent('.king-baglam__ad')), ist.slice(0, 80));
+      await kc.close();
+    }
     // ---- Konu listeleri (2026-11-17): konu haritası dalları, dal seçimi, Akademik grupları; ayrı bağlamda (seçim öbür adımlara sızmasın) ----
     {
       const TH = JSON.parse(fs.readFileSync(path.join(kok, 'alan/tarih/harita.json'), 'utf8'));
@@ -442,6 +475,46 @@ async function goruntu(p, ad, sec = {}) {
     await p.waitForSelector('[data-not-ag] svg');
     await goruntu(p, 'not-agi');
     await goruntu(p, 'yer-7-not-agi', { yalniz: YER });
+
+    // ---- Not klasörleri (2026-11-18k): aç, hızlı notu klasöre yaz, notu taşı, klasörde ara, yeniden adlandır, sil (notlar kalır) + geri al ----
+    const notYedek = await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.kayit'));
+    const notKl = () => p.evaluate(() => JSON.parse(LIFEOS.Kabuk.ic.depo.getItem('lifeos.not.kayit')).map(n => n.klasor).sort().join('|'));
+    await p.click('.klasor-yeni summary');
+    await p.fill('.klasor-yeni input[name=klasorAd]', ' Felsefe ');
+    await p.press('.klasor-yeni input[name=klasorAd]', 'Enter');
+    await p.waitForFunction(() => location.hash === '#/motor/not?klasor=Felsefe');
+    dene('klasör: yeni klasör açılır, adreste seçili, boşken öyle der', /Bu klasörde not yok/.test(await p.textContent('#not-liste'))
+      && /Felsefe\s*0/.test(await p.textContent('.klasor-cip[aria-current="page"]')));
+    await p.fill('.nothizli textarea', 'Klasörde hızlı');
+    await p.press('.nothizli textarea', 'Control+Enter');
+    await p.waitForFunction(() => /Klasörde hızlı/.test(document.getElementById('not-liste').textContent));
+    dene('klasör: seçili klasörde hızlı not o klasöre girer', (await notKl()) === '||Felsefe', await notKl());
+    await p.goto(T + '/kabuk/' + erdem);
+    await p.waitForSelector('form.notform input[name=klasor]');
+    await p.fill('form.notform input[name=klasor]', 'Felsefe');
+    await p.press('form.notform textarea[name=govde]', 'Control+Enter');
+    await p.waitForFunction(() => /Kaydedildi/.test((document.querySelector('.notform .b-uyari') || {}).textContent || ''));
+    dene('klasör: not düzenlenirken klasöre taşınır (Ctrl+Enter kaydeder), kırıntı klasörü gösterir', (await notKl()) === '|Felsefe|Felsefe'
+      && (await p.locator('a.kirinti[href="#/motor/not?klasor=Felsefe"]').count()) === 1, await notKl());
+    await p.goto(T + '/kabuk/#/motor/not?klasor=Felsefe');
+    await p.waitForSelector('#not-liste a.notsatir');
+    dene('klasör: klasör içinde yalnız onun notları', (await p.locator('#not-liste a.notsatir').count()) === 2 && !/Sokrates/.test(await p.textContent('#not-liste')));
+    await p.fill('[data-not-ara]', 'sokr');
+    dene('klasör: arama klasörün içinde kalır', /uyan not yok/.test(await p.textContent('#not-liste')));
+    await goruntu(p, 'not-klasor');
+    await p.click('.klasor-adlandir summary');
+    await p.fill('.klasor-adlandir input[name=klasorAd]', 'Düşünceler');
+    await p.press('.klasor-adlandir input[name=klasorAd]', 'Enter');
+    await p.waitForFunction(() => decodeURIComponent(location.hash) === '#/motor/not?klasor=Düşünceler');
+    dene('klasör: yeniden adlandırılınca notlar yeni adda', (await notKl()) === '|Düşünceler|Düşünceler', await notKl());
+    await p.click('[data-arac-ac="klasor-sil"]');
+    await p.waitForFunction(() => location.hash === '#/motor/not' && !!document.querySelector('[data-geri-al]'));
+    dene('klasör: silinince notlar silinmez, Klasörsüz’e düşer; «Geri al» görünür', (await notKl()) === '||' && /2 not Klasörsüz/.test(await p.textContent('[data-geri-al]')), await notKl());
+    await p.click('[data-geri-al] [data-arac-ac="geri-al"]');
+    await p.waitForFunction(() => /Geri alındı/.test((document.querySelector('[data-geri-al]') || {}).textContent || ''));
+    dene('klasör: geri al klasörü ve notlarını geri getirir', (await notKl()) === '|Düşünceler|Düşünceler' && (await p.locator('.klasor-cip[href="#/motor/not?klasor=D%C3%BC%C5%9F%C3%BCnceler"]').count()) === 1, await notKl());
+    await p.evaluate(v => { LIFEOS.Kabuk.ic.depo.setItem('lifeos.not.kayit', v); LIFEOS.Kabuk.ic.depo.removeItem('lifeos.not.klasorler'); }, notYedek); // sonraki denetimler iki klasörsüz notla sürer
+    await p.goto(T + '/kabuk/#/motor/not'); await p.reload(); await p.waitForSelector('#not-liste a.b-satir');
 
     // ---- Sisteme not: «Yeni araç», Başbuğ okuma izni varsayılan kapalı; kapalı aracın notu Başbuğ süzgecinden geçmez ----
     await p.click('a[href="#/motor/not/arac/yeni"]');

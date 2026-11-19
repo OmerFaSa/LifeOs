@@ -62,7 +62,7 @@ function sahteIdb(o = {}) {
 }
 
 // Kayıt / ayar ayrımı (rapordaki liste). Kabuk dosyalarında geçen her lifeos.* anahtarı ikisinden birinde olmalı.
-const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit', 'lifeos.not.araclar', 'lifeos.tekrar.kartlar', 'lifeos.tekrar.bugun',
+const KAYITLAR = ['lifeos.yol.felsefe.1', 'lifeos.yol.dil.2', 'lifeos.not.kayit', 'lifeos.not.araclar', 'lifeos.not.konularim', 'lifeos.not.klasorler', 'lifeos.tekrar.kartlar', 'lifeos.tekrar.bugun',
   'lifeos.kayit.kayitlar', 'lifeos.plan.durum', 'lifeos.plan.sablon', 'lifeos.soru.oturum', 'lifeos.soru.gecmis', 'lifeos.soru.deneme',
   'lifeos.soru.denemeler', 'lifeos.tanisma.kayit', 'lifeos.tanisma.taslak', 'lifeos.beden.boy', 'lifeos.beden.cinsiyet',
   'lifeos.beden.dogumYili', 'lifeos.beden.hedef', 'lifeos.onay', 'lifeos.plan.eski', 'lifeos.soru.eski', 'lifeos.yol.tarih.dal'];
@@ -82,7 +82,7 @@ const ORNEK = { 'lifeos.yol.felsefe.1': '{"dersler":{"a":1}}', 'lifeos.not.kayit
   });
   await t('anahtar: kabuk dosyalarındaki her lifeos.* anahtarı sınıflanmış', () => {
     const bilinen = new Set(KAYITLAR.concat(AYARLAR)), yeni = [];
-    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'tasima.js', 'harita.js', 'ayar.js', 'onay.js'].forEach(f => {
+    ['kabuk.js', 'araclar.js', 'deneme.js', 'tanisma.js', 'tasima.js', 'harita.js', 'ayar.js', 'onay.js', 'konularim.js'].forEach(f => {
       (fs.readFileSync(path.join(__dirname, f), 'utf8').match(/'lifeos\.[\w.]+'/g) || []).map(s => s.slice(1, -1))
         .filter(k => !k.endsWith('.') && !bilinen.has(k)).forEach(k => yeni.push(f + ': ' + k));
     });

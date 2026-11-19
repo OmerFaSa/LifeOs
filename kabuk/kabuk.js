@@ -416,6 +416,13 @@
     ['Osmanlı İmparatorluğu', '1299', 'Osman Gazi, Fatih Sultan Mehmet']];
   var YILDIZ = '<svg viewBox="0 0 20 20" aria-hidden="true"><polygon points="' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) {
     var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 3.8 : 9.5; return (10 + r * Math.cos(a)).toFixed(2) + ',' + (10.6 + r * Math.sin(a)).toFixed(2); }).join(' ') + '"/></svg>';
+  // Her sayfanın altında Türk mührü (2026-11-18k, sahip: «koyu Türk milliyetçisi tarzı, yıldızlar gibi simgelerle»): on altı yıldız,
+  // «Ne mutlu Türküm diyene!» ve Göktürk harfleriyle «Türük». Ders ve Başbuğ sohbeti hariç.
+  function turkMuhru() {
+    var y = ''; for (var i = 0; i < 16; i++) y += YILDIZ;
+    return '<footer class="turk-muhur"><div class="turk-muhur__yildiz" aria-hidden="true">' + y + '</div>' +
+      '<p class="turk-muhur__soz">Ne mutlu Türküm diyene!</p><p class="turk-muhur__runik" lang="otk" dir="rtl" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</p></footer>';
+  }
   function onAltiYildiz(t) {
     var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5) % 16, d = DEVLET[no];
     return '<section class="tdev" aria-label="On altı büyük Türk devleti"><ol class="tdev__sira">' + DEVLET.map(function (x, i) {
@@ -949,7 +956,8 @@
       ic = (!dr.asama.acik ? asamaBasligi('Aşama ' + f.n, dr.asama.ad) + B.bos({ baslik: KILITLI_ASAMA })
         : neredesin(f, dr, a) + B.bolum({ baslik: 'Dersler', id: 'dersler-baslik', govde: unitelerHtml(dr, a && (a.tur === 'kapi' ? a.id : f.y.ust[a.id]), dr.asama.yerlestirme) }) + sonCalisilan(f.y, kayitOku())) +
         (cok ? B.bolum({ baslik: 'Aşamalar', id: 'asamalar-baslik', govde: asamalarHtml(f.n) }) : '') +
-        (hr ? dallarHtml(hr, dr.asama.acik ? a : null) : '');
+        (hr ? dallarHtml(hr, dr.asama.acik ? a : null) : '') +
+        (Kabuk.ek && Kabuk.ek.alanSonu ? Kabuk.ek.alanSonu(etkinAlan) : ''); // kullanıcının kendi başlık ve konuları (kabuk/konularim.js)
     }
     var dal = seciliDal(etkinAlan);
     return ust(kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: yer.ad, alt: dal ? 'Çalıştığın dal: ' + dal.ad : yer.aciklama }) + mirasKarti(yer.id) + ic +
@@ -1168,7 +1176,7 @@
       if (sira !== cizSira) return; // geçişin bekleyen çizimi, ondan sonra gelen daha yeni çizimin üstüne yazmaz
       var yukleniyordu = !yeniSayfa && !!sayfaEl.querySelector('[aria-busy="true"]'); // «Yükleniyor…»un yerine gelen asıl içerik bir kez süzülür
       var gecen = !yeniSayfa && !yukleniyordu && sayfaEl.classList.contains('canlan') ? canlanAni() : null;
-      sayfaEl.innerHTML = html;
+      sayfaEl.innerHTML = html + (/\/ders\//.test(parca[0]) || yer.id === 'king' ? '' : turkMuhru()); // ders ve sohbet ekranı sade kalır
       sayfaEl.setAttribute('data-ciz', yer.id);
       // alanın tonu sayfaya (kabuk.css --alan-ton/--alan-isik): kapak ışıması, ders ve kart vurguları; tonsuz sayfa sıcak ana renkte
       if (KAPAK[yer.id]) sayfaEl.setAttribute('data-ton', KAPAK[yer.id][1]); else sayfaEl.removeAttribute('data-ton');

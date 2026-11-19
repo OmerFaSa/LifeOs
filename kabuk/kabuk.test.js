@@ -120,6 +120,12 @@ t('not: yeni not kaydolur; boş not motorun cümlesiyle reddedilir ve liste değ
   let h = ''; try { R.notKaydet(Not, r.notlar, 'yeni', { baslik: '  ', govde: '' }, 2000, 'n2'); } catch (e) { h = e.message; }
   dogru(/boş not kaydedilmez/.test(h), h);
 });
+t('not: klasör formdan gelir ve düzeltilir; formda klasör yoksa yerinde kalır (2026-11-18k)', () => {
+  let l = R.notKaydet(Not, [], 'yeni', { baslik: 'A', govde: '', klasor: ' Ders / Tarih ' }, 1000, 'n1').notlar;
+  esit(l[0].klasor, 'Ders/Tarih');
+  esit(R.notKaydet(Not, l, 'n1', { baslik: 'A', govde: 'x' }, 2000).notlar[0].klasor, 'Ders/Tarih');
+  esit(R.notKaydet(Not, l, 'n1', { baslik: 'A', govde: 'x', klasor: '' }, 2000).notlar[0].klasor, '');
+});
 t('not: başlık değişince öbür nottaki bağın görünen adı tazelenir, takma ad kalır; gövde ve işaretler güncellenir', () => {
   let l = R.notKaydet(Not, [], 'yeni', { baslik: 'Erdem', govde: 'a' }, 1000, 'n1').notlar;
   l = R.notKaydet(Not, l, 'yeni', { baslik: 'Sokrates', govde: 'Bkz. ' + Not.bagYaz('n1', 'Erdem') + ' ve ' + Not.bagYaz('n1', 'şu fikir') }, 1100, 'n2').notlar;

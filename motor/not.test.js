@@ -354,6 +354,27 @@ it('göç gün notu: AYS günü, SPİ vitals ve seansı, ESP günü ve seans not
   assert.throws(() => N.goc.gunNotu([], { zaman:GOC }), /modül/);
 });
 
+/* ------------------------------------------------------------- klasörler (2026-11-18k) */
+it('klasorler: notlardan, boş klasörlerden ve araçlardan; Türkçe sıra, alt klasör sayıya girer', () => {
+  const l = [not('a', { klasor:'Ders/Tarih' }), not('b', { klasor:'Ders' }), not('c'), not('d', { klasor:'Çay' })];
+  assert.deepStrictEqual(N.klasorler(l, [' Boş ', 'Ders', 'Zeka']), [{ ad:'Boş', sayi:0 }, { ad:'Çay', sayi:1 }, { ad:'Ders', sayi:2 }, { ad:'Ders/Tarih', sayi:1 }, { ad:'Zeka', sayi:0 }]);
+  assert.deepStrictEqual(N.klasorler([], []), []);
+});
+it('klasorTasi: yeniden adlandırır (alt klasör de), siler (not Klasörsüze düşer, silinmez); araç klasörüne dokunmaz', () => {
+  const l = [not('a', { klasor:'Ders/Tarih' }), not('b', { klasor:'Ders' }), not('c', { klasor:'Dersler' }), not('d')];
+  let r = N.klasorTasi({ notlar:l, bos:['Ders/Boş', 'Başka'], eski:'Ders', yeni:' Okul ', zaman:T0 + 5 });
+  assert.deepStrictEqual(r.notlar.map(n => n.klasor), ['Okul/Tarih', 'Okul', 'Dersler', '']);
+  assert.deepStrictEqual([r.degisen, r.bos, r.notlar[0].guncelleme, r.notlar[2] === l[2]], [['a', 'b'], ['Okul/Boş', 'Başka'], T0 + 5, true]);
+  hepsiGecerli(r.notlar);
+  r = N.klasorTasi({ notlar:l, bos:['Ders/Boş', 'Başka'], eski:'Ders', yeni:'', zaman:T0 + 5 });
+  assert.deepStrictEqual([r.notlar.length, r.notlar.map(n => n.klasor), r.bos], [4, ['', '', 'Dersler', ''], ['Başka']]);
+  const araclar = [N.yeniArac({ id:'a1', ad:'Düşünce', klasor:'Ders/Tarih', olusturma:T0 })];
+  assert.throws(() => N.klasorTasi({ notlar:l, araclar, eski:'Ders', yeni:'Okul', zaman:T0 }), /aracının klasörü/);
+  assert.throws(() => N.klasorTasi({ notlar:l, araclar, eski:'Dersler', yeni:'Ders/Tarih/Alt', zaman:T0 }), /aracının klasörü/);
+  assert.throws(() => N.klasorTasi({ notlar:[not('e', { klasor:'A/B/C' })], eski:'A', yeni:'X/Y', zaman:T0 }), /3 kat/);
+  assert.doesNotThrow(() => N.klasorTasi({ notlar:l, araclar, eski:'Dersler', yeni:'Okul', zaman:T0 }));
+});
+
 /* ------------------------------------------------------------- saflık */
 it('saflık: motor saati ve rastgeleyi kendisi okumaz; tarayıcıda LIFEOS.Motor.Not', () => {
   const kod = fs.readFileSync(path.join(__dirname, 'not.js'), 'utf8');

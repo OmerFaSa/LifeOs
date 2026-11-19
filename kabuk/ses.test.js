@@ -6,7 +6,7 @@ let gecen = 0, kalan = 0;
 function t(ad, f) { try { f(); gecen++; console.log('✓ ' + ad); } catch (e) { kalan++; console.log('✕ ' + ad + '\n    ' + e.message); } }
 function dogru(x, m) { if (!x) throw new Error(m || 'doğru değil'); }
 const saat = (h, m) => new Date(2026, 10, 16, h, m || 0);
-const BEKLENEN = ['tik', 'sec', 'ac', 'bas', 'acik', 'kapali', 'kayit', 'dogru', 'yanlis', 'ders', 'kapi', 'uyari', 'king', 'bildirim'];
+const BEKLENEN = ['tik', 'sec', 'ac', 'bas', 'acik', 'kapali', 'kayit', 'dogru', 'yanlis', 'ders', 'kapi', 'uyari', 'king', 'otag', 'bildirim'];
 
 t('katalog: istenen 14 ses, her biri ne zaman çaldığını söyler', () => {
   dogru(JSON.stringify(S.KATALOG) === JSON.stringify(BEKLENEN), S.KATALOG.join(','));
