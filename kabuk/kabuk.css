@@ -465,7 +465,7 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
   .ayar-menu .b-gezinme__oge{ min-height:44px; }
 }
 /* telefonda ayar grupları tek satır, yatay kaydırılır (üç satır hap yerine; seçili grup görünür kalır, sağ kenar kaydırma ipucu verir) */
-@media (max-width:640px){ :root .ayar-menu{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:calc(-1 * var(--a4)); padding-inline:var(--a4) calc(var(--a4) + 20px); scroll-padding-inline:var(--a4); -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); } .ayar-menu .b-gezinme__oge{ flex:none; white-space:nowrap; } }/* dokunmatikte ayar satırındaki onay kutusu (Sessiz saatler) 44 px dokunma alanında */
+@media (max-width:640px){ :root .ayar-menu{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:calc(-1 * var(--a4)); padding-inline:var(--a4) calc(var(--a4) + 20px); scroll-padding-inline:var(--a4) calc(var(--a4) + 28px); -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%); } .ayar-menu .b-gezinme__oge{ flex:none; white-space:nowrap; } }/* dokunmatikte ayar satırındaki onay kutusu (Sessiz saatler) 44 px dokunma alanında */
 @media (pointer:coarse){ .b-ayar label:has(> input[type="checkbox"]){ display:inline-flex; align-items:center; gap:var(--a2); min-height:44px; } .b-ayar input[type="checkbox"]{ width:22px; height:22px; } }
 
 /* Sadelik (sahibin isteği 2026-11-15: «kenardaki çizgiyi beğenmedim; minimalist, kalabalıktan arınmış, dikkat çekmeyen»):
@@ -478,7 +478,7 @@ h1, .b-baslik h1, .sira__baslik{ letter-spacing:-.022em; }
 .sira__ust{ color:var(--soluk); }
 .yol > [data-adim="simdi"]::before{ box-shadow:none; }
 /* Yüksek kontrast (Ayarlar › Erişilebilirlik) açıkken yüzeylerin kenarı geri gelir: ayrım yalnız tona bırakılmaz */
-:root[data-kontrast="yuksek"] :is(.b-satir, .b-liste--satir, .b-ders, .b-panel, .b-kart, .b-soru, .b-soru__sik, .b-karsilama__alan, .b-karsilama__is, .b-sayi, .b-alan__giris, .b-dugme:not(.b-dugme--ana):not(.b-dugme--sade), .b-tercih__sec[aria-checked="true"], .sira, .asama-ozet__ikincil){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; } /* açılır bölüm ve uyarı köşesiz kap: çerçevelenmez (sert dikdörtgen) */
+:root[data-kontrast="yuksek"] :is(.b-satir, .b-liste--satir, .b-ders, .b-panel, .b-kart, .b-soru, .b-soru__sik, .b-karsilama__alan, .b-karsilama__is, .b-sayi, .b-alan__giris, .b-dugme:not(.b-dugme--ana):not(.b-dugme--sade), .b-tercih__sec[aria-checked="true"], .sira, .asama-ozet__ikincil):not(:focus-visible){ outline:1px solid color-mix(in srgb, var(--yazi) 22%, transparent); outline-offset:-1px; } /* açılır bölüm ve uyarı köşesiz kap: çerçevelenmez (sert dikdörtgen) */
 /* ders sayfasında taslak notu kutu değil, başlığın altında sakin tek satır (derslerin çoğu taslak; her sayfada dikkat çekmesin).
    Onaylar ekranında (inceleme) kutu olarak kalır. */
 article.ders:not([data-onay-sayfa]) > .b-uyari--dikkat{ display:block; margin:calc(-1 * var(--a2)) 0 var(--a3); padding:0; background:none; box-shadow:none; outline:0; }

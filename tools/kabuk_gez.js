@@ -155,6 +155,7 @@ async function goruntu(p, ad, sec = {}) {
       && (await p.title()) === 'Bu sayfa yok · Başbuğ');
     await p.goto(T + '/kabuk/#/ayarlar');
     await p.waitForSelector('.ayarlar');
+    await p.waitForTimeout(150);
     dene('ayarlar: açılışta ilk grup (Görünüm) seçili gösterilir', (await p.getAttribute('nav.ayar-menu a[data-grup="gorunum"]', 'aria-current')) === 'true');
     await p.mouse.move(640, 500);
     await p.mouse.down(); await p.waitForTimeout(700); await p.mouse.up();
@@ -165,6 +166,14 @@ async function goruntu(p, ad, sec = {}) {
     const dondu = await p.evaluate(() => !document.documentElement.classList.contains('ust-gizli'));
     await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(150);
     dene('üst çubuk: aşağı kaydırınca gizlenir, yukarı kaydırınca döner, başta görünür', gizli && dondu && !(await p.evaluate(() => document.documentElement.classList.contains('ust-gizli'))), [gizli, dondu]);
+    await p.goto(T + '/kabuk/#/ayarlar?grup-hesap'); await p.waitForTimeout(150);
+    const gHesap = await p.getAttribute('nav.ayar-menu a[data-grup="hesap"]', 'aria-current');
+    await p.goto(T + '/kabuk/#/ayarlar?lifeos.beden.boy'); await p.waitForTimeout(150);
+    const gBeden = await p.getAttribute('nav.ayar-menu a[data-grup="beden"]', 'aria-current');
+    await p.evaluate(() => scrollTo(0, 0));
+    await p.goto(T + '/kabuk/#/ayarlar?a%22b'); await p.waitForTimeout(150);
+    const gBozuk = await p.getAttribute('nav.ayar-menu a[data-grup="gorunum"]', 'aria-current');
+    dene('ayarlar: grup, satır ve geçersiz odaklarda etkin sekme korunur ve hata çıkmaz', gHesap === 'true' && gBeden === 'true' && gBozuk === 'true', JSON.stringify({ gHesap, gBeden, gBozuk }));
     {
       const tc = await b.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true }), tp = await tc.newPage();
       await tp.goto(T + '/kabuk/#/alan/tarih');
@@ -1218,9 +1227,9 @@ async function goruntu(p, ad, sec = {}) {
     await yp.setViewportSize({ width: 390, height: 800 });
     const ozetMob = await yp.evaluate(() => {
       const b = document.getElementById('asama-ad').getBoundingClientRect(), l = document.querySelector('[data-yer-bul]').getBoundingClientRect();
-      return { altinda: l.top >= b.bottom - 2, h: Math.round(l.height) };
+      return { altinda: l.top >= b.bottom - 2, h: Math.round(l.height), tasma: document.documentElement.scrollWidth <= window.innerWidth, sol: Math.round(l.left), sag: Math.round(l.right) };
     });
-    dene('alan özeti (390 px): seviyemi bul bağlantısı başlığın altında ve >= 40 px', ozetMob.altinda && ozetMob.h >= 40, JSON.stringify(ozetMob));
+    dene('alan özeti (390 px): seviyemi bul bağlantısı başlığın altında, >= 40 px ve 390 px içinde kalır', ozetMob.altinda && ozetMob.h >= 40 && ozetMob.tasma && ozetMob.sol >= 0 && ozetMob.sag <= 390, JSON.stringify(ozetMob));
     await yp.setViewportSize({ width: 1280, height: 800 });
     await yp.click('[data-yer-bul]');
     await yp.waitForSelector('form.kapi[data-yer="1"]');
