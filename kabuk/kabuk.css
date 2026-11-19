@@ -1297,3 +1297,6 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 }
 /* Başbuğ logosu: bozkurt ve on altı yıldız (kabuk/ata.js logoHtml) */
 .ust__amblem{ flex:none; width:32px; height:32px; image-rendering:pixelated; filter:drop-shadow(0 1px 2px rgb(0 0 0 / .35)); }
+/* sistem teması sade ve ciddi (sahip, 2026-11-19): sayfa sonundaki simge bandı yalnız afiş temalarında */
+.turk-muhur > .turk-bant{ display:none; }
+:root[data-afis] .turk-muhur > .turk-bant{ display:flex; }
