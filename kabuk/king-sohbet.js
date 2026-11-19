@@ -214,8 +214,9 @@
     var imlec = odakta ? [em.selectionStart, em.selectionEnd] : null;
     yeni.innerHTML = html(B);
     var el = yeni.firstChild;
-    if (eski) { el.style.marginTop = eski.style.marginTop; eski.replaceWith(el); } // kabuk.js kapakPay'in sahne payı yeniden çizimde kalır (Divan'da kip şeridi sahneye biniyordu)
+    if (eski) eski.replaceWith(el);
     else { var bas = g.firstElementChild; if (bas && bas.nextSibling) g.insertBefore(el, bas.nextSibling); else g.appendChild(el); }
+    if (Kabuk.ic && Kabuk.ic.kapakPay) Kabuk.ic.kapakPay(); // sohbet sayfa çiziminden sonra girer: sahne payı ona geçer (kip şeridi sahneye binmesin)
     var m = el.querySelector('[name="metin"]');
     if (m) m.value = eski ? yazilan : depoOku(TASLAK) || ''; // ilk çizimde gönderilmemiş taslak geri gelir
     boyutla(m);

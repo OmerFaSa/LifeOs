@@ -682,13 +682,14 @@
   // Ambiyans (ay) düğmesi üst çubuktan kalktı (2026-11-16b: tema sanılıyordu); aç/kapa Ayarlar › Ses'te.
   // Geniş ekranda başlık manzaranın içinde: başlıktan sonraki ilk blok sahnenin solan kenarına düşmesin diye sahnenin altına itilir
   // (Plan'daki «Bugünün planı» etiketi sahnenin üstünde okunmuyordu). Kart değil ölçü: içerik ne olursa olsun aynı kural.
+  // Sonradan eklenen blok (Başbuğ sohbeti, king-sohbet.js) başlığın ardına girince yeniden çağrılır: pay önceki bloktan kalkar, yenisine geçer.
+  var payEl = null;
   function kapakPay() {
+    if (payEl) { payEl.style.marginTop = ''; payEl = null; }
     var k = sayfaEl.querySelector(':scope > .kapak'), b = sayfaEl.querySelector(':scope > .govde > .b-baslik:first-child'), s = b && b.nextElementSibling;
-    if (!k || !s) return;
-    s.style.marginTop = '';
-    if (innerWidth < 641) return;
+    if (!k || !s || innerWidth < 641) return;
     var fark = k.getBoundingClientRect().bottom + 24 - s.getBoundingClientRect().top;
-    if (fark > 0) s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px';
+    if (fark > 0) { s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px'; payEl = s; }
   }
   var manzaraIstendi = false;
   // sahne çizimi önbellekte (en çok 24 tuval): aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
@@ -1503,7 +1504,7 @@
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') bugunAlanGuncelle(); }); // Bugün'ün «sırada» satırı için
   }
-  Kabuk.ic = { canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
+  Kabuk.ic = { canlan: canlan, kapakPay: kapakPay, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },

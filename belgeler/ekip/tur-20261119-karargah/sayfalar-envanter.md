@@ -24,7 +24,7 @@ Sonuç sütunu: **kalktı** · **sadeleşti** · **kaldı** (gerekçesiyle) · *
 | Ayarlar | Sol grup menüsü + «Ayar ara» kutusu | İki gezinme yolu; bölüm başlıkları zaten görünür, arama her satırı bulur. Telefonda menü üstte kayan ikinci şeritti | sadeleşti: menü kalktı, arama kaldı; `?grup-…` adresi yine o gruba kaydırır |
 | Ayarlar | Başlık altı «Değişiklikler hemen uygulanır.» | Değişiklik zaten anında görünüyor; fazla metin | kalktı |
 | Ayarlar | Tema satırının açıklaması bütün tema adlarını yeniden sayıyor | Seçenekler hemen altında aynı adlarla duruyor | sadeleşti: tek kısa cümle |
-| Başbuğ | Divan'da hükümdar seçilince kip şeridi manzaranın üstüne biniyor | Hata: yeniden çizimde kapak payı (`kapakPay`) kayboluyordu | düzeldi |
+| Başbuğ | Kip şeridi manzaranın altına binebiliyor (Divan'da her zaman), «Başbuğ hakkında»nın üstünde boş pay | Hata: sahne payı (`kapakPay`) sohbet sayfaya girmeden hesaplanıp «Başbuğ hakkında»ya veriliyordu | düzeldi: sohbet her çizilişte payı yeniden ister |
 | Başbuğ | «Başbuğ hakkında» kapalı bölümü | Gizlilik bilgisi (neyin hangi sunucuya gittiği); kapalı, tek satır | kaldı |
 | Başbuğ · Divan | «Bu bir canlandırma…» notu | Dürüstlük notu, uydurmama sözü | kaldı |
 | Sağlık | Başlıktaki «Kayıt ekle» + her ölçü kutusu | Kutular dört ölçüye, düğme bütün kayıt türlerine (su dahil) gider | kaldı |
@@ -32,3 +32,5 @@ Sonuç sütunu: **kalktı** · **sadeleşti** · **kaldı** (gerekçesiyle) · *
 | Bütün sayfalar | Bölüm başlıklarının başındaki Selçuklu yıldızı (`.b-bolum__ust h2::before`) | Her başlıkta süs | devredildi: «Türk izleri» CSS bloğu, bugun/tema birliği |
 | Ders, alan kartları | Alan tonu pembe zemin (sade temada `--alan-ton` = al) | Renk: «tek vurgu al, yalnız etkin ya da uyarı» | devredildi: tema birliği |
 | Bütün sayfalar | Sayfa sonu mührü (on altı yıldız, söz, Göktürk harfleri) | Tekrar | devredildi: bugun birliği |
+
+Pano: `sayfalar.png` (Öğren, Beslenme, Ders, Not, Ayarlar, Divan; önce/sonra, 1280 ve 390). Açılış yükü 996 921 → 981 812 bayt (−15 109).

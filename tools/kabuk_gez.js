@@ -639,10 +639,10 @@ async function goruntu(p, ad, sec = {}) {
     dene('ayarlar: Beden › boy aralık dışını yazmaz, alanı geçersiz işaretler', (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.beden.boy'))) === '165'
       && (await p.getAttribute('[data-ayar-satir="lifeos.beden.boy"] input', 'aria-invalid')) === 'true');
     const grupSay = await p.evaluate(() => LIFEOS.Kabuk.Ayar.GRUPLAR.length);
-    dene('ayarlar: yanlı düzende grup gezinmesi (her grup bir bağlantı, bölümü bulunur)', (await p.locator('.b-yanli--sol nav.b-gezinme[aria-label="Ayar grupları"] a.b-gezinme__oge').count()) === grupSay
-      && (await p.$$eval('nav.b-gezinme a', l => l.every(a => document.getElementById(a.getAttribute('href').split('?')[1])))), grupSay);
+    dene('ayarlar: her grup tek sütunda kendi başlıklı bölümünde (grup menüsü yok)', (await p.locator('.ayarlar section.b-bolum h2[id^="grup-"]').count()) === grupSay
+      && (await p.locator('nav.b-gezinme').count()) === 0, grupSay);
     await p.goto(T + '/kabuk/#/ayarlar');
-    await p.waitForSelector('nav.b-gezinme');
+    await p.waitForSelector('.ayarlar #grup-gorunum');
     await goruntu(p, 'ayarlar');
     { // 2026-11-18 (tur-20261118/ekranlar.md): telefonda tercih seçici sarınca hap biçimli yumağa dönüyor, «Yazı tipi» kesiliyordu
       const bulgu = [];
