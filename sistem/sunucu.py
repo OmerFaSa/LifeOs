@@ -1293,16 +1293,25 @@ _STIL_ETIKET = re.compile(r'<link rel="stylesheet" href="([^/"]+\.css)">')
 _PAKET_KORUMA = ('<script>if (!(window.LIFEOS && LIFEOS.Kabuk && LIFEOS.Kabuk.ic) && !/[?&]ayri\\b/.test(location.search)) '
                  'location.replace(location.pathname + (location.search ? location.search + "&" : "?") + "ayri" + location.hash);</script>')
 _PAKET = {}
+_PAKET_YAPI = {}
 
 
 def kabuk_paketi():
     """((index govde, gzip, etag, son), (paket.js ...), (paket.css ...)) _statik_oku bicimiyle; betikten biri yoksa None."""
     html_, _, h_etag, h_son = _statik_oku(KABUK_GIRIS)
-    metin = html_.decode("utf-8")
-    srcler = _BETIK_ETIKET.findall(metin)
-    cssler = _STIL_ETIKET.findall(metin)
-    parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in srcler]
-    css_parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in cssler]
+    with _STATIK_KILIT:
+        yapi = _PAKET_YAPI.get("kabuk")
+    if yapi and yapi[0] == h_etag:
+        metin, srcler, cssler, parcalar, css_parcalar = yapi[1]
+    else:
+        metin = html_.decode("utf-8")
+        srcler = _BETIK_ETIKET.findall(metin)
+        cssler = _STIL_ETIKET.findall(metin)
+        parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in srcler]
+        css_parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in cssler]
+        if srcler and None not in parcalar and cssler and None not in css_parcalar:
+            with _STATIK_KILIT:
+                _PAKET_YAPI["kabuk"] = (h_etag, (metin, srcler, cssler, parcalar, css_parcalar))
     if not srcler or None in parcalar or not cssler or None in css_parcalar:
         return None
     okunan = [_statik_oku(p) for p in parcalar]

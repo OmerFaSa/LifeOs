@@ -374,6 +374,8 @@ def sina(eski, tek, kokler=()):
     v2 = _s._statik_oku(gec)
     dene("dosya değişince yeni ETag ve yeni gövde", v2[2] != e1 and v2[0] == b"b" * 2000, (e1, v2[2]))
     shutil.rmtree(os.path.dirname(gec), ignore_errors=True)
+    p1, p2 = _s.kabuk_paketi(), _s.kabuk_paketi()
+    dene("kabuk_paketi yapı önbelleği ardışık çağrılarda aynı paketi verir", p1 is p2 and len(p1) == 3)
 
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.

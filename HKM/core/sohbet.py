@@ -24,10 +24,12 @@
 """
 
 import datetime
-import importlib.util
+import importlib
 import json
 import os
 import re
+import sys
+import threading
 
 from core import (ai, arac, arastir, butce, cross, dil, eylem, iliski, manager, memory, models, motto, patron, program,
                   seviye, streak, urunler)
@@ -981,20 +983,19 @@ def _ozelsiz(x):
 
 
 _KING = {}
+_KING_KILIT = threading.Lock()
 
 
 def _king(ad):
-    """king/<ad>.py (King cekirdegi; motorlar kopyalanmaz, cagrilir). king/ kendi kardes modullerini duz adla
-    yukler (import mcp), o yuzden klasoru yola eklenir."""
-    if ad not in _KING:
-        klasor = os.path.join(KOK, "king")
-        if klasor not in __import__("sys").path:
-            __import__("sys").path.append(klasor)
-        spec = importlib.util.spec_from_file_location("king_" + ad, os.path.join(klasor, ad + ".py"))
-        m = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(m)
-        _KING[ad] = m
-    return _KING[ad]
+    """king/<ad>.py (King cekirdegi; motorlar kopyalanmaz, cagrilir). Tek kanonik modul adıyla
+    yuklenir ki baglam ve sohbet ayni mcp / _KOPRU_ISCI / _ALAN_ASAMA ornegini paylassin."""
+    with _KING_KILIT:
+        if ad not in _KING:
+            klasor = os.path.join(KOK, "king")
+            if klasor not in sys.path:
+                sys.path.insert(0, klasor)
+            _KING[ad] = importlib.import_module(ad)
+        return _KING[ad]
 
 
 def konu_blogu(b):
@@ -1465,10 +1466,10 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # genisligini belirler; tam baglam bulut modelleri icindir.
     yerel_model = ((hazir.get("assignment") or {}).get("provider") == "yerel")
     kisa = bool(sinir and sinir["kisa"]) or yerel_model
-    bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
     uzun = uzun_istek(metin)
     # Kucuk modelde serbest sohbet: olcum listesi gitmez (yalniz tarih).
     serbest = kisa and not uzun and not sistem_konusu(metin) and sonuclar is None
+    bg = _tarih_satiri(date) if serbest else baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
     # Yerel modelde araclarin ilk turu: olcum ozeti gitmez. Kucuk model
     # baglamdaki «veri gelmedi» satirina guvenip okuma aracini cagirmiyordu
     # (sahada, gemma4:e2b ve gemma3:4b, 2026-10-20); kayit modulde, arac okur.
@@ -1480,8 +1481,6 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # Kopru (Antigravity, Claude Code) arac katalogu almaz: duz metin cevaplar (core/kopru.py).
     aracli = bool(sunulan) and not arac.aracsiz_mi(atanan.get("model")) and \
         not (models.PROVIDERS.get(atanan.get("provider")) or {}).get("kopru")
-    if serbest:
-        bg = _tarih_satiri(date)
     if sonuclar:
         veri.add("arac")
         bg += "\n" + arac.sonuc_baglami(sonuclar)
@@ -1729,13 +1728,12 @@ def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     if not izin["ok"]:
         return {"ok": False, "adimlar": adim, "agent": gorevli}
 
-    bg = baglam(con, date, gorevli, th=th)
+    veri = {"sinama"}
+    bg = baglam(con, date, gorevli, th=th, veri=veri)
     ekle("Kural motoru bağlamı", bool(bg.strip()),
          "%d satır ölçüme dayanıyor" % len(bg.splitlines()))
 
     sistem = sistem_metni(gorevli, bg)
-    veri = {"sinama"}
-    baglam(con, date, gorevli, th=th, veri=veri)
     r = ai.ask(con, cfg, rol, "tani",
                [{"role": "user", "content": "Tek cümleyle merhaba de."}],
                baglam=bg, sistem=sistem, transport=transport, veri=veri)

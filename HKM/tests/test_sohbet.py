@@ -1022,3 +1022,24 @@ def run():
         sohbet.konus(_con(), _cfg(), "başlayalım", BUGUN, transport=tas, kayit=False, kip="ogretmen", ders=b)
         ok("KİP: ÖĞRETMEN" in olcu["sistem"] and "Stoacılık ve bilgelik" in olcu["sistem"])
     test("konu baglami: ad tek satir ve sinirli, alan dogrulanir, Ogretmen'e baştan anlat girer", t_konu_baglami)
+
+    def t_king_tek_modul_ve_baglam_kac_kez():
+        ok(sohbet._king("mcp") is sohbet._king("baglam").mcp, "tek kanonik mcp modülü")
+        cfg = models.apply({"local_token": "x"}, {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}, "keys": {"yerel": "yerel"},
+                                                  "assignments": {"king": {"provider": "yerel", "model": "gemma3:4b"}}})
+        cagri = [0]
+        eski_baglam = sohbet.baglam
+
+        def say_baglam(*a, **k):
+            cagri[0] += 1
+            return eski_baglam(*a, **k)
+
+        sohbet.baglam = say_baglam
+        try:
+            sohbet.konus(_con(), cfg, "Nasılsın kanka?", BUGUN, transport=_cevap("İyiyim."))
+            eq(cagri[0], 0, "serbest sohbette baglam cagrilmaz")
+            sohbet.tani(_con(), _cfg(), BUGUN, transport=_cevap("Merhaba."))
+            eq(cagri[0], 1, "tani icinde baglam yalniz bir kez cagrilir")
+        finally:
+            sohbet.baglam = eski_baglam
+    test("tek mcp modülü ve serbest/tani baglam sayisi", t_king_tek_modul_ve_baglam_kac_kez)
