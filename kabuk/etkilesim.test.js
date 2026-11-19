@@ -19,5 +19,13 @@ t('ilerleme: yalnız artan dilimler, ilk görülüşte ve azalınca hiçbiri', (
   esit(E.artanlar(4, 2), []);
   esit(E.artanlar(0, 1), [0]);
 });
+t('hareketAcik: az, inline 0s ve tam dışındaki reduced-motion kapatır', () => {
+  esit(E.hareketAcik('az', '', false), false);
+  esit(E.hareketAcik('tam', ' 0s ', false), false);
+  esit(E.hareketAcik(null, '', true), false);
+  esit(E.hareketAcik('sistem', '', true), false);
+  esit(E.hareketAcik('tam', '', true), true);
+  esit(E.hareketAcik(null, '', false), true);
+});
 console.log(kalan ? kalan + ' kaldı' : 'hepsi geçti');
 process.exit(kalan ? 1 : 0);

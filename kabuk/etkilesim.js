@@ -19,7 +19,12 @@
   }
   // Saf: önceki ve yeni ilerleme değerlerinden yeni dolan dilimlerin sırası; önceki yoksa (ilk görülüş) ya da artmadıysa boş
   function artanlar(once, simdi) { var l = []; if (once == null || !(simdi > once)) return l; for (var i = once; i < simdi; i++) l.push(i); return l; }
-  var E = { egim: egim, artanlar: artanlar };
+  // Saf: data-hareket + inline --sure + prefers-reduced-motion tercihi → hareket açık mı
+  function hareketAcik(h, sure, azTercih) {
+    if (h === 'az' || (sure || '').trim() === '0s') return false;
+    return !(h !== 'tam' && azTercih);
+  }
+  var E = { egim: egim, artanlar: artanlar, hareketAcik: hareketAcik };
   Kabuk.Etkilesim = E;
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
   if (typeof document === 'undefined') return;
@@ -29,9 +34,8 @@
   var ince = kok.matchMedia && kok.matchMedia('(hover: hover) and (pointer: fine)');
   function acik() {
     try {
-      var r = d.documentElement, h = r.getAttribute('data-hareket');
-      if (h === 'az' || r.style.getPropertyValue('--sure').trim() === '0s') return false;
-      return !(h === 'sistem' && kok.matchMedia && kok.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      var r = d.documentElement;
+      return hareketAcik(r.getAttribute('data-hareket'), r.style.getPropertyValue('--sure'), !!(kok.matchMedia && kok.matchMedia('(prefers-reduced-motion: reduce)').matches));
     } catch (e) { return false; }
   }
 
