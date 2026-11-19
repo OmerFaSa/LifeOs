@@ -353,7 +353,7 @@
 
   function uygula() {
     var n = A.kokNitelikleri(depo);
-    if (A.oku(depo, 'lifeos.tema.oto') === 'acik') { var s = new Date().getHours(); n['data-theme'] = (s >= 19 || s < 7) ? 'dark' : 'light'; }
+    if (A.oku(depo, 'lifeos.tema.oto') === 'acik' && !n['data-afis']) { var s = new Date().getHours(); n['data-theme'] = (s >= 19 || s < 7) ? 'dark' : 'light'; }
     Object.keys(n).forEach(function (k) { if (n[k] == null) kokEl.removeAttribute(k); else kokEl.setAttribute(k, n[k]); });
   }
 
@@ -478,7 +478,8 @@
       return '<aside class="miras" aria-label="Türk geleneğinden"><p class="miras__etiket">Türk geleneğinden · ' + kac(x[1]) + '</p><p class="miras__ad">' + kac(x[0]) + '</p>' +
         (x[2] ? '<p class="miras__metin">' + kac(x[2]) + '</p>' : '') + '</aside>';
     }
-    if (id === 'tarih') return '<aside class="miras miras--yildiz">' + onAltiYildiz(t) + '</aside>';
+    // Tarih: on altı yıldız ve günün haritası (kabuk/ata.js; sınırlar yaklaşık)
+    if (id === 'tarih') return '<aside class="miras miras--yildiz">' + onAltiYildiz(t) + '</aside>' + (Kabuk.Ata ? Kabuk.Ata.haritaHtml(Kabuk.Ata.gununHaritasi(t)) : '');
     return '';
   }
   function sozEkIc(tur, gun) {
@@ -501,6 +502,7 @@
     var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
     return '<figure class="soz' + (RESMI.indexOf(gunAnahtar(t)) >= 0 ? ' soz--bayrak">' + BAYRAK.replace('ust__bayrak', 'soz__bayrak') : '">') + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
       y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') +
+      (Kabuk.Ata ? Kabuk.Ata.portreHtml(Kabuk.Ata.sozPortresi(s[1]), 'soz__portre') : '') + // sözün sahibinin portresi (varsa)
       '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
       '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption>' + sozEk(t) + '</figure>' + onAltiYildiz(t);
   }

@@ -91,6 +91,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [Tur 2026-11-18j · Başbuğ adı, tok ses, geçişsiz, keskin piksel](ekip/sadelesme/tur-20261118j/rapor.md) — King görünen adı Başbuğ, sesler iki oktav aşağı ve tok, sayfa geçişi kalktı, sahne pikselleri tam sayıda cihaz noktası.
 - [Tur 2026-11-18k · Notlarda klasör, kendi konuların, tuğ, otağ, Türk mührü](ekip/sadelesme/tur-20261118k/tur.md) — notlar klasörlenir, alanlara kendi başlık ve konuların, Başbuğ simgesi tuğ, otağ sesi, her sayfada Türk mührü, sahneler, Sağlık içeriği.
   - [Notlar: klasörler ve yazma ekranı](ekip/sadelesme/tur-20261118k/notlar.md) — klasör çipleri, yeniden adlandırma, geri alınır silme, yazma kartı
+- [Tur 2026-11-19 · Türk teması 4: ata portreleri, haritalar, askerî afiş temaları](ekip/tur-20261119-turk4/turk4.md) — örnek: yaldız çerçeveli piksel portreler (Atatürk, Fatih), Göktürk haritası (yaklaşık), Kızıl Otağ ve Ordu temaları; önce/sonra panoları.
   - [Kendi başlıkların ve konuların, Başbuğ'la çalış ve konuya kaydet](ekip/sadelesme/tur-20261118k/konularim.md) — alan sayfasında başlık/konu, «Başbuğ düzenlesin», «Başbuğ’un notu»
   - [Piksel: taht figürü, tuğ amblemi, yaylak, medrese huzmeleri](ekip/sadelesme/tur-20261118k/piksel.md) — önce/sonra görüntüler, renk ve süre ölçümü
   - [İçerik yoğunluk denetimi ve Sağlık derslerinin derinleşmesi](ekip/sadelesme/tur-20261118k/icerik.md) — bütün alanlar tablosu, 30 dersin önce/sonra sayıları, kontrol listesi

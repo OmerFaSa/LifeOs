@@ -20,7 +20,8 @@
 
   var SEMA = [
     { anahtar: 'lifeos.tema.secim', ad: 'Tema', tur: 'secim', varsayilan: 'system', grup: 'gorunum', kok: 'data-theme', esitlenir: true,
-      secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu' }, aciklama: 'Açık ya da koyu renkler.', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
+      secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu', otag: 'Kızıl Otağ', ordu: 'Ordu' },
+      aciklama: 'Açık ya da koyu renkler. Kızıl Otağ (siyah, al, altın) ve Ordu (haki, al) koyu, askerî afiş temalarıdır.', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
     { anahtar: 'lifeos.tema.oto', ad: 'Saate göre tema', tur: 'secim', varsayilan: 'kapali', grup: 'gorunum', esitlenir: true,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
@@ -137,8 +138,12 @@
       var v = oku(depo, t.anahtar);
       o[t.kok] = (t.kok === 'data-theme' && v === 'system') ? null : v;
     });
+    // afiş temaları (2026-11-19, sahip: «koyu, askerî, afiş estetiğinde»): koyu temanın üstüne kendi jetonları
+    o['data-afis'] = AFIS[o['data-theme']] ? o['data-theme'] : null;
+    if (o['data-afis']) o['data-theme'] = 'dark';
     return o;
   }
+  var AFIS = { otag: 1, ordu: 1 };
 
   /* Ekran: bir satırın denetimi (HTML metni). Saf; olay bağlamayı kabuk.js yapar (data-ayar, data-deger). */
   function ciz(t, v) {

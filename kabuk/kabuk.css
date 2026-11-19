@@ -1188,3 +1188,50 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
   .notyaz > .b-eylemler .b-eylemler__yazi{ display:none; } /* telefonda klavye kısayolu yok */
   .notyaz__onaylar{ padding-top:0; }
 }
+
+/* Ata portreleri ve Türk devletleri haritası (2026-11-19, kabuk/ata.js): yaldız çerçeveli piksel tablolar, tam sayı ölçekte keskin */
+.ata-portre{ display:block; width:120px; height:120px; image-rendering:pixelated; box-shadow:0 6px 18px rgb(0 0 0 / .35); }
+.soz__portre{ margin:0 auto var(--a3); }
+.king-divan__portre{ width:160px; height:160px; margin:0 auto var(--a3); }
+.ata-harita{ margin:0 0 var(--a5); padding:var(--a4) var(--a5) var(--a5); border-radius:var(--kose); background:var(--yuzey-ust); }
+.ata-harita__ust{ display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--a1) var(--a3); margin-bottom:var(--a3); }
+.ata-harita__etiket{ flex-basis:100%; font-size:var(--yz-k); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ana); }
+.ata-harita__ad{ font:600 var(--yz-h3)/1.3 var(--baslik-serif); color:var(--yazi); }
+.ata-harita__yil{ font-size:var(--yz-k); color:var(--soluk); }
+.ata-harita__resim{ display:block; width:656px; height:320px; max-width:none; margin:0 auto; image-rendering:pixelated; box-shadow:0 6px 18px rgb(0 0 0 / .35); }
+.ata-harita__not{ margin:var(--a3) 0 0; color:var(--yazi); }
+.ata-harita__yildiz{ color:var(--altin); }
+.ata-harita__kaynak{ margin:var(--a1) 0 0; font-size:var(--yz-k); color:var(--soluk); }
+@media (max-width:760px){ .ata-harita__resim{ width:328px; height:160px; } .ata-harita{ padding:var(--a4); } }
+@media (max-width:640px){ .ata-portre{ width:80px; height:80px; } .king-divan__portre{ width:120px; height:120px; } }
+
+/* Afiş temaları (2026-11-19, sahip: «koyu, askerî, afiş estetiğinde»; ilk örnek: on altı yıldız, «Ne mutlu Türküm diyene!», Göktürk harfleri).
+   Kızıl Otağ: siyah, al, altın. Ordu: haki ve zeytin üstüne al. Koyu temanın üstüne biner (ayar.js: data-theme="dark" + data-afis).
+   Başlıklar dar ve kalın (afiş), sahneler baskı gibi birkaç tona iner (index.html #afis-*), sayfanın tepesinde al şerit. Yazı AA (≥ 4,5). */
+:root[data-afis="otag"]{
+  --bg:#0d0b0a; --yuzey:#171311; --yuzey-2:#211b18; --yuzey-ust:#241d19; --cizgi:#34291f; --cizgi-guclu:#574533;
+  --yazi:#f3e9d6; --yazi-2:#ddcfb6; --soluk:#ab9c84; --ana:#f36b5d; --ana-yazi:#0d0b0a; --altin:#e2b65a; --vurgu:#f36b5d; --vurgu-yazi:#0d0b0a;
+  --dugme-ana:#c8102e; --dugme-ana-yazi:#ffffff; --gok:#1a0d0b; --afis-kart:#5e110c; --afis-serit:#c8102e; --afis-filtre:url(#afis-otag);
+}
+:root[data-afis="ordu"]{
+  --bg:#171a10; --yuzey:#20241a; --yuzey-2:#2a2f21; --yuzey-ust:#2c3123; --cizgi:#3a4130; --cizgi-guclu:#59624a;
+  --yazi:#efe8d2; --yazi-2:#d9d0b4; --soluk:#a9a487; --ana:#f6806f; --ana-yazi:#171a10; --altin:#d9b860; --vurgu:#f6806f; --vurgu-yazi:#171a10;
+  --dugme-ana:#b3261e; --dugme-ana-yazi:#ffffff; --gok:#1b1f13; --afis-kart:#2f3522; --afis-serit:#b3261e; --afis-filtre:url(#afis-ordu);
+}
+:root[data-afis]{ --baslik-serif:Bahnschrift,"DIN Condensed","Roboto Condensed","Arial Narrow",sans-serif; --baslik:var(--baslik-serif); }
+:root[data-afis] body{ background:var(--bg); }
+:root[data-afis] body::before{ content:""; position:fixed; z-index:50; inset:0 0 auto; height:4px; pointer-events:none;
+  background:linear-gradient(var(--afis-serit), var(--afis-serit)) top/100% 3px no-repeat, linear-gradient(var(--altin), var(--altin)) 0 3px/100% 1px no-repeat; }
+:root[data-afis] :is(h1, .b-bolum__ust h2, .king-divan__ad, .ata-harita__ad){ font-stretch:condensed; font-variation-settings:"wdth" 75; text-transform:uppercase; }
+:root[data-afis] h1{ font-weight:700; letter-spacing:.02em; }
+:root[data-afis] .b-baslik h1, :root[data-afis] .b-baslik__metin h1{ font-weight:700; letter-spacing:.02em; padding-bottom:.18em;
+  background:linear-gradient(var(--afis-serit), var(--afis-serit)) left bottom/2.2em 4px no-repeat; }
+:root[data-afis] .b-bolum__ust h2{ font-weight:700; letter-spacing:.08em; font-size:var(--yz); }
+:root[data-afis] .b-bolum__ust h2::before{ content:""; display:inline-block; width:10px; height:10px; margin-right:.5em; background:var(--afis-serit); box-shadow:2px 2px 0 var(--altin); }
+:root[data-afis] :is(.kapak__sahne, .b-karsilama__manzara){ filter:var(--afis-filtre); }
+:root[data-afis] .soz{ background:radial-gradient(ellipse 80% 90% at 50% 0%, color-mix(in srgb, var(--altin) 14%, transparent), transparent), var(--afis-kart); }
+:root[data-afis] .soz :is(.soz__milli, .soz__acil > summary){ color:var(--altin); }
+:root[data-afis] .soz :is(.soz__kaynak, .soz__yakin){ color:var(--yazi-2); }
+:root[data-afis] .soz__metin{ font-style:normal; font-weight:600; }
+:root[data-afis] .turk-muhur__soz{ font:700 var(--yz-h3)/1.3 var(--baslik-serif); font-stretch:condensed; letter-spacing:.06em; text-transform:uppercase; font-style:normal; }
+:root[data-afis] .turk-muhur__yildiz svg{ width:16px; height:16px; opacity:1; }

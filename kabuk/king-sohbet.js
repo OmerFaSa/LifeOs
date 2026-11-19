@@ -182,7 +182,7 @@
     var divan = s.kip === 'divan', h = divan && s.hukumdar;
     var secim = divan ? B.cipler({ ad: 'Hükümdar, biri seçilir', ogeler: Object.keys(HUKUMDAR).map(function (k) {
       return { metin: HUKUMDAR[k], tur: 'ikincil', basili: k === s.hukumdar, veri: { 'king-hukumdar': k } }; }) }) +
-      (h ? '<div class="king-divan"><p class="king-divan__ad" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p><p class="king-divan__cag">' + kac(CAG[h]) + '</p></div>' : '') : ''; // ad süslü (okuyucu çipten duyar), altında çağı
+      (h ? '<div class="king-divan">' + (Kabuk.Ata ? Kabuk.Ata.portreHtml(h, 'king-divan__portre') : '') + '<p class="king-divan__ad" aria-hidden="true">' + kac(HUKUMDAR[h]) + '</p><p class="king-divan__cag">' + kac(CAG[h]) + '</p></div>' : '') : ''; // ad süslü (okuyucu çipten duyar), altında çağı
     var giris = divan ? (h ? 'Bu bir canlandırma: Başbuğ, ' + HUKUMDAR[h] + ' olarak tarihî kaynaklara dayanarak konuşur; bilinmeyeni uydurmaz.' : 'Kiminle konuşmak istersin?')
       : konu ? 'Bu konuyu Başbuğ\'la baştan çalış. Şunlardan biriyle başla ya da aklındakini yaz:'
       : s.baglam ? 'Bu dersi Başbuğ\'la çalış. Şunlardan biriyle başla ya da aklındakini yaz:' : SELAM[s.kip];
