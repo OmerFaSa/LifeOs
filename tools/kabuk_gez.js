@@ -1123,6 +1123,11 @@ async function goruntu(p, ad, sec = {}) {
     await p.reload(); await p.waitForSelector('.king-msj--king');
     await p.click('[data-king-yeni]');
     dene('Başbuğ: konuşma yenilemede kalır, «Yeni konuşma» temizler', (await p.locator('.king-msj').count()) === 0 && (await p.locator('[data-king-oneri]').count()) === 3);
+    // 2026-11-19: Divan'da hükümdar seçimi sohbeti yeniden çizer; sahne payı (kapakPay) kaybolup kip şeridi sahnenin üstüne biniyordu
+    await p.click('[data-king-kip="divan"]'); await p.click('[data-king-hukumdar="fatih"]'); await p.waitForTimeout(100);
+    const divanPay = await p.evaluate(() => { const k = document.querySelector('#sayfa > .kapak'), s = document.querySelector('.king-sohbet'); return !k || innerWidth < 641 || s.getBoundingClientRect().top >= k.getBoundingClientRect().bottom; });
+    await p.click('[data-king-kip="ortak"]');
+    dene('Başbuğ: Divan’da hükümdar seçilince sohbet sahnenin altında kalır', divanPay);
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra
