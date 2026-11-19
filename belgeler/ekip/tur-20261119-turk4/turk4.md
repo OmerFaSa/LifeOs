@@ -22,8 +22,15 @@ içerik Türk tarihi ve Atatürk'ün sözleri.
   dar kalın büyük harf başlık ve düğmeler, keskin köşe, sayfa tepesinde al–altın şerit, başlığın altında simge bandı, sahne SVG süzgeciyle baskı gibi
   birkaç tona iner. Yazı AA: en düşük 5,0 (hepsi ölçüldü).
 
+## Sade sistem teması (sahip: «sade ve minimalist ciddi bir tema büründür sistemi, Türklük içinde»)
+- Cihaza uy, Açık ve Koyu artık sade: kâğıt beyazı (#f6f4ef) ya da kömür (#0e0e0f) zemin, siyah/kemik yazı, tek vurgu al, gölge ve ışıma en aza indi,
+  piksel sahne gravür gibi gri, alan tonları ala bağlandı, başlık altında kısa al çizgi. Kökte `data-sade` (ayar.js kokNitelikleri).
+- Türklük kimlik olarak: bayrak, bozkurt logosu, tepede ince al çizgi, on altı yıldız, Göktürk harfleri, portreler ve haritalar.
+- Eski renkli piksel görünüm Ayarlar › Tema › **Klasik** (cihaza uyar). Afiş temaları değişmedi. Yazı AA en düşük 4,89.
+- Ofis 082 (Antigravity zafer tabloları) sahibin isteğiyle durduruldu; dalda Malazgirt commit'i duruyor (birleştirilmedi).
+
 ## Panolar
-`pano-1-tema.png` (Bugün ve Tarih, 1280 ve 390), `pano-2-portre.png` (galeri, söz, Divan), `pano-3-harita.png` (galeri, Tarih), `pano-4-logo-tablo-simge.png`.
+`pano-1-tema.png` (Bugün ve Tarih, 1280 ve 390), `pano-2-portre.png` (galeri, söz, Divan), `pano-3-harita.png` (galeri, Tarih), `pano-4-logo-tablo-simge.png`, `pano-5-sade.png` (sade sistem teması, önce/sonra, Klasik).
 
 ## Açık
 - Malazgirt, İstanbul'un fethi, Çanakkale: Kocatepe kalitesinde, sahne motoruyla (piksel-doga) çizilmeli.
