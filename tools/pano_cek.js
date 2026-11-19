@@ -289,8 +289,8 @@ async function cek(ayar) {
         try {
           await p.goto(`${S.T}/kabuk/#/${yer}`, { waitUntil: 'load' });
           await p.waitForFunction(() => {
-            const g = document.querySelector('#sayfa[data-ciz] .govde');
-            return Boolean(g && g.innerText.trim().length > 0 && !document.querySelector('#sayfa [aria-busy="true"]'));
+            const g = document.querySelector('#sayfa[data-ciz]');
+            return Boolean(g && g.innerText.trim().length > 0 && !g.querySelector('[aria-busy="true"]'));
           }, { timeout: 6000 }).catch(() => {});
           await p.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
           await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));

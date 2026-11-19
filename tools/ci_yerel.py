@@ -352,6 +352,20 @@ if __name__ == "__main__":
             assert _degisen_yollar("origin/main") is None
         finally:
             subprocess.run = eski_run
+
+        def _sahte_git(cmd, *a, **kw):
+            s = " ".join(cmd)
+            if "rev-parse" in s:
+                return subprocess.CompletedProcess(cmd, 0, "abc\n", "")
+            if "..." in s:
+                return subprocess.CompletedProcess(cmd, 128, "", "no merge base")
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        subprocess.run = _sahte_git
+        try:
+            assert _degisen_yollar("HEAD") is None
+        finally:
+            subprocess.run = eski_run
         if os.name == "nt":
             b = _bash()
             assert b.lower().endswith("bash.exe") and os.path.isfile(b), b
