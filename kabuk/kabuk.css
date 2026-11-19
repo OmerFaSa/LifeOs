@@ -1300,3 +1300,5 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 /* sistem teması sade ve ciddi (sahip, 2026-11-19): sayfa sonundaki simge bandı yalnız afiş temalarında */
 .turk-muhur > .turk-bant{ display:none; }
 :root[data-afis] .turk-muhur > .turk-bant{ display:flex; }
+/* sistem teması (Açık, Koyu, Cihaza uy): sade ve ciddi Türk kimliği — resmî yazı kâğıdı gibi tepede ince al çizgi; süs yok */
+:root:not([data-afis]) body::before{ content:""; position:fixed; z-index:50; inset:0 0 auto; height:2px; pointer-events:none; background:#c8102e; }

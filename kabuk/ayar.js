@@ -26,7 +26,8 @@
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
       secenekler: { piksel: 'Piksel', sistem: 'Cihazın yazısı' }, aciklama: 'Uygulamadaki yazıların tipi.', kaynak: ENV + ' §3c Tema, yazı: yazi' },
-    { anahtar: 'lifeos.vurgu', ad: 'Vurgu rengi', tur: 'secim', varsayilan: 'modul', grup: 'gorunum', kok: 'data-vurgu', esitlenir: true,
+    // varsayılan al (2026-11-19, sahip: «sade ve ciddi olacak sistem teması, Türkçü sade»); alanın rengi seçenek olarak kalır
+    { anahtar: 'lifeos.vurgu', ad: 'Vurgu rengi', tur: 'secim', varsayilan: 'al', grup: 'gorunum', kok: 'data-vurgu', esitlenir: true,
       secenekler: { modul: 'Alanın rengi', al: 'Al', turkuaz: 'Turkuaz', mavi: 'Mavi', yesil: 'Yeşil', mor: 'Mor', turuncu: 'Turuncu', pembe: 'Pembe', grafit: 'Grafit' },
       aciklama: 'Seçili düğme ve sekmenin rengi; ölçü renkleri değişmez.', kaynak: ENV + ' §3b lifeos.vurgu' },
     { anahtar: 'lifeos.boyut', ad: 'Yazı boyutu', tur: 'secim', varsayilan: 'normal', grup: 'erisim', kok: 'data-boyut', esitlenir: true,
