@@ -13,11 +13,12 @@
      5. King'in guncellik turu arada bir bakar: tikte bir kayit, ayni
         kayda `guncellik_gun` dolmadan donmez; degisen kayit icin emir acar.
      6. Depo denetimi kodla surumleri baglar, hicbir kaydi silmez."""
+import datetime
 import json
 import urllib.error
 import urllib.parse
 
-from core import bam, butce, db, depo, king, sohbet, web
+from core import aktif, bam, butce, db, depo, king, sohbet, web
 from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
@@ -405,3 +406,58 @@ def run():
         el = bam.kayit_ekle(con, "plan", "El", {}, now=AN)["id"]
         eq(depo.kayit_depo(con, el, now=AN)["maliyet"], None)
     test("kayit gorunumu: ureten isin olculen maliyeti; cagrisiz is veri yok", t_kayit_maliyet)
+
+    def t_bozuk_json_koruma():
+        con = db.connect(":memory:")
+        satirlar = [
+            ("arastirma", "Liste govde", "[]", "dogrulanmadi", "2026-01-01T10:00:00", None, "[1]"),
+            ("materyal", "Sayi govde", "123", "dogrulanmadi", AN, None, None),
+            ("plan", "Null govde", "null", "dogrulanmadi", "2025-01-01T10:00:00", None, None),
+            ("materyal", "Bozuk dayanak", '{"dayanak":"bozuk","kaynaklar":5}', "dogrulanmadi", AN, None, None),
+            ("materyal", "Bool dayanak", '{"dayanak":true,"kaynaklar":null}', "dogrulanmadi", AN, None, None),
+        ]
+        idler = []
+        for s in satirlar:
+            cur = con.execute(
+                "INSERT INTO bam_kayitlar (tur, baslik, govde, dogruluk, created_at, anahtar, denetim) "
+                "VALUES (?,?,?,?,?,?,?)", s)
+            idler.append(cur.lastrowid)
+        t = depo.tarayici(con, now=AN)
+        eq(t["toplam"], 5)
+        ok(all(x["kaynak"] == 0 for x in t["kayitlar"]))
+        for kid in idler:
+            d = depo.kayit_depo(con, kid, now=AN)
+            eq(d["kaynaklar"], [])
+        ic, yap = aktif.icerik(con, AN[:10], datetime.datetime.fromisoformat(AN))
+        ok(isinstance(ic, list) and isinstance(yap, list))
+        con.execute(
+            "INSERT INTO intents (module, kind, payload, note, source, state, created_at) VALUES (?,?,?,?,?,?,?)",
+            ("ays", "plan.add", "[]", "not", "bam", "pending", AN))
+        kul = depo.kullanilmayan(con, now=AN)
+        eq((len(kul), kul[0]["baslik"]), (1, "plan.add"))
+    test("bozuk/non-dict JSON govde, denetim ve payload cokmez", t_bozuk_json_koruma)
+
+    def t_tarayici_tek_cozum():
+        con = db.connect(":memory:")
+        aid = None
+        for i in range(50):
+            k = bam.kayit_ekle(con, "arastirma", "Ara %d" % i, {"konu": "K%d" % i, "kaynaklar": [{"n": 1}]},
+                               anahtar=depo.konu_anahtari("K%d" % i), now="2026-09-01T10:00:00")
+            aid = k["id"]
+        for i in range(50):
+            bam.kayit_ekle(con, "materyal", "Mat %d" % i, {"dayanak": aid, "kaynaklar": [{"n": 1}]},
+                           now="2026-09-02T10:00:00")
+        eski_loads = depo.json.loads
+        sayac = [0]
+
+        def izli(*a, **kw):
+            sayac[0] += 1
+            return eski_loads(*a, **kw)
+        depo.json.loads = izli
+        try:
+            r = depo.tarayici(con, limit=50, now=AN)
+        finally:
+            depo.json.loads = eski_loads
+        eq((r["toplam"], len(r["kayitlar"])), (100, 50))
+        ok(sayac[0] <= 55, "govde satir basina tek kez cozulur: %d" % sayac[0])
+    test("tarayici: non-arastirma govdesi tek kez cozulur", t_tarayici_tek_cozum)

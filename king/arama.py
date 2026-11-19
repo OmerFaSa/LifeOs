@@ -40,8 +40,9 @@ ONBELLEK_SN = 600
 ONBELLEK_SINIR = 128
 ONBELLEK = {}                          # (kaynak, konu) -> (zaman, sonuc); not ve alan taramasi
 _ONBELLEK_KILIT = threading.Lock()
-_ALAN_INDEKS = {}                      # abs_yol -> (mtime_ns, size, ad, taslak, [(yol, s, s_kucuk), ...])
+_ALAN_INDEKS = {}                      # abs_yol -> (mtime_ns, size, ad, taslak, [(yol, s, s_kucuk), ...], tum_kucuk)
 _MCP_MOD = None
+_MCP_KILIT = threading.Lock()
 _KIMLIK_SADE_RE = re.compile(r"^[\w./-]+$")
 _KAPI_YOL_RE = re.compile(r"(?:^|\.)kapi\b")
 NOT_TETIK = re.compile(r"\bnot(?:lar)?(?:ım|um|umda|larımda|larım|umu)\b|\bdefter", re.I)
@@ -107,16 +108,30 @@ def _ozel_mi(n):
     return bool(n.get("ozel") or n.get("kapali") or n.get("gizli"))
 
 
+def _mcp_mod():
+    global _MCP_MOD
+    if _MCP_MOD is not None:
+        return _MCP_MOD
+    with _MCP_KILIT:
+        if _MCP_MOD is not None:
+            return _MCP_MOD
+        import importlib
+        hedef = os.path.normcase(os.path.join(KOD, "king", "mcp.py"))
+        for aday in (sys.modules.get("__main__"), sys.modules.get("mcp"), sys.modules.get("king.mcp")):
+            yol = getattr(aday, "__file__", None)
+            if yol and os.path.normcase(os.path.abspath(yol)) == hedef and callable(getattr(aday, "t_notlar", None)):
+                _MCP_MOD = aday
+                return _MCP_MOD
+        king_dizini = os.path.join(KOD, "king")
+        if king_dizini not in sys.path:
+            sys.path.insert(0, king_dizini)
+        _MCP_MOD = importlib.import_module("mcp")
+        return _MCP_MOD
+
+
 def mcp_notlari(konu, sinir=10):
     """Varsayilan not kaynagi: king/mcp.py Not kapisi (kingOkur suzgecli, canli dosyanin kopyasi)."""
-    global _MCP_MOD
-    if _MCP_MOD is None:
-        import importlib.util
-        sp = importlib.util.spec_from_file_location("king_mcp", os.path.join(KOD, "king", "mcp.py"))
-        m = importlib.util.module_from_spec(sp)
-        sp.loader.exec_module(m)
-        _MCP_MOD = m
-    return _MCP_MOD.t_notlar({"ara": konu, "sinir": sinir}).get("notlar") or []
+    return _mcp_mod().t_notlar({"ara": konu, "sinir": sinir}).get("notlar") or []
 
 
 def not_kaynaklari(konu, terimler, notlar):
@@ -145,7 +160,7 @@ def _dizgeler(x, yol=""):
 
 
 def _alan_ozet(d):
-    """Tek yuruyuste parcalari ve taslak («dogrulanmamis») bayragini cikarir; 2.5 MB dumps gerektirmez."""
+    """Tek yuruyuste parcalari, birlesik kucuk metni ve taslak («dogrulanmamis») bayragini cikarir; 2.5 MB dumps gerektirmez."""
     parca, taslak = [], [False]
 
     def gez(x, yol):
@@ -165,7 +180,8 @@ def _alan_ozet(d):
 
     gez(d, "")
     baslik = d.get("ad") if isinstance(d, dict) else None
-    return baslik, taslak[0], parca
+    tum_kucuk = "\n".join(sk for _, _, sk in parca)
+    return baslik, taslak[0], parca, tum_kucuk
 
 
 def alan_kaynaklari(konu, terimler, kok=None):
@@ -173,6 +189,7 @@ def alan_kaynaklari(konu, terimler, kok=None):
     kok = kok or KOD
     alan_koku = os.path.abspath(os.path.join(kok, "alan")) + os.sep
     dosyalar = sorted(glob.glob(os.path.join(kok, "alan", "**", "*.json"), recursive=True))
+    esik = len(terimler) if len(terimler) <= 2 else (len(terimler) + 1) // 2
     aktif, out = set(), []
     for yol in dosyalar:
         if os.path.basename(yol) == "harita.json":
@@ -188,7 +205,7 @@ def alan_kaynaklari(konu, terimler, kok=None):
         with _ONBELLEK_KILIT:
             onb = _ALAN_INDEKS.get(abs_yol)
         if onb and onb[0] == st.st_mtime_ns and onb[1] == st.st_size:
-            _, _, baslik, taslak, parca = onb
+            _, _, baslik, taslak, parca, tum_kucuk = onb
         else:
             try:
                 with open(yol, encoding="utf-8") as f:
@@ -198,10 +215,13 @@ def alan_kaynaklari(konu, terimler, kok=None):
                     _ALAN_INDEKS.pop(abs_yol, None)
                 continue
             # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
-            baslik, taslak, parca = _alan_ozet(d)
+            baslik, taslak, parca, tum_kucuk = _alan_ozet(d)
             with _ONBELLEK_KILIT:
-                _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca)
-        uyan = [(y, s) for y, s, sk in parca if _uyar_kucuk(sk, terimler)]
+                _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca, tum_kucuk)
+        eslesen = [t for t in terimler if t in tum_kucuk]
+        if len(eslesen) < esik:
+            continue
+        uyan = [(y, s) for y, s, sk in parca if sum(t in sk for t in eslesen) >= esik]
         if not uyan:
             continue
         goreli = os.path.relpath(yol, kok).replace("\\", "/")

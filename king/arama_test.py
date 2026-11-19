@@ -200,6 +200,38 @@ class AramaTest(unittest.TestCase):
         for t in ts: t.join()
         self.assertEqual(errs, [])
 
+    def test_mcp_tek_modul(self):
+        import mcp
+        eski = arama._MCP_MOD
+        arama._MCP_MOD = None
+        try:
+            self.assertIs(arama._mcp_mod(), mcp)
+            self.assertNotIn("king_mcp", sys.modules)
+        finally:
+            arama._MCP_MOD = eski
+
+    def test_alan_on_suzgec_esik(self):
+        d1 = os.path.join(self.kok, "alan", "mat2")
+        os.makedirs(d1, exist_ok=True)
+        with open(os.path.join(d1, "asama-1.json"), "w", encoding="utf-8") as f:
+            json.dump({
+                "ad": "Dagilmis",
+                "a": "Bu cumlede yalniz alfa ve beta terimleri birlikte geciyor uzun metin.",
+                "b": "Burada da sadece gama ve delta kelimeleri ayri olarak duruyor uzun.",
+            }, f, ensure_ascii=False)
+        d2 = os.path.join(self.kok, "alan", "fiz2")
+        os.makedirs(d2, exist_ok=True)
+        with open(os.path.join(d2, "asama-1.json"), "w", encoding="utf-8") as f:
+            json.dump({
+                "ad": "Eslesen",
+                "a": "Burada alfa, beta ve gama terimleri ayni metin parcasinda bulunuyor.",
+            }, f, ensure_ascii=False)
+        r = arama.alan_kaynaklari("sorgu", ["alfa", "beta", "gama", "delta", "epsilon"], self.kok)
+        self.assertEqual([x["url"] for x in r], ["alan/fiz2/asama-1.json"])
+        self.assertIn("alfa, beta ve gama", r[0]["metin"])
+        r_bos = arama.alan_kaynaklari("bos", [], self.kok)
+        self.assertEqual(len(r_bos), 3)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

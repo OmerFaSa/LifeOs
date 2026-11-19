@@ -377,9 +377,54 @@ def run():
         finally:
             ses._ema_kapat()
 
+    def t_ema_kapat_temiz():
+        cagri = []
+
+        class _Boru:
+            def __init__(self, ad):
+                self.ad, self.closed = ad, False
+
+            def close(self):
+                self.closed = True
+                cagri.append("close:" + self.ad)
+
+        class _Sahte:
+            def __init__(self):
+                self.stdin, self.stdout = _Boru("in"), _Boru("out")
+
+            def kill(self):
+                cagri.append("kill")
+
+            def wait(self, timeout=None):
+                cagri.append(("wait", timeout))
+
+        sahte = _Sahte()
+        ses._EMA.update(p=sahte, q="q", cihaz="cpu")
+        try:
+            ses._ema_kapat()
+        finally:
+            ses._EMA.update(p=None, q=None, cihaz=None)
+        ok("kill" in cagri, cagri)
+        ok(any(isinstance(x, tuple) and x[0] == "wait" for x in cagri), cagri)
+        ok(sahte.stdin.closed and sahte.stdout.closed, "borular kapatilir")
+
+        d = tempfile.mkdtemp(prefix="hkm-ema-kapat-")
+        betik = os.path.join(d, "isci.py")
+        with open(betik, "w", encoding="utf-8") as f:
+            f.write(SAHTE_ISCI)
+        try:
+            list(ses._ema_akis(sys.executable, betik, "Merhaba", 20))
+            p = ses._EMA["p"]
+            ok(p is not None)
+            ses._ema_kapat()
+            ok(p.poll() is not None and p.stdin.closed and p.stdout.closed, "gercek isci ve borular kapali")
+        finally:
+            ses._ema_kapat()
+
     test("EMA bulunur; yoksa nerede aranacağı söylenir", t_ema_bul)
     test("sıra: önce EMA, olmazsa Piper; Gemini yalnız elle; parçalar tek WAV", t_ema_sira)
     test("EMA borusu: parçalar sırayla, süreç sıcak, hatada kapanır", t_ema_boru)
+    test("EMA kapatma: kill, wait ve stdin/stdout borularini temiz kapatir", t_ema_kapat_temiz)
 
     def t_akis():
         con = _con()

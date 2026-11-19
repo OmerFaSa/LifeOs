@@ -367,10 +367,15 @@ TARA_EN_COK = 500
 
 
 def _json(x, bos):
-    try:
-        return json.loads(x) if x else bos
-    except ValueError:
+    if not x:
         return bos
+    try:
+        v = json.loads(x)
+    except (ValueError, TypeError):
+        return bos
+    if isinstance(bos, dict) and not isinstance(v, dict):
+        return bos
+    return v
 
 
 def _gun(a, b):
@@ -387,7 +392,7 @@ def _son_surumler(satir):
     return son
 
 
-def _tazelik(r, son, arastirma, at):
+def _tazelik(r, son, arastirma, at, govde=None):
     """Bir kaydin tazeligi: {durum, metin, etiket}. Kod karar verir.
 
     Arastirma kaydinin kendi denetimine, materyal ve plan kaydinin
@@ -396,8 +401,13 @@ def _tazelik(r, son, arastirma, at):
         return {"durum": "eski_surum", "etiket": "olculdu",
                 "metin": "Yeni sürümü var (#%d); bu kayıt geçmiş için duruyor." % son[r["anahtar"]]}
     if r["tur"] != "arastirma":
-        dayanak = _json(r["govde"], {}).get("dayanak")
-        if not dayanak or int(dayanak) not in arastirma:
+        g = govde if isinstance(govde, dict) else _json(r["govde"], {})
+        dayanak = g.get("dayanak")
+        try:
+            did = int(dayanak) if dayanak is not None and not isinstance(dayanak, bool) else None
+        except (TypeError, ValueError):
+            did = None
+        if not did or did not in arastirma:
             yas = _gun(r["created_at"], at)
             sinir = ESKI_GUN.get(r["tur"], 365)
             if yas is not None and yas > sinir:
@@ -405,12 +415,12 @@ def _tazelik(r, son, arastirma, at):
                         "metin": "%d gün önce yazıldı; bu tür için süre %d gün." % (yas, sinir)}
             return {"durum": "soru_yok", "etiket": "hesaplandi",
                     "metin": "Bir araştırmaya dayanmıyor; güncellik sorusu yok."}
-        a = arastirma[int(dayanak)]
+        a = arastirma[did]
         t = _tazelik(a, son, arastirma, at)
         t = dict(t)
         t["metin"] = "Dayandığı araştırma (#%d): %s" % (a["id"], t["metin"][0].lower() + t["metin"][1:])
         return t
-    d = _json(r["denetim"], None) or {}
+    d = _json(r["denetim"], {})
     if d.get("durum") in ("guncel", "degisti", "denetlenemedi"):
         ne = {"guncel": "kaynakları açıldı, güncel",
               "degisti": "kaynağı değişti; yeni sürüm gerekir",
@@ -451,21 +461,27 @@ def tarayici(con, sorgu="", tur=None, durum=None, limit=50, now=None):
     son = _son_surumler(satir)
     arastirma = {r["id"]: r for r in satir if r["tur"] == "arastirma"}
     kelimeler = [w for w in normal(sorgu).split() if len(w) >= 2]
-    out, sayim = [], {"tur": {}, "durum": {}}
+    sinir = max(1, min(int(limit or 50), 200))
+    out, sayim, toplam = [], {"tur": {}, "durum": {}}, 0
     for r in satir:
         if not _eslesir(r, kelimeler):
             continue
-        t = _tazelik(r, son, arastirma, at)
+        g = _json(r["govde"], {}) if r["tur"] != "arastirma" else None
+        t = _tazelik(r, son, arastirma, at, govde=g)
         sayim["tur"][r["tur"]] = sayim["tur"].get(r["tur"], 0) + 1
         sayim["durum"][t["durum"]] = sayim["durum"].get(t["durum"], 0) + 1
         if (tur and r["tur"] != tur) or (durum and t["durum"] != durum):
             continue
-        g = _json(r["govde"], {})
-        out.append({"id": r["id"], "tur": r["tur"], "baslik": r["baslik"],
-                    "dogruluk": r["dogruluk"], "surum": r["surum"],
-                    "tarih": str(r["created_at"])[:10], "yas_gun": _gun(r["created_at"], at),
-                    "kaynak": len(g.get("kaynaklar") or []), "tazelik": t})
-    return {"kayitlar": out[:max(1, min(int(limit or 50), 200))], "toplam": len(out),
+        toplam += 1
+        if len(out) < sinir:
+            if g is None:
+                g = _json(r["govde"], {})
+            kaynaklar = g.get("kaynaklar")
+            out.append({"id": r["id"], "tur": r["tur"], "baslik": r["baslik"],
+                        "dogruluk": r["dogruluk"], "surum": r["surum"],
+                        "tarih": str(r["created_at"])[:10], "yas_gun": _gun(r["created_at"], at),
+                        "kaynak": len(kaynaklar) if isinstance(kaynaklar, list) else 0, "tazelik": t})
+    return {"kayitlar": out, "toplam": toplam,
             "sayim": sayim, "at": at, "etiket": "olculdu", "adlar": TAZELIK_AD,
             "kural": "Tazelik kaynakların canlı açılmasıyla ölçülür; ölçülmemiş kayıt «güncel» "
                      "sayılmaz. Süreler: araştırma %d, plan %d, materyal %d gün."
@@ -510,13 +526,14 @@ def kayit_depo(con, kayit_id, now=None):
             zincir.append(x)
             x = sonraki.get(x["id"])
     g = _json(r["govde"], {})
-    return {"tazelik": _tazelik(r, son, arastirma, at),
+    kaynaklar = g.get("kaynaklar")
+    return {"tazelik": _tazelik(r, son, arastirma, at, govde=g),
             "maliyet": _kayit_maliyeti(con, r["is_id"]),
             "surumler": [{"id": x["id"], "surum": x["surum"], "tarih": str(x["created_at"])[:10],
                           "bu": x["id"] == r["id"]} for x in zincir],
             "kaynaklar": [{"n": k.get("n"), "baslik": k.get("baslik"), "url": k.get("url"),
                            "alan": k.get("alan"), "tur": k.get("tur"), "erisim": k.get("erisim")}
-                          for k in g.get("kaynaklar") or []]}
+                          for k in (kaynaklar if isinstance(kaynaklar, list) else []) if isinstance(k, dict)]}
 
 
 # ------------------------------------------------------------ kullanim (8e)
@@ -545,10 +562,7 @@ def kullanilmayan(con, modul=None, now=None, gun=KULLANIM_GUN):
         arg.append(modul)
     out = []
     for r in con.execute(q + " ORDER BY id DESC", arg).fetchall():
-        try:
-            p = json.loads(r["payload"] or "{}")
-        except ValueError:
-            p = {}
+        p = _json(r["payload"], {})
         out.append({"id": r["id"], "modul": r["module"], "tur": r["kind"],
                     "baslik": str(p.get("baslik") or p.get("ad") or r["kind"])[:80],
                     "durum": DURUM_AD.get(r["state"], r["state"])})

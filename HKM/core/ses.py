@@ -353,7 +353,7 @@ def piper(cfg, metin, calistir=None, bul=None):
 EMA_HZ = 24000
 EMA_ZAMAN = 90                      # ilk istekte PyTorch ve model yuklenir
 EMA_BOS = 600
-_EMA = {"p": None, "q": None, "py": None, "son": 0.0, "cihaz": None, "acilis_sn": None}
+_EMA = {"p": None, "q": None, "t": None, "py": None, "son": 0.0, "cihaz": None, "acilis_sn": None}
 _EMA_KILIT = threading.Lock()
 
 
@@ -409,13 +409,25 @@ def _ema_canli():
 
 
 def _ema_kapat():
-    p = _EMA["p"]
-    _EMA.update(p=None, q=None, cihaz=None)
+    p, t = _EMA["p"], _EMA.get("t")
+    _EMA.update(p=None, q=None, t=None, cihaz=None)
     if p is not None:
         try:
             p.kill()
         except OSError:
             pass
+        try:
+            p.wait(timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        if t is not None and t is not threading.current_thread():
+            t.join(timeout=1)
+        for boru in (getattr(p, "stdin", None), getattr(p, "stdout", None)):
+            if boru is not None:
+                try:
+                    boru.close()
+                except (OSError, ValueError):
+                    pass
 
 
 atexit.register(_ema_kapat)
@@ -456,11 +468,16 @@ def _ema_baslat(py, betik, timeout):
     q = queue.Queue()
 
     def oku():
-        for satir in p.stdout:
-            q.put(satir)
-        q.put(None)
-    threading.Thread(target=oku, daemon=True).start()
-    _EMA.update(p=p, q=q, py=py, son=time.monotonic())
+        try:
+            for satir in p.stdout:
+                q.put(satir)
+        except (OSError, ValueError):
+            pass
+        finally:
+            q.put(None)
+    t = threading.Thread(target=oku, daemon=True)
+    t.start()
+    _EMA.update(p=p, q=q, t=t, py=py, son=time.monotonic())
     ilk = _ema_satir(q, timeout)
     if not ilk.get("hazir"):
         _ema_kapat()
