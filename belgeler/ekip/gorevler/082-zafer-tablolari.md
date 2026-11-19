@@ -1,6 +1,6 @@
 # 082 · Üç zafer tablosu (Malazgirt, İstanbul, Çanakkale) ve portre yüzleri
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** takıldı   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/082-zafer-tablolari`
 **Efor:** yüksek   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro; ölçülen 2026-10-31: flash ile aynı model) -->
 **Kabul testi:** `tools/turk_tablo_kabul_test.py`
@@ -55,7 +55,7 @@ Metinler (aynen):
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** Depo sahibi görevi iptal etti (2026-11-19: «yapmasın, durdurdum»). İlk deneme 69. adımda model akışı kesilince boş kaldı; ikinci denemede `ag/082-zafer-tablolari` dalına Malazgirt tablosu commit'lendi (698515d0), birleştirilmedi.
+- **Koşan testler:** yok
+- **Kabul testi:** koşulmadı (kırmızı kaldı)
+- **Açık kalan:** Malazgirt, İstanbul, Çanakkale tabloları; dal duruyor, istenirse incelenip alınabilir.
