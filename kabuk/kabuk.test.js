@@ -873,5 +873,13 @@ t('sozEk: kapalı details başlıklarıyla hafif DOM üretir, ağır iç listele
   dogru(!/<(li|input|ul|ol)\b/.test(html), 'ilk açılışta ağır alt etiket olmamalı');
 });
 
+t('görsel cila CSS kuralları: Başbuğ öneri kartı, alan özeti mobil düzeni ve ayarlar kaydırma solması', () => {
+  const fs = require('fs'), path = require('path');
+  const css = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
+  dogru(/\.king-oneri__oge\{[^}]*align-items:center;[^}]*min-height:64px/.test(css), 'king-oneri__oge ortali ve dengeli yukseklikte olmali');
+  dogru(/\.asama-ozet__ikincil\{[^}]*display:inline-flex/.test(css), 'asama-ozet__ikincil dokunma hedefi olmali');
+  dogru(/\.ayar-menu\{[^}]*mask-image:linear-gradient/.test(css), 'ayar-menu telefonda sag kenar solmasi tasimali');
+});
+
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

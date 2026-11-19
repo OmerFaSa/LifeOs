@@ -801,9 +801,10 @@
       var el = d.getElementById(odak) || $('[data-ayar-satir="' + odak + '"]');
       if (el) { el.scrollIntoView({ block: 'center' }); var f = $('[aria-checked="true"], input', el) || el; f.focus(); el.classList.add('b-ayar--isik'); }
     }, 0);
+    var ilkGrup = (odak && odak.indexOf('grup-') === 0 && A.GRUPLAR.some(function (g) { return g.id === odak.slice(5); })) ? odak.slice(5) : (A.GRUPLAR[0] ? A.GRUPLAR[0].id : '');
     // sol menü: her grubun simgesi; kaydırdıkça bulunduğun grup işaretlenir (ayarIzle)
     var menu = '<nav class="b-gezinme ayar-menu" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) {
-      return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
+      return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"' + (g.id === ilkGrup ? ' aria-current="true"' : '') + '><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
     }).join('') + '</nav>';
     var ara = '<div class="ayar-ara">' + B.alan({ ad: 'Ayarlarda ara', isim: 'ayarAra', tur: 'arama', yerTutucu: 'Ayar ara: tema, yazı boyu, ses, beden…', veri: { 'ayar-ara': '' } }) +
       '<p class="soluk ayar-ara__yok" hidden>Bu sözcükle bir ayar yok.</p></div>';

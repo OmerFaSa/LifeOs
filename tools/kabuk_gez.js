@@ -155,6 +155,7 @@ async function goruntu(p, ad, sec = {}) {
       && (await p.title()) === 'Bu sayfa yok · Başbuğ');
     await p.goto(T + '/kabuk/#/ayarlar');
     await p.waitForSelector('.ayarlar');
+    dene('ayarlar: açılışta ilk grup (Görünüm) seçili gösterilir', (await p.getAttribute('nav.ayar-menu a[data-grup="gorunum"]', 'aria-current')) === 'true');
     await p.mouse.move(640, 500);
     await p.mouse.down(); await p.waitForTimeout(700); await p.mouse.up();
     dene('basılı tutmak halkayı açmaz (masaüstünde yalnız sağ tık ve Ctrl .)', !(await halkaAcik()));
@@ -1214,6 +1215,13 @@ async function goruntu(p, ad, sec = {}) {
       && (await yp.getAttribute('.asama-ozet .b-dugme', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id && /Öğrenmeye başla/.test(await yp.textContent('.asama-ozet .b-dugme'))
       && (await yp.getAttribute('[data-yer-bul]', 'href')) === '#/alan/dil/yer/1' && (await yp.evaluate(() => location.hash)) === '#/alan/dil' && (await yp.locator('form.kapi').count()) === 0
       && (await yp.getAttribute('a.b-ders--sira', 'href')) === '#/alan/dil/ders/' + dil[0].uniteler[0].dersler[0].id);
+    await yp.setViewportSize({ width: 390, height: 800 });
+    const ozetMob = await yp.evaluate(() => {
+      const b = document.getElementById('asama-ad').getBoundingClientRect(), l = document.querySelector('[data-yer-bul]').getBoundingClientRect();
+      return { altinda: l.top >= b.bottom - 2, h: Math.round(l.height) };
+    });
+    dene('alan özeti (390 px): seviyemi bul bağlantısı başlığın altında ve >= 40 px', ozetMob.altinda && ozetMob.h >= 40, JSON.stringify(ozetMob));
+    await yp.setViewportSize({ width: 1280, height: 800 });
     await yp.click('[data-yer-bul]');
     await yp.waitForSelector('form.kapi[data-yer="1"]');
     const n1 = await yp.locator('form.kapi[data-yer="1"] fieldset').count();
