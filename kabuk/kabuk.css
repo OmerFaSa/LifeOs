@@ -1265,32 +1265,38 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 /* sistem teması (Açık, Koyu, Cihaza uy): sade ve ciddi Türk kimliği — resmî yazı kâğıdı gibi tepede ince al çizgi; süs yok */
 :root:not([data-afis]) body::before{ content:""; position:fixed; z-index:50; inset:0 0 auto; height:2px; pointer-events:none; background:#c8102e; }
 
-/* Sade sistem teması (2026-11-19, sahip: «sade ve minimalist ciddi bir tema büründür sistemi, Türklük içinde»): Cihaza uy, Açık, Koyu.
-   Kâğıt beyazı ya da kömür zemin, siyah/kemik yazı, tek vurgu al; gölge ve ışıma yok denecek kadar az, sahne gravür gibi gri.
-   Türklük süs değil kimlik: bayrak, bozkurt logosu, tepede ince al çizgi, on altı yıldız, Göktürk harfleri. Eski renkli görünüm: Klasik. Yazı AA ≥ 4,8. */
+/* Sade sistem teması · karargâh (2026-11-19, sahip: «askerî karargâh gibi olsun»): Cihaza uy, Açık, Koyu. Komuta panosu: tek vurgu al (etkin, uyarı);
+   başlık dar, kalın, büyük harf; serif, italik, gölge, gradyan, kart kenarı yok; köşe 2 px; sahne sert gri gravür. AA: belgeler/ekip/tur-20261119-karargah/tema.md */
 :root[data-sade]{
-  --bg:#f6f4ef; --yuzey:#ffffff; --yuzey-2:#efece5; --yuzey-ust:#f1eee8; --cizgi:#e3dfd6; --cizgi-guclu:#c9c3b6;
-  --yazi:#141414; --yazi-2:#33312d; --soluk:#5c5a55; --ana:#b3121f; --ana-yazi:#ffffff; --altin:#7a5f18; --murekkep:#141414;
-  --dugme-ana:#141414; --dugme-ana-yazi:#ffffff; --isik-oran:0%;
-  --golge-yumusak:0 1px 2px rgb(0 0 0 / .06); --golge-orta:0 1px 3px rgb(0 0 0 / .08), 0 8px 18px -10px rgb(0 0 0 / .14);
-  --golge-buyuk:0 2px 6px rgb(0 0 0 / .08), 0 18px 40px -18px rgb(0 0 0 / .22); --kose:10px; --kose-k:6px;
+  --bg:#eeece6; --yuzey:#fbfaf7; --yuzey-2:#e4e1d9; --yuzey-ust:#f6f5f1; --cizgi:#dcd8ce; --cizgi-guclu:#c9c3b6;
+  --yazi:#141414; --yazi-2:#33312d; --soluk:#5a5852; --ana:#b3121f; --ana-yazi:#fff; --altin:#7a5f18; --murekkep:#141414; --dugme-ana:#141414; --dugme-ana-yazi:#fff; --isik-oran:0%;
+  --golge-yumusak:0 0 #0000; --golge-orta:0 0 #0000; --golge-buyuk:0 0 #0000; --kose:2px; --kose-k:2px; --kose-tam:2px;
+  --baslik-serif:Bahnschrift,"DIN Condensed","Roboto Condensed","Arial Narrow",sans-serif; --baslik:var(--baslik-serif); --okuma:var(--govde);
 }
 @media (prefers-color-scheme: dark){ :root[data-sade]:not([data-theme="light"]){
-  --bg:#0e0e0f; --yuzey:#161617; --yuzey-2:#1d1d1f; --yuzey-ust:#1f1f21; --cizgi:#2a2a2d; --cizgi-guclu:#3c3c40;
-  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#9d9a93; --ana:#ef5a4f; --ana-yazi:#0e0e0f; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111111;
-  --golge-yumusak:0 1px 2px rgb(0 0 0 / .5); --golge-orta:0 2px 6px rgb(0 0 0 / .5); --golge-buyuk:0 8px 28px -10px rgb(0 0 0 / .7);
+  --bg:#0c0d0c; --yuzey:#171816; --yuzey-2:#21221f; --yuzey-ust:#1b1c1a; --cizgi:#2a2b28; --cizgi-guclu:#3c3d39;
+  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#a09d96; --ana:#ef5a4f; --ana-yazi:#0c0d0c; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111;
 } }
 :root[data-sade][data-theme="dark"]{
-  --bg:#0e0e0f; --yuzey:#161617; --yuzey-2:#1d1d1f; --yuzey-ust:#1f1f21; --cizgi:#2a2a2d; --cizgi-guclu:#3c3c40;
-  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#9d9a93; --ana:#ef5a4f; --ana-yazi:#0e0e0f; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111111;
-  --golge-yumusak:0 1px 2px rgb(0 0 0 / .5); --golge-orta:0 2px 6px rgb(0 0 0 / .5); --golge-buyuk:0 8px 28px -10px rgb(0 0 0 / .7);
+  --bg:#0c0d0c; --yuzey:#171816; --yuzey-2:#21221f; --yuzey-ust:#1b1c1a; --cizgi:#2a2b28; --cizgi-guclu:#3c3d39;
+  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#a09d96; --ana:#ef5a4f; --ana-yazi:#0c0d0c; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111;
 }
-:root[data-sade] body{ background:var(--bg); }
+:root[data-sade] body{ background:var(--bg); font-variant-numeric:tabular-nums; }
+:root[data-sade] *{ font-style:normal !important; }
+:root[data-sade] em{ font-weight:600; }
 :root[data-sade] [data-ton]{ --alan-ton:var(--ana); }
-:root[data-sade] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) contrast(1.04); }
-@media (prefers-color-scheme: dark){ :root[data-sade]:not([data-theme="light"]) :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) brightness(.78); } }
-:root[data-sade][data-theme="dark"] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) brightness(.78); }
-:root[data-sade] .soz{ background:var(--yuzey); }
-:root[data-sade] .soz__metin{ font-style:normal; }
-:root[data-sade] .b-baslik h1, :root[data-sade] .b-baslik__metin h1{ padding-bottom:.14em; background:linear-gradient(var(--ana), var(--ana)) left bottom/1.4em 2px no-repeat; }
+:root[data-sade] :is(h1, h2, h3, .b-karsilama__selam, .b-karsilama__alanad){ font-family:var(--baslik-serif); font-stretch:condensed; font-variation-settings:"wdth" 75; }
+:root[data-sade] :is(h1, .b-karsilama__selam){ font-weight:700; letter-spacing:.03em; text-transform:uppercase; }
+:root[data-sade] :is(.b-bolum__ust h2, .b-karsilama__baslik){ font:600 var(--yz-k)/1.3 var(--baslik-serif); letter-spacing:.14em; text-transform:uppercase; color:var(--soluk); }
+:root[data-sade] :is(.b-bolum__ust h2, .b-karsilama__baslik)::before{ display:none; }
+:root[data-sade] :is(.hs-kimlik__ozet dt, .sira__ust, .asama-ozet__bolum span, .b-karsilama__tarih, .asama-ozet__ad span, .ders-bolum__ad, .ders__sonraki > span){ font-family:var(--baslik-serif); letter-spacing:.12em; }
+:root[data-sade] :is(.sira, .asama-ozet, .ders-kart[data-grup="simdi"], .b-karsilama__alan:has(.b-karsilama__cizgi), .hs-kimlik, .b-bos, .soz){ background:var(--yuzey); }
+:root[data-sade] .b-ilerleme__cubuk--surekli i.dolu{ background:var(--vurgu); }
+:root[data-sade] .b-karsilama__alanlar{ gap:2px; }
+:root[data-sade] :is(.kapak, .b-karsilama__sahne){ box-shadow:none; }
+:root[data-sade] :is(.kapak, .b-karsilama__sahne)::before{ display:none; }
+@media (min-width:641px){ :root[data-sade] .b-karsilama__sahne{ height:300px; } :root[data-sade] .b-karsilama__ic{ bottom:56px; } }
+:root[data-sade] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) contrast(1.25) brightness(.92); }
+@media (prefers-color-scheme: dark){ :root[data-sade]:not([data-theme="light"]) :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) contrast(1.2) brightness(.62); } }
+:root[data-sade][data-theme="dark"] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) contrast(1.2) brightness(.62); }
 :root[data-sade] .turk-muhur__yildiz{ color:var(--soluk); }
