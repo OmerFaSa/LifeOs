@@ -492,17 +492,17 @@
     return t.toLocaleDateString('tr-TR', t.getFullYear() === b.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
   }
   // gövdenin ad dışında kalan ilk anlamlı satırı: bağ sözdizimi adına, etiketler çipe gider
-  function notOzet(n) {
-    var ad = Not.ad(n), l = String(n.govde || '').split('\n').map(function (x) {
+  function notOzet(n, ad) {
+    var notAd = ad == null ? Not.ad(n) : ad, l = String(n.govde || '').split('\n').map(function (x) {
       return x.replace(/!?\[\[!?(?:not:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/(^|\s)#[^\s#]+/g, '$1').replace(/^[>*\-\s]+/, '').replace(/\s+/g, ' ').trim();
     }).filter(Boolean);
-    if (!String(n.baslik || '').trim() || l[0] === ad) l.shift(); // başlıksız notun adı zaten ilk satırdır
+    if (!String(n.baslik || '').trim() || l[0] === notAd) l.shift(); // başlıksız notun adı zaten ilk satırdır
     return l[0] || '';
   }
   function notSatiri(n, parca, klasorlu) { // klasorlu: notun klasörü çiplerin başında (Hepsi görünümü)
-    var k = ic().kac, et = Not.etiketleri(n), ozet = parca || notOzet(n), kl = klasorlu && n.klasor ? '<span class="notsatir__klasor">' + k(n.klasor) + '</span>' : '';
+    var k = ic().kac, notAd = Not.ad(n), et = Not.etiketleri(n), ozet = parca || notOzet(n, notAd), kl = klasorlu && n.klasor ? '<span class="notsatir__klasor">' + k(n.klasor) + '</span>' : '';
     return '<a class="b-satir b-satir--uzun notsatir" href="#/motor/not/' + k(n.id) + '"><span class="b-satir__metin">' +
-      '<span class="b-satir__ad">' + k(Not.ad(n) || 'Adsız not') + '</span>' + (ozet ? '<span class="b-satir__not">' + k(ozet) + '</span>' : '') +
+      '<span class="b-satir__ad">' + k(notAd || 'Adsız not') + '</span>' + (ozet ? '<span class="b-satir__not">' + k(ozet) + '</span>' : '') +
       (et.length || kl ? '<span class="notsatir__cipler">' + kl + et.slice(0, 4).map(function (e) { return '<span class="notsatir__cip">#' + k(e) + '</span>'; }).join('') +
         (et.length > 4 ? '<span class="notsatir__cip">+' + (et.length - 4) + '</span>' : '') + '</span>' : '') + '</span>' +
       '<span class="notsatir__yan">' + (n.sabit ? B.pul({ metin: 'sabit', tur: 'altin' }) : '') + (n.ozel ? B.pul('özel') : '') +
@@ -894,8 +894,9 @@
         kural.eksik ? '<p class="soluk">Enerji hedefi için eksik: ' + k(kural.eksik.join(', ')) + '. <a href="#/ayarlar">Ayarlar › Beden</a>; kilo, Kayıt › Kilo kaydından gelir.</p>' : '',
         kural.emirVeriYok ? '<p class="soluk">Antrenman kararı için toparlanma verisi yok: uyku, nabız ya da enerji kaydı girince hesaplanır.</p>' : ''] }) +
       (bugun.length ? B.acilir({ baslik: sAd + ' kayıtları (' + bugun.length + ')', acik: true, govde: B.liste({ ad: 'Kayıtlar', ogeler: bugun.map(function (r) {
-        return { ad: kayitMetni(Kayit, r), not: r.zaman && gunAdi(r.zaman) === r.gun ? new Date(r.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
-          eylemler: [{ metin: 'Sil', tur: 'sade', etiket: 'Kaydı sil: ' + kayitMetni(Kayit, r), veri: { 'arac-ac': 'kayit-sil', id: r.id } }] };
+        var km = kayitMetni(Kayit, r);
+        return { ad: km, not: r.zaman && gunAdi(r.zaman) === r.gun ? new Date(r.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '',
+          eylemler: [{ metin: 'Sil', tur: 'sade', etiket: 'Kaydı sil: ' + km, veri: { 'arac-ac': 'kayit-sil', id: r.id } }] };
       }) }) }) : '') +
       '<p class="soluk">' + l.length + ' kayıt · bu cihazda durur</p></div>';
   }

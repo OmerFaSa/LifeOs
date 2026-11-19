@@ -396,5 +396,24 @@ t('kapı tekrar adayları: yanlış ve boş sorular, kimlik soru kimliği, kayna
   atar(function () { Yol.kapiTekrarAdaylari(y, 't.1.1.1', {}); }, 'kapı sahibi');
 });
 
+t('durum önbellekli açıklık hesabı her ünite ve ders için acikMi ile birebir eşleşir', function () {
+  var v = ornek();
+  v.uniteler.push({
+    id: 't.1.3', ad: 'Üçüncü', onKosul: ['t.1.2'],
+    dersler: [{ id: 't.1.3.1', ad: 'D4', onKosul: [], durum: 'taslak', yazan: 'model', kaynak: ['k1'], ozet: 'o', metin: ['a'], alistirmalar: [] },
+              { id: 't.1.3.2', ad: 'D5', onKosul: ['t.1.3.1'], durum: 'taslak', yazan: 'model', kaynak: ['k1'], ozet: 'o', metin: ['b'], alistirmalar: [] }],
+    kapi: { esik: 0.7, sorular: [soru('t.1.3.k1', 'A')] }
+  });
+  var y = Yol.yukle(v), k = Yol.bosKayit();
+  [k, Yol.dersOku(y, Yol.kapiDene(y, k, 't.1.1', hepsiDogru(y, 't.1.1'), Z).kayit, 't.1.1.1', Z + 1)].forEach(function (kay) {
+    var dr = Yol.durum(y, kay);
+    esit(dr.asama.acik, Yol.acikMi(y, kay, y.id));
+    dr.uniteler.forEach(function (u) {
+      esit(u.acik, Yol.acikMi(y, kay, u.id));
+      u.dersler.forEach(function (d) { esit(d.acik, Yol.acikMi(y, kay, d.id)); });
+    });
+  });
+});
+
 console.log((sayac - hatali) + '/' + sayac + ' test geçti');
 process.exit(hatali ? 1 : 0);

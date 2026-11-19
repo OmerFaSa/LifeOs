@@ -261,12 +261,23 @@
 
   // Butun durum: neyin acik oldugu, neyin gecildigi ve etiketli ilerleme sayilari.
   function durum(y, kayit) {
+    var karsCache = {};
+    function karsMemo(id) {
+      if (!(id in karsCache)) karsCache[id] = karsilandi(y, kayit, id);
+      return karsCache[id];
+    }
+    function hepsiMemo(liste) {
+      if (!liste || !liste.length) return true;
+      for (var i = 0; i < liste.length; i++) if (!karsMemo(liste[i])) return false;
+      return true;
+    }
+    var asamaAcik = hepsiMemo(y.oge[y.id].onKosul);
     var dersSay = 0, okunan = 0, cevapli = 0, dogru = 0, gecilen = 0, atlanan = 0, atla = atlandiMi(kayit), yer = kayit.yerlestirme;
     var uniteler = y.veri.uniteler.map(function (u) {
-      var kp = kapiOzeti(kayit, u.id);
+      var kp = kapiOzeti(kayit, u.id), uAcik = asamaAcik && hepsiMemo(u.onKosul);
       if (kp.gecti) gecilen++; else if (atla) atlanan++;
       return {
-        id: u.id, ad: u.ad, acik: acikMi(y, kayit, u.id), gecti: kp.gecti, atlandi: atla && !kp.gecti, kapi: kp,
+        id: u.id, ad: u.ad, acik: uAcik, gecti: kp.gecti, atlandi: atla && !kp.gecti, kapi: kp,
         dersler: u.dersler.map(function (d) {
           dersSay++;
           if (kayit.dersler[d.id]) okunan++;
@@ -276,7 +287,7 @@
             cevapli++;
             if (c[c.length - 1].dogru) dogru++;
           });
-          return { id: d.id, ad: d.ad, acik: acikMi(y, kayit, d.id), okundu: !!kayit.dersler[d.id], etiket: etiket(d) };
+          return { id: d.id, ad: d.ad, acik: uAcik && hepsiMemo(d.onKosul), okundu: !!kayit.dersler[d.id], etiket: etiket(d) };
         })
       };
     });
@@ -285,14 +296,14 @@
         okunanDers: sayi(okunan, ETIKET.OLCULDU, { toplam: dersSay }),
         gecilenUnite: sayi(gecilen, ETIKET.HESAPLANDI, { toplam: y.veri.uniteler.length }),
         // asama ilerlemesi yalniz gecilen kapilardan hesaplanir; okuma ve alistirma sayilmaz
-        asama: sayi((gecilen + (asamaGectiMi(y, kayit, y.id) ? 1 : 0)) / adim, ETIKET.HESAPLANDI),
+        asama: sayi((gecilen + (gectiA ? 1 : 0)) / adim, ETIKET.HESAPLANDI),
         alistirmaDogruluk: cevapli ? sayi(dogru / cevapli, ETIKET.HESAPLANDI, { cevapli: cevapli })
                                    : sayi(null, ETIKET.VERI_YOK)
     };
     // atlanan unite sayisi ayri satirdir; gecilen uniteye ve asama ilerlemesine girmez
     if (atla) ilerleme.atlananUnite = sayi(atlanan, yer.etiket || ETIKET.HESAPLANDI, { toplam: y.veri.uniteler.length });
     return {
-      asama: { id: y.id, ad: y.veri.ad, acik: acikMi(y, kayit, y.id), gecti: gectiA, atlandi: atla && !gectiA, kapi: ak,
+      asama: { id: y.id, ad: y.veri.ad, acik: asamaAcik, gecti: gectiA, atlandi: atla && !gectiA, kapi: ak,
         yerlestirme: yer ? { sonuc: yer.sonuc, etiket: yer.etiket || null, uretim: yer.uretim || null, dogruSayisi: yer.dogruSayisi, toplam: yer.toplam, esik: yer.esik } : null },
       uniteler: uniteler,
       ilerleme: ilerleme

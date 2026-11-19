@@ -338,5 +338,21 @@ it('her bağdaştırıcının taşıyamadıkları yazılı', () => {
   Object.keys(T.GOC).forEach(a => assert.ok(Array.isArray(T.EKSIK[a]) && T.EKSIK[a].length, a));
 });
 
+it('plan: kararlilik=null (Infinity) eşitliklerini ve gecikme sırasını kimlikle bozar, tavanları uygular', () => {
+  const kartlar = [
+    T.yeniKart('c', { durum:'yeniden', kararlilik:null, sonraki:T0 - GUN }),
+    T.yeniKart('a', { durum:'yeniden', kararlilik:null, sonraki:T0 - 5 * GUN }),
+    T.yeniKart('d', { durum:'tekrar', kararlilik:2, son:T0 - 4 * GUN, sonraki:T0 - 2 * GUN }),
+    T.yeniKart('b', { durum:'tekrar', kararlilik:10, son:T0 - 4 * GUN, sonraki:T0 - 2 * GUN }),
+    T.yeniKart('e', { durum:'tekrar', kararlilik:2, son:T0, sonraki:T0 + 3 * GUN }),
+    T.yeniKart('n1', { durum:'yeni' }),
+    T.yeniKart('n2', { durum:'yeni' }),
+  ];
+  const p = T.plan(kartlar, T0, { tekrarTavan:3, yeniTavan:1 });
+  assert.deepStrictEqual(p.tekrar.map(x => x.id), ['a', 'c', 'd']);
+  assert.deepStrictEqual(p.yeni.map(x => x.id), ['n1']);
+  assert.deepStrictEqual(p.bekleyen, { tekrar:1, yeni:1 });
+});
+
 console.log((kirmizi ? '✕ ' : '✓ ') + (n - kirmizi) + '/' + n + ' test geçti');
 process.exit(kirmizi ? 1 : 0);

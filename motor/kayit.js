@@ -170,42 +170,64 @@
   }
   const son = (liste, a) => { const l = liste.filter(r => deger(r, a).v != null); return l.length ? Object.assign({}, deger(l[l.length - 1], a)) : yok(); };
   const gunDegeri = (kayitlar, tur, a, gun) => son(turde(kayitlar, tur, gun), a).v;
+  const _zaman = r => r.zaman == null ? -Infinity : r.zaman;
+  const _sonra = (a, ia, b, ib) => a.gun !== b.gun ? a.gun > b.gun
+    : (_zaman(a) !== _zaman(b) ? _zaman(a) > _zaman(b) : ia > ib);
+  const OLCUM_TURLER = ['kilo', 'bel', 'yagOrani', 'nabiz', 'hrv', 'tansiyon', 'spo2', 'ates'];
 
-  /* Uyku günü (SPI core/uyku.js:13-15, :71-77): gece + kestirmeler; gece yoksa toplam «veri yok». */
-  function uykuGunu(kayitlar, gun){
-    const gece = son(turde(kayitlar, 'uyku', gun), 'saat'), kl = turde(kayitlar, 'kestirme', gun);
+  function _gunKova(kayitlar, gun){
+    const kova = {}, l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(r && r.gun === gun) (kova[r.tur] || (kova[r.tur] = [])).push(r);
+    }
+    for(const t in kova) if(kova[t].length > 1) kova[t] = sirali(kova[t]);
+    return kova;
+  }
+
+  function _uykuKovadan(kova){
+    const gece = son(kova.uyku || [], 'saat'), kl = kova.kestirme || [];
     const kDk = topla(kl, 'dk');
     const toplam = gece.v == null ? yok()
       : { v:Math.round(gece.v * 60 + (kDk.v || 0)), k:birlesik([gece.k].concat(kl.map(r => deger(r, 'dk').k))) };
     return { gece, kestirmeSayisi:kl.length, kestirmeDk:kDk, toplamDk:toplam };
   }
 
-  function gunluk(kayitlar, gun){
-    const h = turde(kayitlar, 'hareket', gun), c = turde(kayitlar, 'calisma', gun);
+  /* Uyku günü (SPI core/uyku.js:13-15, :71-77): gece + kestirmeler; gece yoksa toplam «veri yok». */
+  function uykuGunu(kayitlar, gun){ return _uykuKovadan(_gunKova(kayitlar, gun)); }
+
+  function _gunlukKovadan(kova, gun){
+    const h = kova.hareket || [], c = kova.calisma || [];
     let yuk = 0, bilinmeyen = 0;
-    h.forEach(r => { const y = seansYuku(r); if(y == null) bilinmeyen++; else yuk += y; });
+    for(let i = 0; i < h.length; i++){ const y = seansYuku(h[i]); if(y == null) bilinmeyen++; else yuk += y; }
     const alanlar = {};
-    c.forEach(r => { (alanlar[r.ek.alan] = alanlar[r.ek.alan] || []).push(r); });
-    Object.keys(alanlar).forEach(a => { alanlar[a] = topla(alanlar[a], 'dk'); });
+    for(let i = 0; i < c.length; i++){ const r = c[i]; (alanlar[r.ek.alan] || (alanlar[r.ek.alan] = [])).push(r); }
+    for(const a in alanlar) alanlar[a] = topla(alanlar[a], 'dk');
     const olcum = {};
-    ['kilo', 'bel', 'yagOrani', 'nabiz', 'hrv', 'tansiyon', 'spo2', 'ates'].forEach(t => {
-      const l = turde(kayitlar, t, gun);
-      if(l.length) olcum[t] = Object.keys(TURLER[t].sayilar).reduce((o, a) => (o[a] = son(l, a), o), {});
-    });
-    const og = turde(kayitlar, 'ogun', gun);
+    for(let i = 0; i < OLCUM_TURLER.length; i++){
+      const t = OLCUM_TURLER[i], l = kova[t];
+      if(l && l.length){
+        const sayilar = TURLER[t].sayilar, obj = {};
+        for(const a in sayilar) obj[a] = son(l, a);
+        olcum[t] = obj;
+      }
+    }
+    const og = kova.ogun || [];
     return {
       gun,
-      su:topla(turde(kayitlar, 'su', gun), 'ml'),
-      uyku:uykuGunu(kayitlar, gun),
+      su:topla(kova.su || [], 'ml'),
+      uyku:_uykuKovadan(kova),
       hareket:{ seans:h.length, dk:topla(h, 'dk'),
         yuk:h.length && bilinmeyen < h.length ? { v:yuk, k:'computed', bilinmeyen } : Object.assign(yok(), { bilinmeyen }) },
       calisma:{ dk:topla(c, 'dk'), alanlar },
       ogun:{ sayi:og.length ? { v:og.length, k:'computed' } : yok(), kcal:topla(og, 'kcal') },
-      enerji:son(turde(kayitlar, 'enerji', gun), 'puan'),
-      mola:topla(turde(kayitlar, 'mola', gun), 'dk'),
+      enerji:son(kova.enerji || [], 'puan'),
+      mola:topla(kova.mola || [], 'dk'),
       olcum,
     };
   }
+
+  function gunluk(kayitlar, gun){ return _gunlukKovadan(_gunKova(kayitlar, gun), gun); }
 
   /* Tahliller: belirteç başına (harf farkı gözetmeden) bütün değerler, eskiden yeniye; en son yapılan belirteç önce.
      konum: değer kaydın kendi referans aralığına göre 'alt' | 'ic' | 'ust'; aralık yazılmadıysa null (yorum yok, yalnız karşılaştırma). */
@@ -229,19 +251,44 @@
     return l.length ? { v:yuvarla(l.reduce((s, d) => s + d.v, 0) / l.length, 1), k:birlesik(l.map(d => d.k)), gun:l.length } : yok();
   }
   function haftalik(kayitlar, bitis){
+    const gunStr = [], gunIdx = {}, kovalar = [], veri = [];
+    for(let i = 0; i < 7; i++){
+      const g = gunEkle(bitis, i - 6);
+      gunStr.push(g); gunIdx[g] = i; kovalar.push({}); veri.push(false);
+    }
+    let kiloSon = null, kiloIdx = -1;
+    const l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r) continue;
+      const gi = gunIdx[r.gun];
+      if(gi !== undefined){
+        veri[gi] = true;
+        const kova = kovalar[gi];
+        (kova[r.tur] || (kova[r.tur] = [])).push(r);
+      }
+      if(r.tur === 'kilo' && r.gun <= bitis && deger(r, 'kg').v != null){
+        if(!kiloSon || _sonra(r, i, kiloSon, kiloIdx)){ kiloSon = r; kiloIdx = i; }
+      }
+    }
     const gunler = [];
-    for(let i = 6; i >= 0; i--) gunler.push(gunluk(kayitlar, gunEkle(bitis, -i)));
-    const toplam = sec => { const l = gunler.map(sec).filter(d => d.v != null);
-      return l.length ? { v:yuvarla(l.reduce((s, d) => s + d.v, 0), 2), k:birlesik(l.map(d => d.k)), gun:l.length } : yok(); };
-    const veriGunu = gunler.filter(g => (kayitlar || []).some(r => r.gun === g.gun)).length;
+    let veriGunu = 0;
+    for(let i = 0; i < 7; i++){
+      if(veri[i]) veriGunu++;
+      const kova = kovalar[i];
+      for(const t in kova) if(kova[t].length > 1) kova[t] = sirali(kova[t]);
+      gunler.push(_gunlukKovadan(kova, gunStr[i]));
+    }
+    const toplam = sec => { const sl = gunler.map(sec).filter(d => d.v != null);
+      return sl.length ? { v:yuvarla(sl.reduce((s, d) => s + d.v, 0), 2), k:birlesik(sl.map(d => d.k)), gun:sl.length } : yok(); };
     return {
-      bas:gunEkle(bitis, -6), bitis, veriGunu, gunler,
+      bas:gunStr[0], bitis, veriGunu, gunler,
       uykuOrt:ortalama(gunler.map(g => g.uyku.gece.v ? g.uyku.gece : yok())),   // AYS: 0 saatlik gece ortalamaya girmez
       suOrt:ortalama(gunler.map(g => g.su)),
       enerjiOrt:ortalama(gunler.map(g => g.enerji)),
       hareketDk:toplam(g => g.hareket.dk), yuk:toplam(g => g.hareket.yuk),
       calismaDk:toplam(g => g.calisma.dk),
-      kilo:son(turde((kayitlar || []).filter(r => r.gun <= bitis), 'kilo'), 'kg'),
+      kilo:kiloSon ? Object.assign({}, deger(kiloSon, 'kg')) : yok(),
     };
   }
 
@@ -253,9 +300,15 @@
 
   /* Güncel kilo: son ölçülen kilo, yoksa profildeki (SPI core/state.js:588-594 kiloOf). */
   function guncelKilo(kayitlar, profil, gun){
-    const l = turde((kayitlar || []).filter(r => gun == null || r.gun <= gun), 'kilo');
-    const s = son(l, 'kg');
-    if(s.v > 0) return { kg:s.v, k:s.k, gun:l.filter(r => deger(r, 'kg').v != null).pop().gun };
+    let best = null, bestIdx = -1, bestD = null;
+    const l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.tur !== 'kilo' || (gun != null && r.gun > gun)) continue;
+      const d = deger(r, 'kg');
+      if(d.v != null && (!best || _sonra(r, i, best, bestIdx))){ best = r; bestIdx = i; bestD = d; }
+    }
+    if(bestD && bestD.v > 0) return { kg:bestD.v, k:bestD.k, gun:best.gun };
     return profil && Number(profil.kilo) > 0 ? { kg:Number(profil.kilo), k:'measured', gun:null } : null;
   }
 
@@ -343,10 +396,23 @@
   const ATES_ESIK = 38.5, SPO2_ESIK = 92;                                         // move.js:124, :129
 
   /* Kişisel taban (move.js:44-55): o gün hariç geriye 30 gün, en az 3 değer. */
+  function _tabanOrt(gunMap, gun){
+    let sum = 0, n = 0;
+    for(let i = 1; i <= 30; i++){
+      const k = gunMap[gunEkle(gun, -i)];
+      if(k){ sum += k.v; n++; }
+    }
+    return n < 3 ? null : { ort:yuvarla(sum / n, 1), n };
+  }
   function taban(kayitlar, tur, a, gun){
-    const l = [];
-    for(let i = 1; i <= 30; i++){ const v = gunDegeri(kayitlar, tur, a, gunEkle(gun, -i)); if(v != null) l.push(v); }
-    return l.length < 3 ? null : { ort:yuvarla(l.reduce((s, x) => s + x, 0) / l.length, 1), n:l.length };
+    const bas = gunEkle(gun, -30), bit = gunEkle(gun, -1), m = {}, l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.tur !== tur || r.gun < bas || r.gun > bit) continue;
+      const v = deger(r, a).v;
+      if(v != null && (!m[r.gun] || _sonra(r, i, m[r.gun].r, m[r.gun].i))) m[r.gun] = { v, r, i };
+    }
+    return _tabanOrt(m, gun);
   }
   const PUANLAR = {                                                               // move.js:61-94
     uyku:h => h >= UYKU_IDEAL[0] && h <= UYKU_IDEAL[1] ? 100
@@ -355,18 +421,37 @@
     nabiz:(v, t) => t ? sikistir(80 - (v - t.ort) * 7, 0, 100) : null,
     enerji:v => sikistir((v - 1) * 25, 0, 100),
   };
+  const _TOP_ALAN = { uyku:'saat', hrv:'ms', nabiz:'atim', enerji:'puan', ates:'derece', spo2:'yuzde' };
 
   /* Toparlanma (move.js:96-160): eksik girdinin ağırlığı kalanlara dağılır; ateş ≥ 38,5 ya da
      oksijen < %92 günü toparlanma gününe çevirir. SAPMA (bilerek): eski kod bu bayrağı hiç girdi
      yokken uygulamıyordu (move.js:116-122 erken dönüş) ve yalnız ateş girilen gün tam yük
      çıkıyordu; burada bayrak her zaman geçerlidir. Bayrak yalnız azaltır. */
   function toparlanma(kayitlar, gun){
+    const bas = gunEkle(gun, -30), bugun = {}, hrv30 = {}, nabiz30 = {}, l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.gun > gun || r.gun < bas) continue;
+      const alan = _TOP_ALAN[r.tur];
+      if(!alan) continue;
+      const v = deger(r, alan).v;
+      if(v == null) continue;
+      if(r.gun === gun){
+        if(!bugun[r.tur] || _sonra(r, i, bugun[r.tur].r, bugun[r.tur].i)) bugun[r.tur] = { v, r, i };
+      }else if(r.tur === 'hrv'){
+        if(!hrv30[r.gun] || _sonra(r, i, hrv30[r.gun].r, hrv30[r.gun].i)) hrv30[r.gun] = { v, r, i };
+      }else if(r.tur === 'nabiz'){
+        if(!nabiz30[r.gun] || _sonra(r, i, nabiz30[r.gun].r, nabiz30[r.gun].i)) nabiz30[r.gun] = { v, r, i };
+      }
+    }
+    const tHrv = bugun.hrv ? _tabanOrt(hrv30, gun) : null;
+    const tNabiz = bugun.nabiz ? _tabanOrt(nabiz30, gun) : null;
     const parcalar = Object.keys(TOPARLANMA).map(id => {
-      const d = TOPARLANMA[id], v = gunDegeri(kayitlar, d.tur, d.alan, gun);
-      const p = v == null ? null : PUANLAR[id](v, id === 'hrv' || id === 'nabiz' ? taban(kayitlar, d.tur, d.alan, gun) : null);
+      const d = TOPARLANMA[id], v = bugun[d.tur] ? bugun[d.tur].v : undefined;
+      const p = v == null ? null : PUANLAR[id](v, id === 'hrv' ? tHrv : id === 'nabiz' ? tNabiz : null);
       return { id, ad:d.ad, agirlik:d.agirlik, deger:v, puan:p };
     });
-    const ates = gunDegeri(kayitlar, 'ates', 'derece', gun), spo2 = gunDegeri(kayitlar, 'spo2', 'yuzde', gun);
+    const ates = bugun.ates ? bugun.ates.v : undefined, spo2 = bugun.spo2 ? bugun.spo2.v : undefined;
     const bayrak = spo2 != null && spo2 < SPO2_ESIK ? 'spo2' : ates != null && ates >= ATES_ESIK ? 'ates' : null;
     const var_ = parcalar.filter(p => p.puan != null);
     if(!var_.length) return { ok:false, puan:yok(), bant:bayrak ? BANTLAR[BANTLAR.length - 1] : null, bayrak, parcalar, kapsam:0, ince:true };
@@ -390,27 +475,57 @@
   }
   function yukBilgisi(kayitlar, bitis, gunSay){
     let yuk = 0, bilinmeyen = 0;
-    for(let i = 0; i < gunSay; i++) turde(kayitlar, 'hareket', gunEkle(bitis, -i)).forEach(r => {
+    if(gunSay <= 0) return { yuk, bilinmeyen };
+    const bas = gunEkle(bitis, -(gunSay - 1)), l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.tur !== 'hareket' || r.gun < bas || r.gun > bitis) continue;
       const y = seansYuku(r); if(y == null) bilinmeyen++; else yuk += y;
-    });
+    }
     return { yuk, bilinmeyen };
   }
-  const ilkHareket = kayitlar => turde(kayitlar, 'hareket').reduce((m, r) => m == null || r.gun < m ? r.gun : m, null);
+  function ilkHareket(kayitlar){
+    let minG = null;
+    const l = kayitlar || [];
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(r && r.tur === 'hareket' && (minG == null || r.gun < minG)) minG = r.gun;
+    }
+    return minG;
+  }
 
   /* Akut/kronik oran (move.js:217-266): 21 günden kısa geçmişte yok; kronik pencere geçmiş
      kadar; yükü bilinmeyen seans «yük az» hükmünü düşürür. */
   function akutKronik(kayitlar, gun){
-    const ilk = ilkHareket(kayitlar);
+    const minG = gunEkle(gun, -27), gunYuk = {}, gunBil = {}, l = kayitlar || [];
+    let ilk = null;
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.tur !== 'hareket') continue;
+      if(ilk == null || r.gun < ilk) ilk = r.gun;
+      if(r.gun >= minG && r.gun <= gun){
+        const y = seansYuku(r);
+        if(y == null) gunBil[r.gun] = (gunBil[r.gun] || 0) + 1;
+        else gunYuk[r.gun] = (gunYuk[r.gun] || 0) + y;
+      }
+    }
     if(!ilk) return { ok:false, neden:'Henüz antrenman kaydı yok.' };
     const span = gunFarki(ilk, gun);
     if(span < 21) return { ok:false, span, neden:'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
     const kronikGun = Math.min(28, span + 1);
-    const akut = yukBilgisi(kayitlar, gun, 7).yuk / 7, kb = yukBilgisi(kayitlar, gun, kronikGun), kronik = kb.yuk / kronikGun;
+    let akutSum = 0, kronikSum = 0, bilinmeyen = 0;
+    for(let i = 0; i < kronikGun; i++){
+      const g = gunEkle(gun, -i), y = gunYuk[g] || 0;
+      if(i < 7) akutSum += y;
+      kronikSum += y;
+      bilinmeyen += gunBil[g] || 0;
+    }
+    const akut = akutSum / 7, kronik = kronikSum / kronikGun;
     if(!kronik) return { ok:false, neden:'Son dört haftada yeterli yük kaydı yok.' };
     const oran = yuvarla(akut / kronik, 2);
     let bolge = oran < YUK.acwrAlt ? 'low' : oran > YUK.acwrUst ? 'high' : 'ok';
-    if(kb.bilinmeyen && bolge === 'low') bolge = 'ok';
-    return { ok:true, oran:{ v:oran, k:'computed' }, akut:Math.round(akut), kronik:Math.round(kronik), bolge, kronikGun, bilinmeyen:kb.bilinmeyen };
+    if(bilinmeyen && bolge === 'low') bolge = 'ok';
+    return { ok:true, oran:{ v:oran, k:'computed' }, akut:Math.round(akut), kronik:Math.round(kronik), bolge, kronikGun, bilinmeyen };
   }
 
   /* Beş haftada bir indirme haftası (move.js:268-290); sayaç ilk seanstan başlar. */
@@ -425,9 +540,22 @@
      `enCok` bu haftaya izin verilen en yüksek yüktür; `dkEnCok` aynı kural süre için
      (movement.js:339 «koşu mesafesi, set sayısı ve toplam süre için ayrı ayrı»). */
   function haftalikBuyume(kayitlar, gun){
-    const bu = yukBilgisi(kayitlar, gun, 7).yuk, gecen = yukBilgisi(kayitlar, gunEkle(gun, -7), 7).yuk;
-    const dk = b => { let t = 0; for(let i = 0; i < 7; i++) t += topla(turde(kayitlar, 'hareket', gunEkle(b, -i)), 'dk').v || 0; return t; };
-    const gecenDk = dk(gunEkle(gun, -7));
+    const buBas = gunEkle(gun, -6), gecenSon = gunEkle(gun, -7), gecenBas = gunEkle(gun, -13), l = kayitlar || [];
+    let bu = 0, gecen = 0;
+    const gecenKova = {};
+    for(let i = 0; i < l.length; i++){
+      const r = l[i];
+      if(!r || r.tur !== 'hareket' || r.gun < gecenBas || r.gun > gun) continue;
+      const y = seansYuku(r);
+      if(r.gun >= buBas){
+        if(y != null) bu += y;
+      }else{
+        if(y != null) gecen += y;
+        (gecenKova[r.gun] || (gecenKova[r.gun] = [])).push(r);
+      }
+    }
+    let gecenDk = 0;
+    for(let i = 0; i < 7; i++) gecenDk += topla(gecenKova[gunEkle(gecenSon, -i)] || [], 'dk').v || 0;
     const dkEnCok = gecenDk ? { v:Math.floor(gecenDk * (1 + YUK.buyume)), k:'computed' } : yok();
     if(!gecen) return { ok:false, buHafta:bu, gecenHafta:gecen, enCok:yok(), dkEnCok };
     const buyume = yuvarla((bu - gecen) / gecen, 2);

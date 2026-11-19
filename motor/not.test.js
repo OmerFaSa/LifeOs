@@ -375,6 +375,27 @@ it('klasorTasi: yeniden adlandırır (alt klasör de), siler (not Klasörsüze d
   assert.doesNotThrow(() => N.klasorTasi({ notlar:l, araclar, eski:'Dersler', yeni:'Okul', zaman:T0 }));
 });
 
+it('katla, kingOkur, ara ve klasorler: hızlı yol eşdeğerliği, iç içe klasör sayımı ve kopya güvenliği', () => {
+  assert.strictEqual(N.katla('I i ABC-123'), 'i i abc-123');
+  assert.strictEqual(N.katla('İ ı IŞIK ÇĞÖŞÜçğöşüâîû'), 'i i isik cgosucgosuaiu');
+  const nlar = [
+    not('a', { baslik:'Felsefe İlkeler', govde:'[[not:b|Gizli Link]] #etiket1 İlkeler derin #orta', klasor:'A/B/C', ozellik:{} }),
+    not('b', { baslik:'Gizli', govde:'saklı', ozel:true, klasor:'Gizli', ozellik:{ sohbet:[{ metin:'[[not:a|İlkeler]]' }] } }),
+    not('c', { baslik:'Orta', govde:'sadece ilkeler metni', klasor:'A/B', etiketler:['etiket2'] }),
+    not('d', { baslik:'Dışarıda', govde:'[[not:b|Özel]]', klasor:'A', ozellik:{ bag:['[[not:b|Gizli]]'] } }),
+  ];
+  const kr = N.kingOkur(nlar, { kapaliKlasorler:['Gizli'] });
+  assert.deepStrictEqual(ids(kr), ['a', 'c', 'd']);
+  assert.strictEqual(kr[0].govde.indexOf('«özel not»') >= 0, true);
+  assert.deepStrictEqual(kr[2].ozellik.bag, ['«özel not»']);
+  assert.notStrictEqual(kr[0].ozellik, nlar[0].ozellik);
+  assert.deepStrictEqual(N.ara(nlar, 'ilkeler', { sinir:1 }).map(x => [x.id, x.puan > 0, x.parca.length > 0]), [['a', true, true]]);
+  assert.deepStrictEqual(N.ara(nlar, '#etiket1').map(x => x.id), ['a']);
+  assert.deepStrictEqual(N.klasorler(nlar, ['A/Boş']), [
+    { ad:'A', sayi:3 }, { ad:'A/B', sayi:2 }, { ad:'A/B/C', sayi:1 }, { ad:'A/Boş', sayi:0 }, { ad:'Gizli', sayi:1 }
+  ]);
+});
+
 /* ------------------------------------------------------------- saflık */
 it('saflık: motor saati ve rastgeleyi kendisi okumaz; tarayıcıda LIFEOS.Motor.Not', () => {
   const kod = fs.readFileSync(path.join(__dirname, 'not.js'), 'utf8');

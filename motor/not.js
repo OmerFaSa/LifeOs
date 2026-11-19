@@ -47,7 +47,11 @@
   /* Türkçe küçük harf, ICU'ya bakmadan: I → ı, İ → i. */
   const kucuk = s => String(s == null ? '' : s).replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase();
   /* Arama katlaması: büyük/küçük ve ç ğ ı ö ş ü (â î û) farkı yok. «IŞIK» = «ışık» = «isik». */
-  const katla = s => kucuk(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i');
+  const ASCII_RE = /^[\x00-\x7f]*$/;
+  const katla = s => {
+    const x = String(s == null ? '' : s);
+    return ASCII_RE.test(x) ? x.toLowerCase() : kucuk(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i');
+  };
   /* «  Sağlık / uyku/ » → «Sağlık/uyku»; defter.js:650 klasorAdi ile aynı. */
   const klasorAdi = k => String(k || '').split('/').map(x => x.replace(/\s+/g, ' ').trim().slice(0, 40)).filter(Boolean).slice(0, 3).join('/');
   const icinde = (n, k) => k == null ? true : k === '' ? !n.klasor : (n.klasor === k || n.klasor.indexOf(k + '/') === 0);   // defter.js:661
@@ -117,7 +121,10 @@
     const y = f({ id, ad:a == null ? '' : a.trim(), celiski:c === '!' });
     return y == null ? tam : y;
   });
-  const govdeEtiketleri = g => Array.from(String(g || '').matchAll(ETIKET_RE), m => kucuk(m[2]));
+  const govdeEtiketleri = g => {
+    const s = String(g || '');
+    return s.indexOf('#') < 0 ? [] : Array.from(s.matchAll(ETIKET_RE), m => kucuk(m[2]));
+  };
   /* Kayıttaki etiketler + gövdedeki #etiketler (defter.js bugün yalnız gövdeden türetiyor). */
   const etiketleri = n => Array.from(new Set((n.etiketler || []).map(kucuk).concat(govdeEtiketleri(n.govde)))).sort();
 
@@ -233,17 +240,30 @@
       .map(a => ({ id:a.id, ad:a.ad, klasor:a.klasor, gorunum:a.gorunum, anlam:a.sistemNotu.anlam, kullanim:a.sistemNotu.kullanim }));
   }
 
+  const _kapali = o => ((o && o.kapaliKlasorler) || []).map(klasorAdi).filter(Boolean).concat(kapaliAraclar(o && o.araclar));
+  const _izinli = (n, kapali) => !!(n && !n.ozel && (!kapali.length || !kapali.some(k => icinde(n, k))));
   /* King bu notu okuyabilir mi: özel değil, kapalı bir klasörde (ya da altında) değil, King'e kapalı bir aracın klasöründe değil. */
-  function kingIzin(n, o){
-    if(!n || n.ozel) return false;
-    const kapali = ((o && o.kapaliKlasorler) || []).map(klasorAdi).filter(Boolean).concat(kapaliAraclar(o && o.araclar));
-    return !kapali.some(k => icinde(n, k));
-  }
+  function kingIzin(n, o){ return _izinli(n, _kapali(o)); }
   /* King'e gidecek notlar: izinliler, kopya olarak; izinsiz nota giden bağın adı silinir (başlık sızmasın). */
   function kingOkur(notlar, o){
-    const l = notlar || [], gizli = new Set(l.filter(n => !kingIzin(n, o)).map(n => n.id));
-    const sil = s => baglariDegistir(s, b => gizli.has(b.id) ? '«özel not»' : null);
-    return l.filter(n => kingIzin(n, o)).map(n => Object.assign({}, n, { govde:sil(n.govde), ozellik:derin(n.ozellik, sil) }));
+    const l = notlar || [], kapali = _kapali(o), gizli = new Set(), izinliler = [];
+    for(let i = 0; i < l.length; i++){
+      const n = l[i];
+      if(_izinli(n, kapali)) izinliler.push(n);
+      else if(n) gizli.add(n.id);
+    }
+    const sil = s => {
+      const t = String(s || '');
+      return !gizli.size || t.indexOf('[[') < 0 ? t : baglariDegistir(t, b => gizli.has(b.id) ? '«özel not»' : null);
+    };
+    const ozKopya = oz => {
+      if(oz && typeof oz === 'object' && !Array.isArray(oz)){
+        for(const _k in oz) return derin(oz, sil);
+        return {};
+      }
+      return derin(oz, sil);
+    };
+    return izinliler.map(n => Object.assign({}, n, { govde:sil(n.govde), ozellik:ozKopya(n.ozellik) }));
   }
   /* King'in önerisi: bir kayıt, uygulama değil. hedef = değişecek notun kimliği
      ya da yeni notun alacağı kimlik; taban = King'in okuduğu sürümün güncelleme zamanı. */
@@ -304,18 +324,24 @@
     }
     const kelimeler = q.split(/[^\p{L}\p{N}]+/u).filter(Boolean), out = [];
     if(!kelimeler.length) return [];
-    l.forEach(n => {
-      const b = katla(ad(n)), e = etiketleri(n).map(katla), g = katla([n.govde].concat(dizgiler(n.ozellik, 'sohbet')).join('\n'));
-      let puan = 0;
-      for(const k of kelimeler){
-        const bv = b.indexOf(k) >= 0, ev = e.some(x => x.indexOf(k) >= 0), gs = say(g, k);
-        if(!bv && !ev && !gs) return;
+    for(let i = 0; i < l.length; i++){
+      const n = l[i], b = katla(ad(n)), etRaw = etiketleri(n), e = etRaw.length ? etRaw.map(katla) : etRaw;
+      let ozVar = false;
+      if(n.ozellik && typeof n.ozellik === 'object') for(const _k in n.ozellik){ ozVar = true; break; }
+      const gMetin = ozVar ? [n.govde].concat(dizgiler(n.ozellik, 'sohbet')).join('\n') : (n.govde || '');
+      const g = katla(gMetin);
+      let puan = 0, uydu = true;
+      for(let j = 0; j < kelimeler.length; j++){
+        const k = kelimeler[j], bv = b.indexOf(k) >= 0, ev = e.some(x => x.indexOf(k) >= 0), gs = say(g, k);
+        if(!bv && !ev && !gs){ uydu = false; break; }
         puan += (bv ? 10 + (kelimeBasi(b, k) ? 5 : 0) : 0) + (ev ? 6 : 0) + gs;
       }
+      if(!uydu) continue;
       if(b === q) puan += 30;
-      out.push({ n, puan, parca:parca(n.govde, kelimeler) });
-    });
-    return out.sort((x, y) => y.puan - x.puan || siralama(x.n, y.n)).slice(0, sinir).map(sonuc);
+      out.push({ n, puan });
+    }
+    return out.sort((x, y) => y.puan - x.puan || siralama(x.n, y.n)).slice(0, sinir)
+      .map(x => ({ id:x.n.id, ad:ad(x.n), puan:x.puan, parca:parca(x.n.govde, kelimeler) }));
   }
 
   /* ---------------------------------------------------------- göç */
@@ -563,11 +589,22 @@
          (ya da araç klasörü taşıyan bir üst klasöre) dokunmaz: Başbuğ'un okuma izni klasöre bağlıdır, araç sayfasından yönetilir. */
   const kapsam = (k, ust) => k === ust || k.indexOf(ust + '/') === 0, ka = klasorAdi;
   function klasorler(notlar, ekler){
-    const adlar = new Set();
-    (notlar || []).forEach(n => { if(n && n.klasor) adlar.add(n.klasor); });
-    (ekler || []).map(ka).filter(Boolean).forEach(k => adlar.add(k));
-    return Array.from(adlar).sort((a, b) => a.localeCompare(b, 'tr'))
-      .map(ad => ({ ad, sayi:(notlar || []).filter(n => n && n.klasor && kapsam(n.klasor, ad)).length }));
+    const adlar = new Set(), sayim = new Map(), l = notlar || [];
+    for(let i = 0; i < l.length; i++){
+      const n = l[i], kl = n && n.klasor;
+      if(!kl) continue;
+      adlar.add(kl);
+      let idx = kl.indexOf('/');
+      while(idx >= 0){
+        const alt = kl.slice(0, idx);
+        sayim.set(alt, (sayim.get(alt) || 0) + 1);
+        idx = kl.indexOf('/', idx + 1);
+      }
+      sayim.set(kl, (sayim.get(kl) || 0) + 1);
+    }
+    const ek = ekler || [];
+    for(let i = 0; i < ek.length; i++){ const k = ka(ek[i]); if(k) adlar.add(k); }
+    return Array.from(adlar).sort((a, b) => a.localeCompare(b, 'tr')).map(ad => ({ ad, sayi:sayim.get(ad) || 0 }));
   }
   function klasorTasi(o){
     const eski = ka(o.eski), yeni = ka(o.yeni), zaman = o.zaman;

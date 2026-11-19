@@ -444,6 +444,42 @@ it('tahliller: belirteç başına zaman sırasıyla değerler, en son yapılan �
   assert.ok(!K.gunluk(l, '2026-09-01').olcum.tahlil, 'günlük ölçüm özetine girmez (bir günde çok belirteç)');
 });
 
+it('çoklu gün taraması: karışık sıra, null zaman, gelecek kilo ve 30 günlük tabanlar belirlenimcidir', () => {
+  const baz = '2026-11-20';
+  const ks = [];
+  for (let i = 34; i >= 1; i--) {
+    const g = K.yardimci.gunEkle(baz, -i);
+    ks.push(kay('hrv', { ms: String(50 + (i % 5)) }, g, { zaman: 100 }));
+    ks.push(kay('hrv', { ms: String(60 + (i % 5)) }, g, { zaman: 200 }));
+    ks.push(kay('nabiz', { atim: String(55 + (i % 4)) }, g, { zaman: null }));
+    ks.push(kay('nabiz', { atim: String(62 + (i % 4)) }, g, { zaman: null }));
+    if (i <= 25) ks.push(kay('hareket', { dk: String(30 + i), rpe: '6', tur: 'kardiyo' }, g, { zaman: 300 }));
+  }
+  ks.push(kay('uyku', { saat: '7,5' }, baz, { zaman: null }));
+  ks.push(kay('uyku', { saat: '8' }, baz, { zaman: null }));
+  ks.push(kay('kestirme', { dk: '25' }, baz, { zaman: 50 }));
+  ks.push(kay('hrv', { ms: '70' }, baz, { zaman: 10 }));
+  ks.push(kay('nabiz', { atim: '54' }, baz, { zaman: 20 }));
+  ks.push(kay('enerji', { puan: '4' }, baz, { zaman: 30 }));
+  ks.push(kay('kilo', { kg: '73,4' }, '2026-11-18', { zaman: 100 }));
+  ks.push(kay('kilo', { kg: '72,9' }, '2026-11-25', { zaman: 100 })); // bitisten sonraki kilo alinmaz
+  ks.push(kay('su', { ml: '400' }, baz, { zaman: 10 }));
+  ks.push(kay('su', { ml: '600' }, baz, { zaman: 20 }));
+  const karisik = ks.slice().reverse();
+  const h = K.haftalik(ks, baz);
+  assert.strictEqual(h.kilo.v, 73.4);
+  assert.strictEqual(h.veriGunu, 7);
+  assert.deepStrictEqual(h.gunler[6].su, { v: 1000, k: 'computed' });
+  assert.deepStrictEqual(h.gunler[6].uyku.toplamDk, { v: 505, k: 'computed' }); // null zaman: sonuncu (8 saat = 480 + 25)
+  const r = K.Kural.toparlanma(ks, baz);
+  assert.ok(r.ok && r.puan.v > 0);
+  const a1 = K.Kural.akutKronik(ks, baz), a2 = K.Kural.akutKronik(karisik, baz);
+  assert.deepStrictEqual(a1, a2);
+  const b1 = K.Kural.haftalikBuyume(ks, baz), b2 = K.Kural.haftalikBuyume(karisik, baz);
+  assert.deepStrictEqual(b1, b2);
+  assert.strictEqual(K.Kural.guncelKilo(ks, null, baz).kg, 73.4);
+});
+
 it('saflık: motor saat okumaz (Date.now / new Date() yok)', () => {
   const src = kaynak('motor/kayit.js');
   assert.ok(!/Date\.now\(|new Date\(\)/.test(src));
