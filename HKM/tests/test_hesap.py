@@ -2128,3 +2128,53 @@ def run():
         no(any(x in gunluk.getvalue() for x in sirlar), "gunluge sir yazilmadi")
     test("HTTP soz 30: iki cihaz, biri cikarilir: onun her korumali yolu 401, oteki ve bilgisayar surer; sir sizmaz",
          t_http_merkez_yolu)
+
+    def t_http_eksi_govde_boyutu():
+        import http.client
+
+        class _SayacAkis:
+            def __init__(self, veri=b""):
+                self.veri = veri
+                self.cagri = 0
+
+            def read(self, n=-1):
+                self.cagri += 1
+                return self.veri if n < 0 else self.veri[:n]
+
+        class _SahteIstek:
+            def __init__(self, basliklar, veri=b""):
+                self.headers = basliklar
+                self.rfile = _SayacAkis(veri)
+
+        for boy in ("-1", "-5", "-999999", "abc"):
+            h = _SahteIstek({"Content-Length": boy})
+            _hata(lambda h=h: hesap._govde(h), 400)
+            eq(h.rfile.cagri, 0, "bozuk boyutta rfile okunmaz: " + boy)
+        h_buyuk = _SahteIstek({"Content-Length": str(hesap.GOVDE_EN_BUYUK + 1)})
+        _hata(lambda: hesap._govde(h_buyuk), 413)
+        eq(h_buyuk.rfile.cagri, 0, "siniri asinca rfile okunmaz")
+        for bas in ({}, {"Content-Length": "0"}):
+            h_bos = _SahteIstek(bas)
+            eq(hesap._govde(h_bos), {})
+            eq(h_bos.rfile.cagri, 0, "bos govdede rfile okunmaz")
+        veri = b'{"ad":"omer"}'
+        h_ok = _SahteIstek({"Content-Length": str(len(veri))}, veri)
+        eq(hesap._govde(h_ok), {"ad": "omer"})
+        eq(h_ok.rfile.cagri, 1)
+
+        with _Srv() as s:
+            for yol, bas, boy in (
+                ("/api/hesap/giris", H, "-1"),
+                ("/api/hesap/giris", H, "-5"),
+                ("/api/hesap/gelen", {"Authorization": "Bearer test-anahtar"}, "-1"),
+            ):
+                bag = http.client.HTTPConnection("127.0.0.1", s.s.server_address[1], timeout=2)
+                try:
+                    bag.putrequest("POST", yol)
+                    for ad, deger in dict(bas, **{"Content-Length": boy}).items():
+                        bag.putheader(ad, deger)
+                    bag.endheaders()
+                    eq(bag.getresponse().status, 400, f"{yol} ({boy})")
+                finally:
+                    bag.close()
+    test("HTTP _govde: eksi ve gecersiz Content-Length okumadan 400 doner", t_http_eksi_govde_boyutu)

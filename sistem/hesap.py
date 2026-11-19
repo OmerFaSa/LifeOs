@@ -2639,6 +2639,8 @@ def _govde(h):
         n = int(h.headers.get("Content-Length") or 0)
     except ValueError:
         raise Hata(400, "Geçersiz istek.")
+    if n < 0:
+        raise Hata(400, "Geçersiz istek.")              # read(-1) baglanti kapanana dek bekler
     if n > GOVDE_EN_BUYUK:
         raise Hata(413, "İstek çok büyük.")
     ham = h.rfile.read(n) if n else b""
