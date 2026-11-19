@@ -961,7 +961,7 @@
       return { ad: x.ad, not: zamanKisa(kayit.dersler[id].okundu) + ' okundu' + (sec ? ' · alıştırma ' + dogru + '/' + sec + ' doğru' : ''), pul: { metin: 'okundu', tur: 'altin' }, href: F() + '/ders/' + id };
     }) }) }) : '';
   }
-  // Neredesin: aşama (seviye) n/N ve adı, hedef, şu anki bölüm (ünite · ders k/m) ve sıradaki dersin adı, ilerleme, tek ana düğme
+  // Neredesin: aşama n/N ve adı, hedef (aşama listesi yoksa; varsa hedef yalnız orada, 2026-11-19), şu anki bölüm (ünite · ders k/m) ve sıradaki dersin adı, ilerleme, tek ana düğme
   function neredesin(f, dr, a) {
     var od = dr.ilerleme.okunanDers, ls = asamaListe(etkinAlan), yer_ = dr.asama.yerlestirme, kapi = a && a.tur === 'kapi';
     var u = a ? f.y.oge[kapi ? a.id : f.y.ust[a.id]] || {} : {}, ud = (u.dersler || []).map(function (x) { return x && x.id || x; });
@@ -969,9 +969,9 @@
     var bolum = !a ? '' : kapi ? (u.ad || 'Ünite') + ' · dersler bitti, ünite kapısı' : (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + ' / ' + ud.length : '');
     var eylem = a ? { metin: kapi ? 'Ünite kapısına geç' : od && od.deger ? 'Öğrenmeye devam et' : 'Öğrenmeye başla', tur: 'ana', href: adimYolu(a) }
       : sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(sonraki.n) } : null;
-    return '<section class="asama-ozet" aria-labelledby="asama-ad"><div class="asama-ozet__ust"><h2 class="asama-ozet__ad" id="asama-ad"><span>Seviye · Aşama ' + f.n + (ls.length > 1 ? ' / ' + ls.length : '') + '</span>' + kac(dr.asama.ad) + '</h2>' +
+    return '<section class="asama-ozet" aria-labelledby="asama-ad"><div class="asama-ozet__ust"><h2 class="asama-ozet__ad" id="asama-ad"><span>Aşama ' + f.n + (ls.length > 1 ? ' / ' + ls.length : '') + '</span>' + kac(dr.asama.ad) + '</h2>' +
         (a && alanYeni(etkinAlan) ? '<a class="asama-ozet__ikincil" href="' + F() + '/yer/1" data-yer-bul="">Biliyorsan: seviyemi bul</a>' : '') + '</div>' +
-      (f.y.veri.hedef ? '<p class="asama-ozet__hedef">' + kac(f.y.veri.hedef) + '</p>' : '') +
+      (ls.length < 2 && f.y.veri.hedef ? '<p class="asama-ozet__hedef">' + kac(f.y.veri.hedef) + '</p>' : '') +
       (bolum ? '<div class="asama-ozet__bolum"><p><span>Bölüm</span>' + kac(bolum) + '</p>' + (a.tur === 'ders' ? '<p><span>Sıradaki ders</span>' + kac(a.ad) + '</p>' : '') + '</div>' : '') +
       (dr.asama.gecti && !a ? '<p class="asama-ozet__hedef">Bu aşamanın bütün derslerini ve kapısını geçtin.</p>' : '') +
       (od && od.toplam ? B.ilerleme({ ad: 'Okunan ders', deger: od.deger, toplam: od.toplam }) : '') +
