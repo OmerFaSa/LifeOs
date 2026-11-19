@@ -863,14 +863,13 @@ t('sahneBoyut: tüm DPR ve ekran genişliklerinde manzara ile önbellek anahtar�
   esit([buyuk.olc, buyuk.w, buyuk.h], [3, 435, 104]);
 });
 
-t('sozEk: kapalı details başlıklarıyla hafif DOM üretir, ağır iç listeler açılınca dolar', () => {
-  dogru(typeof K.sozEk === 'function', 'K.sozEk dışa verilmeli');
-  const html = K.sozEk(new Date(2026, 10, 19));
-  dogru(/<details class="soz__acil" data-soz-ek="milli"/.test(html), 'millî günler lazy details');
-  dogru(/<details class="soz__acil" data-soz-ek="gokturk"/.test(html), 'Göktürk lazy details');
-  dogru(/<summary>Yılın tarihî günleri<\/summary><\/details>/.test(html), 'kapalıyken liste basılmamalı');
-  dogru(/<summary>Göktürk yazısı<\/summary><\/details>/.test(html), 'kapalıyken harf tablosu basılmamalı');
-  dogru(!/<(li|input|ul|ol)\b/.test(html), 'ilk açılışta ağır alt etiket olmamalı');
+t('Türk izleri sade (karargâh 2026-11-19): söz kartında Göktürk harfi ve açılır, yıldız sırası, mühürde süs yok', () => {
+  const fs = require('fs'), path = require('path');
+  const js = fs.readFileSync(path.join(__dirname, 'kabuk.js'), 'utf8'), css = fs.readFileSync(path.join(__dirname, 'kabuk.css'), 'utf8');
+  const eski = /soz__runik|soz__acil|soz__ek\b|tdev\b|tdev__|turk-muhur__(yildiz|runik)|selam-runik|soz__tablo|soz__bayrak/;
+  dogru(!eski.test(js), 'kabuk.js eski süsü üretmemeli: ' + (js.match(eski) || [''])[0]);
+  dogru(!/\.(soz__runik|soz__acil|soz__ek|tdev|turk-muhur__runik|selam-runik|soz__tablo|soz__bayrak)\b/.test(css), 'kabuk.css kalkan bileşenin kuralını taşımamalı');
+  dogru(/function turkMuhru\(\) \{ return '<footer class="turk-muhur"><p class="turk-muhur__soz">Ne mutlu Türküm diyene!<\/p><\/footer>'; \}/.test(js), 'mühür tek satır');
 });
 
 t('görsel cila CSS kuralları: Başbuğ öneri kartı, alan özeti mobil düzeni, yüksek kontrast odak ve ayarlar solması', () => {

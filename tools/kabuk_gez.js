@@ -98,14 +98,19 @@ async function goruntu(p, ad, sec = {}) {
       && (await p.locator('.b-karsilama__is').count()) === 0 && (await p.textContent('#b-k-alanlar')) === 'İlerleme', JSON.stringify(ia));
     dene('Bugün: karşılama taşı tek h1 selam ve özet cümlesi', (await p.locator('#sayfa h1.b-karsilama__selam').count()) === 1 && (await p.locator('#sayfa h1').count()) === 1
       && /^Bugün .* var\.$/.test(await p.textContent('.b-karsilama__ozet')));
-    // Türk izleri (2026-11-18f): tarihte on iki hayvanlı Türk takviminin yılı, İlerleme'nin altında günün sözü (Göktürk harfleriyle «Türük», kaynak)
-    dene('Bugün: tarih satırında Türk takvimi yılı, günün sözü kaynağıyla ve Göktürk harfleriyle', /· \S+ yılı$/.test((await p.textContent('.b-karsilama__tarih')).trim())
-      && (await p.textContent('.soz .soz__runik')) === '\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}' && (await p.textContent('.soz__metin')).length > 5 && (await p.textContent('.soz__kaynak')).length > 3,
+    // Türk izleri (2026-11-18f; karargâh 2026-11-19 sadeleşti): tarihte Türk takviminin yılı; İlerleme'nin altında tek sakin söz bloğu (söz, kaynak,
+    // en çok bir küçük portre); Göktürk harfleri, açılırlar, on altı yıldız ve «Bugünün devleti» Bugün'de yok (Tarih'te)
+    dene('Bugün: tarih satırında Türk takvimi yılı; söz kartı tek blok: söz, kaynak, en çok bir portre, süs yok', /· \S+ yılı$/.test((await p.textContent('.b-karsilama__tarih')).trim())
+      && (await p.locator('.soz').count()) === 1 && (await p.textContent('.soz__metin')).length > 5 && (await p.textContent('.soz__kaynak')).length > 3
+      && (await p.locator('.soz img').count()) <= 1 && (await p.locator('.soz details, .soz [lang="otk"], .tdev, .miras, .selam-runik').count()) === 0
+      && (await p.evaluate(() => getComputedStyle(document.querySelector('.soz__metin')).fontStyle)) === 'normal',
       await p.textContent('.b-karsilama__tarih'));
-    // 2026-11-18g: tarihî gün değilse en yakın gelen gün ve kalan gün («N gün sonra · 22 Kasım · …»); logoda al bayrak
+    // 2026-11-18g: tarihî gün değilse en yakın gelen gün ve kalan gün («N gün sonra · 22 Kasım · …») tek satır, sözün altında; logoda al bayrak
     { const yk = (await p.locator('.soz__yakin').count()) ? await p.textContent('.soz__yakin') : '', ml = await p.locator('.soz__milli').count();
-      dene('Bugün: söz üstünde bugünün tarihî günü ya da yaklaşan gün sayacı; logoda al bayrak', (ml === 1 || /^\d+ gün sonra · \d+ \S+ · .+/.test(yk))
+      dene('Bugün: sözün altında bugünün tarihî günü ya da yaklaşan gün tek satır; logoda al bayrak', (ml + (yk ? 1 : 0)) === 1 && (ml === 1 || /^\d+ gün sonra · \d+ \S+ · .+/.test(yk))
         && (await p.locator('.ust__logo .ust__bayrak').count()) === 1, yk); }
+    dene('sayfa sonu mührü tek satır: «Ne mutlu Türküm diyene!», yıldız, Göktürk harfi ve simge yok', (await p.textContent('.turk-muhur')) === 'Ne mutlu Türküm diyene!'
+      && (await p.locator('.turk-muhur *').count()) === 1);
     dene('Bugün: üst çubukta logo, beş bölüm (Bugün seçili), arama komut çubuğunu açar', (await p.locator('.ust--sahne .ust__sekmeler a').count()) === 5
       && (await p.getAttribute('.ust__sekmeler a[aria-current="page"]', 'href')) === '#/bugun' && (await p.getAttribute('.ust__ara', 'data-ac')) === 'komut');
     await goruntu(p, 'karsilama');
@@ -401,6 +406,26 @@ async function goruntu(p, ad, sec = {}) {
       // Dil'de Göktürk yazısı ünitesi (dil.1.4, 2026-11-18i) önkoşulsuz: ilk üniteyle birlikte o da açık gelir
       dene(alan + ': yalnız ilk ünite (Dil’de bir de Göktürk yazısı) açık gelir', (await p.locator('.yol > details.b-acilir[open]').count()) === (alan === 'dil' ? 2 : 1));
       dene(alan + ': ilk ders listede «sıradaki», ona götürür', (await p.getAttribute('a.b-ders--sira', 'href')) === '#/alan/' + alan + '/ders/' + d1.id);
+      if (alan === 'tarih') {
+        // karargâh 2026-11-19: derslerin önünde tek «Türk tarihi» kartı (bugünün devleti + harita), geri kalan her şey sonda tek açılır arşivde; süs yok
+        const kart = await p.evaluate(() => { const k = document.querySelectorAll('#sayfa .miras'); return { n: k.length, ad: k[0] && k[0].querySelector('.miras__ad').textContent,
+          harita: k[0] && k[0].querySelectorAll('img[data-harita]').length, onde: !!k[0] && !!(k[0].compareDocumentPosition(document.querySelector('.yol')) & 4) }; });
+        dene('tarih: derslerin önünde tek Türk tarihi kartı, bugünün devleti ve tek harita', kart.n === 1 && kart.ad.length > 3 && kart.harita === 1 && kart.onde, JSON.stringify(kart));
+        const ars = '.tarih-arsiv details[data-arsiv]';
+        dene('tarih: arşiv derslerin sonunda, kapalı ve boş; yıldız sırası ve tablo resmi sayfada yok', (await p.locator(ars + ':not([open])').count()) === 1
+          && (await p.locator(ars + ' .b-acilir__govde > *').count()) === 0 && (await p.locator('.tdev, .govde [lang="otk"], img[data-tablo]').count()) === 0
+          && (await p.evaluate(a => !!(document.querySelector('.yol').compareDocumentPosition(document.querySelector(a)) & 4), ars)));
+        await p.click(ars + ' > summary'); await p.waitForSelector(ars + ' .gokturk__gir');
+        await p.fill(ars + ' .gokturk__gir', 'Başbuğ');
+        await p.waitForFunction(() => document.querySelector('.gokturk__cik').textContent === '\u{10C09}\u{10C00}\u{10C41}\u{10C09}\u{10C06}\u{10C0D}', null, { timeout: 3000 }).catch(() => {});
+        const ic = await p.evaluate(a => { const e = document.querySelector(a); return { devlet: e.querySelectorAll('.tarih-arsiv__devlet li').length, bugun: e.querySelectorAll('.tarih-arsiv__devlet li[aria-current]').length,
+          harita: e.querySelectorAll('.ata-haritalar img[data-harita]').length, tablo: e.querySelectorAll('.tablolar img[data-tablo]').length, simge: e.querySelectorAll('.simgeler li').length,
+          gun: e.querySelectorAll('.soz-gun li').length, cik: e.querySelector('.gokturk__cik').textContent }; }, ars);
+        dene('tarih: arşiv açılınca on altı devlet (bugünkü işaretli), bütün haritalar, tablolar, simgeler, tarihî günler; Göktürk çevirici yazılanı çevirir',
+          ic.devlet === 16 && ic.bugun === 1 && ic.harita >= 8 && ic.tablo >= 3 && ic.simge >= 10 && ic.gun >= 10 && ic.cik === '\u{10C09}\u{10C00}\u{10C41}\u{10C09}\u{10C06}\u{10C0D}', JSON.stringify(ic));
+        await p.waitForFunction(a => [...document.querySelectorAll(a + ' img[data-tablo]')].every(i => i.src), ars, { timeout: 5000 }).catch(() => {});
+        dene('tarih: arşiv açılınca tablo resimleri yüklenir (kabuk/tablo.js)', await p.evaluate(a => [...document.querySelectorAll(a + ' img[data-tablo]')].every(i => /^data:image\/png/.test(i.src)), ars));
+      }
       await p.click('a.b-ders--sira');
       await p.waitForSelector('article.ders h1');
       dene(alan + ': ilk ders açılır', (await p.textContent('article.ders h1')) === d1.ad);

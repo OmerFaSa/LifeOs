@@ -20,7 +20,11 @@ t('harita ızgarası: boy, devlet ve başkent', () => Object.keys(A.DEVLET).forE
   assert.ok(/[sS]/.test(s) && /[lL]/.test(s), 'deniz ve kara');
   assert.ok(A.DEVLET[k].kaynak && A.DEVLET[k].yil && A.DEVLET[k].zirve, k + ': kaynak, yıl, zirve yazılı');
 }));
-t('harita HTML yaklaşık der', () => assert.ok(/yaklaşık/.test(A.haritaHtml('gokturk')) && /yaklaşık/.test(A.haritalarHtml('gokturk'))));
+t('harita HTML yaklaşık der; başlıksız kipte devlet adı tekrarlanmaz; arşivde bütün haritalar', () => {
+  assert.ok(/yaklaşık/.test(A.haritaHtml('gokturk')) && /yaklaşık/.test(A.haritalarHtml()));
+  assert.ok(/Günün haritası/.test(A.haritaHtml('gokturk')) && !/ata-harita__ust/.test(A.haritaHtml('gokturk', false)) && /data-harita="gokturk"/.test(A.haritaHtml('gokturk', false)));
+  assert.strictEqual((A.haritalarHtml().match(/data-harita=/g) || []).length, Object.keys(A.DEVLET).length);
+});
 t('tarih tabloları: adı, metni, millî gün; resimler kabuk/tablo.js', () => {
   const R = require('./tablo.js');
   Object.keys(A.TABLO).forEach(k => { assert.ok(A.TABLO[k].ad && A.TABLO[k].metin, k); assert.ok(/^data:image\/png;base64,/.test(R[k].buyuk) && /^data:image\/png;base64,/.test(R[k].kucuk), k); });

@@ -276,11 +276,7 @@
     var olc = Math.max(2, Math.round((pencereEn < 640 ? 2 : 3) * dpr)) / dpr;
     return { olc: olc, w: Math.max(120, Math.ceil((en + 24) / olc)), h: Math.max(40, Math.ceil((boy + 12) / olc)) };
   }
-  function sozEk(t) {
-    return '<div class="soz__ek"><details class="soz__acil" data-soz-ek="milli" data-gun="' + kac(gunAnahtar(t)) +
-      '"><summary>Yılın tarihî günleri</summary></details><details class="soz__acil" data-soz-ek="gokturk"><summary>Göktürk yazısı</summary></details></div>';
-  }
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gokturk = gokturk; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz; Kabuk.sahneBoyut = sahneBoyut; Kabuk.sozEk = sozEk;
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gokturk = gokturk; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz; Kabuk.sahneBoyut = sahneBoyut;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -415,39 +411,21 @@
   function yaklasan(t) {
     for (var i = 1; i <= 366; i++) { var g = new Date(t.getFullYear(), t.getMonth(), t.getDate() + i), m = MILLI[gunAnahtar(g)]; if (m) return [i, g, yilDonumu(m, g.getFullYear())]; }
   }
-  // Bugün'de günün sözü: gün sırasıyla döner (aynı gün aynı söz); millî günde üstünde o günün adı. Başında Göktürk harfleriyle «Türük» (sağdan sola).
-  // resmî millî günlerde söz kartının başında al bayrak
-  var RESMI = ['3-12', '3-18', '4-23', '5-19', '5-29', '7-15', '7-24', '8-26', '8-30', '9-9', '10-29', '11-10'];
-  // On altı büyük Türk devleti (Cumhurbaşkanlığı forsundaki on altı yıldız): ad, kuruluş yılı, tanınmış hükümdarı. Her gün biri öne çıkar.
-  var DEVLET = [['Büyük Hun İmparatorluğu', 'MÖ 204', 'Mete Han'], ['Batı Hun İmparatorluğu', '48', ''], ['Avrupa Hun İmparatorluğu', '375', 'Attila'],
-    ['Ak Hun İmparatorluğu', '420', ''], ['Göktürk İmparatorluğu', '552', 'Bumin Kağan, Bilge Kağan'], ['Avar İmparatorluğu', '565', 'Bayan Kağan'],
-    ['Hazar İmparatorluğu', '651', ''], ['Uygur Devleti', '744', 'Kutluk Bilge Kül Kağan'], ['Karahanlı Devleti', '932', 'Satuk Buğra Han'],
-    ['Gazneli Devleti', '962', 'Gazneli Mahmud'], ['Büyük Selçuklu İmparatorluğu', '1040', 'Tuğrul Bey, Alp Arslan'], ['Harzemşahlar Devleti', '1077', 'Celâleddin Harzemşah'],
-    ['Altın Orda Devleti', '1224', 'Batu Han'], ['Büyük Timur İmparatorluğu', '1369', 'Timur'], ['Babür İmparatorluğu', '1526', 'Babür Şah'],
-    ['Osmanlı İmparatorluğu', '1299', 'Osman Gazi, Fatih Sultan Mehmet']];
-  var YILDIZ = '<svg viewBox="0 0 20 20" aria-hidden="true"><polygon points="' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) {
-    var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 3.8 : 9.5; return (10 + r * Math.cos(a)).toFixed(2) + ',' + (10.6 + r * Math.sin(a)).toFixed(2); }).join(' ') + '"/></svg>';
-  // Her sayfanın altında Türk mührü (2026-11-18k, sahip: «koyu Türk milliyetçisi tarzı, yıldızlar gibi simgelerle»): on altı yıldız,
-  // «Ne mutlu Türküm diyene!» ve Göktürk harfleriyle «Türük». Ders ve Başbuğ sohbeti hariç.
-  function turkMuhru() {
-    var y = ''; for (var i = 0; i < 16; i++) y += YILDIZ;
-    return '<footer class="turk-muhur">' + (Kabuk.Ata ? Kabuk.Ata.turkBandi() : '') + '<div class="turk-muhur__yildiz" aria-hidden="true">' + y + '</div>' +
-      '<p class="turk-muhur__soz">Ne mutlu Türküm diyene!</p><p class="turk-muhur__runik" lang="otk" dir="rtl" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</p></footer>';
-  }
-  // portre: Tarih'te bugünün devletinin tanınmış hükümdarının portresi (kabuk/ata.js; varsa)
-  function onAltiYildiz(t, portre) {
-    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5) % 16, d = DEVLET[no], At = portre && Kabuk.Ata;
-    return '<section class="tdev" aria-label="On altı büyük Türk devleti">' + (At && d[2] ? At.portreHtml(At.sozPortresi(d[2]), 'tdev__portre') : '') + '<ol class="tdev__sira">' + DEVLET.map(function (x, i) {
-      return '<li title="' + kac(x[0] + ' · ' + x[1]) + '"' + (i === no ? ' aria-current="true"' : '') + '>' + YILDIZ + '<span class="gizli">' + kac(x[0] + ', ' + x[1]) + '</span></li>';
-    }).join('') + '</ol><p class="tdev__bugun"><span>Bugünün devleti</span> ' + kac(d[0]) + ' <span class="tdev__yil">' + kac(d[1]) + '</span>' +
-      (d[2] ? '<span class="tdev__han">' + kac(d[2]) + '</span>' : '') + '</p></section>';
-  }
+  // On altı büyük Türk devleti (Cumhurbaşkanlığı forsundaki on altı yıldız): ad, kuruluş yılı, tanınmış hükümdarı, haritası (kabuk/ata.js DEVLET; varsa). Her gün biri öne çıkar.
+  var DEVLET = [['Büyük Hun İmparatorluğu', 'MÖ 204', 'Mete Han', 'hun'], ['Batı Hun İmparatorluğu', '48', ''], ['Avrupa Hun İmparatorluğu', '375', 'Attila'],
+    ['Ak Hun İmparatorluğu', '420', ''], ['Göktürk İmparatorluğu', '552', 'Bumin Kağan, Bilge Kağan', 'gokturk'], ['Avar İmparatorluğu', '565', 'Bayan Kağan'],
+    ['Hazar İmparatorluğu', '651', ''], ['Uygur Devleti', '744', 'Kutluk Bilge Kül Kağan', 'uygur'], ['Karahanlı Devleti', '932', 'Satuk Buğra Han', 'karahanli'],
+    ['Gazneli Devleti', '962', 'Gazneli Mahmud'], ['Büyük Selçuklu İmparatorluğu', '1040', 'Tuğrul Bey, Alp Arslan', 'selcuklu'], ['Harzemşahlar Devleti', '1077', 'Celâleddin Harzemşah'],
+    ['Altın Orda Devleti', '1224', 'Batu Han'], ['Büyük Timur İmparatorluğu', '1369', 'Timur', 'timurlu'], ['Babür İmparatorluğu', '1526', 'Babür Şah', 'babur'],
+    ['Osmanlı İmparatorluğu', '1299', 'Osman Gazi, Fatih Sultan Mehmet', 'osmanli']];
+  // Her sayfanın altında tek satır mühür (karargâh 2026-11-19, sahip: «her şey çok karıştı»): yıldız sırası, Göktürk harfleri, simge bandı yok. Ders ve Başbuğ sohbeti hariç.
+  function turkMuhru() { return '<footer class="turk-muhur"><p class="turk-muhur__soz">Ne mutlu Türküm diyene!</p></footer>'; }
   var GT_HARF = [[0x10C00, 'a, e'], [0x10C03, 'ı, i'], [0x10C06, 'o, u'], [0x10C07, 'ö, ü'], [0x10C09, 'b'], [0x10C0B, 'b ince'], [0x10C11, 'd'], [0x10C13, 'd ince'],
     [0x10C0D, 'g, ğ'], [0x10C0F, 'g, ğ ince'], [0x10C34, 'k'], [0x10C1A, 'k ince'], [0x10C38, 'ok, uk'], [0x10C36, 'ık'], [0x10C1E, 'l'], [0x10C20, 'l ince'], [0x10C22, 'm'],
     [0x10C23, 'n'], [0x10C24, 'n ince'], [0x10C2D, 'ng'], [0x10C2F, 'p'], [0x10C32, 'ç'], [0x10C3A, 'r'], [0x10C3C, 'r ince'], [0x10C3D, 's'], [0x10C3E, 's ince'],
     [0x10C41, 'ş'], [0x10C43, 't'], [0x10C45, 't ince'], [0x10C16, 'y'], [0x10C18, 'y ince'], [0x10C14, 'z']];
   // Alan sayfalarında Türk mirası (2026-11-18i, sahip: «YKS ve SPİ alanında da Türklük teması»): Akademik/Öğren'de günün Türk bilgini,
-  // Sağlık'ta ata sporu ve sağlık geleneği, Tarih'te on altı yıldız. Gün sırasıyla döner; yalnız kesin bilgiler.
+  // Sağlık'ta ata sporu ve sağlık geleneği, Tarih'te bugünün devleti ve haritası. Gün sırasıyla döner; yalnız kesin bilgiler.
   var BILGIN = [['Uluğ Bey', '1394–1449', 'Matematik · Astronomi', 'Semerkant\'ta rasathane kurdu; adını taşıyan Zîc\'te binden fazla yıldızın konumu ölçüldü.'],
     ['Ali Kuşçu', 'ö. 1474', 'Matematik · Astronomi', 'Uluğ Bey\'in öğrencisiydi; Fatih döneminde İstanbul\'a gelip medresede matematik ve astronomi okuttu.'],
     ['Kaşgarlı Mahmud', '11. yüzyıl', 'Türkçe · Coğrafya', 'Divanü Lugati\'t-Türk\'ü yazdı; eserdeki dünya haritasında Türk yurtları gösterilir.'],
@@ -481,15 +459,21 @@
       return '<aside class="miras" aria-label="Türk geleneğinden"><p class="miras__etiket">Türk geleneğinden · ' + kac(x[1]) + '</p><p class="miras__ad">' + kac(x[0]) + '</p>' +
         (x[2] ? '<p class="miras__metin">' + kac(x[2]) + '</p>' : '') + '</aside>';
     }
-    // Tarih: on altı yıldız ve günün haritası (kabuk/ata.js; sınırlar yaklaşık)
+    // Tarih: tek kart — bugünün devleti (hükümdar portresi varsa) ve haritası; devletin haritası yoksa günün haritası kendi başlığıyla; millî günde o günün tablosu (kabuk/ata.js; sınırlar yaklaşık)
     if (id === 'tarih') {
-      var At = Kabuk.Ata, hg = At && At.gununHaritasi(t);
-      return '<aside class="miras miras--yildiz">' + onAltiYildiz(t, true) + '</aside>' + (At ? At.haritaHtml(hg) + At.haritalarHtml(hg) : '');
+      var At = Kabuk.Ata, dv = DEVLET[n % DEVLET.length], hk = At && (dv[3] || At.gununHaritasi(t));
+      return '<section class="miras miras--tarih" aria-label="Türk tarihi"><div class="miras__ust">' + (At && dv[2] ? At.portreHtml(At.sozPortresi(dv[2]), 'miras__portre') : '') +
+        '<div><p class="miras__etiket">Bugünün devleti</p><p class="miras__ad">' + kac(dv[0]) + ' <span>' + kac(dv[1] + (dv[2] ? ' · ' + dv[2] : '')) + '</span></p></div></div>' +
+        (At ? At.haritaHtml(hk, hk !== dv[3]) + (At.gununTablosu(t) ? At.tabloHtml(At.gununTablosu(t), 'miras__tablo') : '') : '') + '</section>';
     }
     return '';
   }
-  // Alan sayfasının sonunda: Tarih'te tarih tabloları ve Türk simgeleri (kabuk/ata.js)
-  function mirasSonu(id) { var At = Kabuk.Ata; return id === 'tarih' && At ? At.tablolarHtml() + At.simgelerHtml() : ''; }
+  // Tarih'in sonunda tek açılır «Türk tarihi arşivi»: içi açılınca dolar (arsivIc); tablo resimleri (kabuk/tablo.js) de ancak o zaman yüklenir.
+  // Yol haritası gelmeden (iskelet) çizilmez: derslerin sonunda durur, tek başına görünmesin.
+  function mirasSonu(id) {
+    var f = al();
+    return id === 'tarih' && f && !f.hata ? '<div class="tarih-arsiv">' + B.acilir({ baslik: 'Türk tarihi arşivi', not: 'harita · tablo · simge', veri: { arsiv: gunAnahtar(new Date()) }, govde: '' }) + '</div>' : '';
+  }
   // ağır görsel veri ayrı dosyalarda (açılış yüküne girmez): portre/harita/simge ızgaraları kabuk/ata-veri.js, tablo resimleri kabuk/tablo.js.
   // Sayfada boş çerçeve varsa dosya bir kez yüklenir, gelince bütün belgedeki boş çerçeveler doldurulur (Başbuğ sohbeti dahil).
   var betikIstendi = {};
@@ -499,34 +483,30 @@
     if (d.querySelector('img[data-portre]:not([src]), img[data-harita]:not([src]), img[data-simge]:not([src])') && !At.doldur(d)) betik('ata-veri.js', function () { At.doldur(d); });
     if (d.querySelector('img[data-tablo]:not([src])') && !At.tabloDoldur(d)) betik('tablo.js', function () { At.tabloDoldur(d); });
   }
-  function sozEkIc(tur, gun) {
-    if (tur === 'milli') {
-      var gunler = Object.keys(MILLI).sort(function (a, b) { var x = a.split('-'), y = b.split('-'); return x[0] - y[0] || x[1] - y[1]; });
-      return '<ol class="soz-gun">' + gunler.map(function (k) {
+  function arsivIc(gun) {
+    var At = Kabuk.Ata, no = gunNo(new Date()) % DEVLET.length, bas = function (b) { return '<h3 class="tarih-arsiv__bas">' + b + '</h3>'; };
+    var gunler = Object.keys(MILLI).sort(function (a, b) { var x = a.split('-'), y = b.split('-'); return x[0] - y[0] || x[1] - y[1]; });
+    return '<section>' + bas('On altı büyük Türk devleti') + '<ol class="tarih-arsiv__devlet">' + DEVLET.map(function (x, i) {
+        return '<li' + (i === no ? ' aria-current="true"' : '') + '>' + kac(x[0]) + ' <span>' + kac(x[1] + (x[2] ? ' · ' + x[2] : '')) + '</span></li>'; }).join('') + '</ol></section>' +
+      (At ? At.haritalarHtml() + At.tablolarHtml() + At.simgelerHtml() : '') +
+      '<section>' + bas('Yılın tarihî günleri') + '<ol class="soz-gun">' + gunler.map(function (k) {
         var x = k.split('-');
         return '<li' + (k === gun ? ' aria-current="date"' : '') + '><span class="soz-gun__tarih">' + x[1] + ' ' + AY[x[0] - 1] + '</span>' + kac(MILLI[k]) + '</li>';
-      }).join('') + '</ol>';
-    }
-    if (tur === 'gokturk') {
-      return '<label class="gokturk"><span>Bir şey yaz, Göktürk harfleriyle görün</span>' +
+      }).join('') + '</ol></section>' +
+      '<section>' + bas('Göktürk yazısı') + '<label class="gokturk"><span>Bir şey yaz, Göktürk harfleriyle görün</span>' +
         '<input class="gokturk__gir" type="text" maxlength="60" value="Türk" autocomplete="off" spellcheck="false"></label>' +
         '<p class="gokturk__cik" lang="otk" dir="rtl" aria-live="polite">' + gokturk('Türk') + '</p><p class="gokturk__not">Harf harf, yaklaşık: yazıtlarda bazı ünlüler yazılmaz, sağdan sola okunur.</p>' +
-        '<ul class="gokturk__harf">' + GT_HARF.map(function (h) { return '<li><b lang="otk">' + String.fromCodePoint(h[0]) + '</b>' + h[1] + '</li>'; }).join('') + '</ul>';
-    }
-    return '';
+        '<ul class="gokturk__harf">' + GT_HARF.map(function (h) { return '<li><b lang="otk">' + String.fromCodePoint(h[0]) + '</b>' + h[1] + '</li>'; }).join('') + '</ul></section>';
   }
+  // Bugün'de günün sözü (gün sırasıyla döner): tek sakin blok — sözün sahibinin küçük portresi (varsa), söz, kaynak; bugün ya da yaklaşan millî gün tek satır
   function gununSozu(t) {
-    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
-    return '<figure class="soz' + (RESMI.indexOf(gunAnahtar(t)) >= 0 ? ' soz--bayrak">' + BAYRAK.replace('ust__bayrak', 'soz__bayrak') : '">') + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
-      y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') +
-      (Kabuk.Ata && Kabuk.Ata.gununTablosu(t) ? Kabuk.Ata.tabloHtml(Kabuk.Ata.gununTablosu(t), 'soz__tablo') : '') + // millî günde o günün tablosu
-      (Kabuk.Ata ? Kabuk.Ata.portreHtml(Kabuk.Ata.sozPortresi(s[1]), 'soz__portre') : '') + // sözün sahibinin portresi (varsa)
-      '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
-      '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption>' + sozEk(t) + '</figure>' + onAltiYildiz(t);
+    var s = SOZ[gunNo(t) % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
+    return '<figure class="soz">' + (Kabuk.Ata ? Kabuk.Ata.portreHtml(Kabuk.Ata.sozPortresi(s[1]), 'soz__portre') : '') +
+      '<div class="soz__govde"><blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption>' +
+      (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
+        y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') + '</div></figure>';
   }
   // ad Hesap oturumundan (hitap, yoksa görünen ad); Hesap yüklü değilse ya da oturum yoksa adsız selam
-  // selamın altında adın Göktürk harfleriyle yazılışı (ad yoksa yok)
-  function adRunik() { var a = gokturk(hesapAdi()); return a ? '<p class="selam-runik" lang="otk" dir="rtl" title="Adın Göktürk harfleriyle">' + a + '</p>' : ''; }
   function hesapAdi() {
     try { var o = kok.LIFEOS.HESAP.durum().oturum; return o ? (o.hitap || o.gorunen_ad || '') : ''; } catch (e) { return ''; }
   }
@@ -694,7 +674,7 @@
       // 2026-11-17d (sahip: büyük «sıradaki» kartı Bugün'de olmasın; alanlar ilerleme gibi bir bölümde): iş kartı yok, alanlar «İlerleme»de,
       // çalışılan alan en başta ilerleme çizgisi ve sıradaki adımıyla
       alanlarBaslik: 'İlerleme', alanlar: alanKartlari(f, od, a),
-      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t)).replace('</h1>', '</h1>' + adRunik()) + '<div class="soz-kap">' + gununSozu(t) + '</div>'; // söz İlerleme'nin altında
+      plan: v.plan ? { href: '#/motor/plan', satirlar: v.plan } : null, ekler: ekler }).replace('<div class="b-karsilama__ic">', '<div class="b-karsilama__ic">' + gunYayiHtml(t)) + '<div class="soz-kap">' + gununSozu(t) + '</div>'; // söz İlerleme'nin altında
   }
   // Bugün'ün alan ızgarası: haritadaki taşınmış alanlar; simge index.html'deki #i-<alan>, ilerleme yalnız açık alan için bilinir
   var ALAN_RENK = { felsefe: 'turuncu', akademik: 'mavi', dil: 'yesil', tarih: 'pembe', okuma: 'sari', hareket: 'deniz', muzik: 'mor', beslenme: 'yesil', uyku: 'gok', tahlil: 'pembe',
@@ -1547,10 +1527,10 @@
       else if (e.target.matches('input[data-ayar]')) sayiYaz(e.target);
     });
     d.addEventListener('toggle', function (e) {
-      var el = e.target, tur = el && el.open && el.getAttribute && el.getAttribute('data-soz-ek');
-      if (!tur || el.getAttribute('data-soz-ek-dolu')) return;
-      el.setAttribute('data-soz-ek-dolu', '1');
-      el.insertAdjacentHTML('beforeend', sozEkIc(tur, el.getAttribute('data-gun') || ''));
+      var el = e.target, gun = el && el.open && el.getAttribute && el.getAttribute('data-arsiv');
+      if (gun == null || el.hasAttribute('data-arsiv-dolu')) return;
+      el.setAttribute('data-arsiv-dolu', '');
+      el.querySelector('.b-acilir__govde').innerHTML = arsivIc(gun); ataYukle();
     }, true);
     d.addEventListener('contextmenu', sagTik);
     altEl = $('#alt-cubuk');

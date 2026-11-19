@@ -173,11 +173,12 @@
     for (var i = 0; i < SOZ_PORTRE.length; i++) if (k.indexOf(SOZ_PORTRE[i][0]) >= 0 && PORTRE[SOZ_PORTRE[i][1]]) return SOZ_PORTRE[i][1];
     return null;
   }
-  function haritaHtml(ad) {
+  // ust === false: başlıksız (çevreleyen kart aynı devletin adını zaten yazıyor)
+  function haritaHtml(ad, ust) {
     var d = DEVLET[ad]; if (!d) return '';
     var u = png('h-' + ad, haritaTablo(ad));
-    return '<figure class="ata-harita"><figcaption class="ata-harita__ust"><span class="ata-harita__etiket">Türk devletleri</span>' +
-      '<span class="ata-harita__ad">' + kac(d.ad) + '</span><span class="ata-harita__yil">' + kac(d.yil) + '</span></figcaption>' +
+    return '<figure class="ata-harita">' + (ust === false ? '' : '<figcaption class="ata-harita__ust"><span class="ata-harita__etiket">Günün haritası</span>' +
+      '<span class="ata-harita__ad">' + kac(d.ad) + '</span><span class="ata-harita__yil">' + kac(d.yil) + '</span></figcaption>') +
       '<img class="ata-harita__resim" data-harita="' + ad + '"' + (u ? ' src="' + u + '"' : '') + ' width="' + (HW + CER * 2) + '" height="' + (HH + CER * 2) + '" alt="' + kac(d.ad + ' haritası, ' + d.zirve + '; sınırlar yaklaşık') + '">' +
       '<p class="ata-harita__not">' + kac(d.zirve) + (d.baskent ? ' · <span class="ata-harita__yildiz" aria-hidden="true">✦</span> ' + kac(d.baskent[0]) : '') + '</p>' +
       '<p class="ata-harita__kaynak">Sınırlar yaklaşık, sadeleştirilmiş çizim · Tarihler: ' + kac(d.kaynak) + '</p></figure>';
@@ -197,7 +198,7 @@
       '<figcaption><span class="tablo__ad">' + kac(t.ad) + '</span><span class="tablo__alt">' + kac(t.alt) + '</span><span class="tablo__metin">' + kac(t.metin) + '</span></figcaption></figure>';
   }
   function tablolarHtml() {
-    return '<section class="tablolar" aria-label="Tarih tabloları"><p class="tablolar__etiket">Tarih tabloları</p><div class="tablolar__izgara">' + Object.keys(TABLO).map(function (k) { return tabloHtml(k); }).join('') + '</div></section>';
+    return '<section class="tablolar"><h3 class="tarih-arsiv__bas">Tarih tabloları</h3><div class="tablolar__izgara">' + Object.keys(TABLO).map(function (k) { return tabloHtml(k); }).join('') + '</div></section>';
   }
   // kabuk/tablo.js yüklüyse boş çerçeveleri doldurur (telefonda küçük, masaüstünde büyük resim); yüklü değilse false
   function tabloDoldur(el) {
@@ -207,7 +208,7 @@
     el.querySelectorAll('img[data-tablo]:not([src])').forEach(function (i) { var r = R[i.getAttribute('data-tablo')]; if (r) i.src = kucuk ? r.kucuk : r.buyuk; });
     return true;
   }
-  // millî günün tablosu (ay-gün → tablo)
+  // millî günün tablosu (ay-gün → tablo): o gün Tarih'in «Türk tarihi» kartında
   var TABLO_GUN = { '8-26': 'kocatepe', '8-30': 'kocatepe' };
   function gununTablosu(t) { return TABLO_GUN[(t.getMonth() + 1) + '-' + t.getDate()] || null; }
   // Türk simgeleri (16×16): bant (süs) ve kart (adı ve bir cümle bilgi)
@@ -219,16 +220,16 @@
     return h ? '<div class="turk-bant" aria-hidden="true">' + h + '</div>' : '';
   }
   function simgelerHtml() {
-    return '<section class="simgeler" aria-label="Türk simgeleri"><p class="simgeler__etiket">Türk simgeleri</p><ul class="simgeler__liste">' + Object.keys(SIMGE).map(function (k) {
+    return '<section class="simgeler"><h3 class="tarih-arsiv__bas">Türk simgeleri</h3><ul class="simgeler__liste">' + Object.keys(SIMGE).map(function (k) {
       return '<li>' + simgeHtml(k, 'simgeler__resim') + '<span><b>' + kac(SIMGE[k].ad) + '</b>' + kac(SIMGE[k].bilgi) + '</span></li>'; }).join('') + '</ul></section>';
   }
-  // Bütün haritalar: açılır bölümde küçük tablolar (bugünkü hariç)
-  function haritalarHtml(haric) {
-    return '<details class="ata-haritalar"><summary>Bütün haritalar</summary><ul>' + Object.keys(DEVLET).filter(function (k) { return k !== haric; }).map(function (k) {
+  // Bütün haritalar: Tarih arşivinde küçük tablolar
+  function haritalarHtml() {
+    return '<section class="ata-haritalar"><h3 class="tarih-arsiv__bas">Türk devletleri haritaları</h3><ul>' + Object.keys(DEVLET).map(function (k) {
       var d = DEVLET[k], u = png('h-' + k, haritaTablo(k));
       return '<li><img data-harita="' + k + '"' + (u ? ' src="' + u + '"' : '') + ' width="' + (HW + CER * 2) + '" height="' + (HH + CER * 2) + '" alt="' + kac(d.ad + ' haritası; sınırlar yaklaşık') + '">' +
         '<span><b>' + kac(d.ad) + '</b> ' + kac(d.yil) + '</span><span>' + kac(d.zirve) + '</span></li>'; }).join('') +
-      '</ul><p class="ata-harita__kaynak">Sınırlar yaklaşık, sadeleştirilmiş çizim · Tarihler: TDV İslâm Ansiklopedisi ilgili maddeleri</p></details>';
+      '</ul><p class="ata-harita__kaynak">Sınırlar yaklaşık, sadeleştirilmiş çizim · Tarihler: TDV İslâm Ansiklopedisi ilgili maddeleri</p></section>';
   }
 
   // Başbuğ logosu (2026-11-19, sahip: «bir kurdun etrafında Türk devleti sayısı kadar yıldız»): al mühür, on altı yıldız, bozkurt başı; 32×32
