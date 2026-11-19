@@ -482,7 +482,9 @@ async function goruntu(p, ad, sec = {}) {
     await p.click('.klasor-yeni summary');
     await p.fill('.klasor-yeni input[name=klasorAd]', ' Felsefe ');
     await p.press('.klasor-yeni input[name=klasorAd]', 'Enter');
-    await p.waitForFunction(() => location.hash === '#/motor/not?klasor=Felsefe');
+    // adres değişince ekran bir sonraki olayda çizilir: seçili çip ve boş metin gelene dek beklenir (CI'da yavaş makine kararsızlığı, 2026-11-19)
+    await p.waitForFunction(() => { const c = document.querySelector('.klasor-cip[aria-current="page"]'), l = document.getElementById('not-liste');
+      return location.hash === '#/motor/not?klasor=Felsefe' && c && /Felsefe/.test(c.textContent) && l && /Bu klasörde not yok/.test(l.textContent); }, null, { timeout: 5000 }).catch(() => {});
     dene('klasör: yeni klasör açılır, adreste seçili, boşken öyle der', /Bu klasörde not yok/.test(await p.textContent('#not-liste'))
       && /Felsefe\s*0/.test(await p.textContent('.klasor-cip[aria-current="page"]')));
     await p.fill('.nothizli textarea', 'Klasörde hızlı');
