@@ -388,6 +388,16 @@ def run():
                 self.closed = True
                 cagri.append("close:" + self.ad)
 
+        class _SahteThread:
+            def __init__(self):
+                self.alive = False
+
+            def join(self, timeout=None):
+                cagri.append(("join", timeout))
+
+            def is_alive(self):
+                return self.alive
+
         class _Sahte:
             def __init__(self):
                 self.stdin, self.stdout = _Boru("in"), _Boru("out")
@@ -399,13 +409,12 @@ def run():
                 cagri.append(("wait", timeout))
 
         sahte = _Sahte()
-        ses._EMA.update(p=sahte, q="q", cihaz="cpu")
+        ses._EMA.update(p=sahte, q="q", t=_SahteThread(), cihaz="cpu")
         try:
             ses._ema_kapat()
         finally:
-            ses._EMA.update(p=None, q=None, cihaz=None)
-        ok("kill" in cagri, cagri)
-        ok(any(isinstance(x, tuple) and x[0] == "wait" for x in cagri), cagri)
+            ses._EMA.update(p=None, q=None, t=None, cihaz=None)
+        eq(cagri, ["kill", ("wait", 2), ("join", 1), "close:in", "close:out"], "kapatma sirasi")
         ok(sahte.stdin.closed and sahte.stdout.closed, "borular kapatilir")
 
         d = tempfile.mkdtemp(prefix="hkm-ema-kapat-")
@@ -414,10 +423,38 @@ def run():
             f.write(SAHTE_ISCI)
         try:
             list(ses._ema_akis(sys.executable, betik, "Merhaba", 20))
-            p = ses._EMA["p"]
-            ok(p is not None)
+            p, t = ses._EMA["p"], ses._EMA.get("t")
+            ok(p is not None and t is not None)
             ses._ema_kapat()
             ok(p.poll() is not None and p.stdin.closed and p.stdout.closed, "gercek isci ve borular kapali")
+            no(t.is_alive(), "okuyucu is parcacigi kapandi")
+
+            # Bos ilk parcada akis() kilidi sizdirmaz (piper yedegi sirasinda kilit acik olmali)
+            con = _con()
+            ses._ONBELLEK.clear()
+            cfg = {"ses": {"ema_yol": _ema_dizini(), "piper_yol": _piper_dizini()}}
+            bul = ses.piper_bul(cfg, ara=lambda x: None)
+
+            def ema_bos(py, b, m, z):
+                with ses._EMA_KILIT:
+                    yield b""
+
+            kilit_acik = []
+
+            def piper_kilit_kontrol(e, sd, m, z):
+                ok_kilit = ses._EMA_KILIT.acquire(blocking=False)
+                kilit_acik.append(ok_kilit)
+                if ok_kilit:
+                    ses._EMA_KILIT.release()
+                return RIFF
+
+            r = ses.akis(con, cfg, "Bos parca", "oto", ema_calistir=ema_bos, calistir=piper_kilit_kontrol, bul=bul)
+            eq((r["ok"], r.get("motor"), kilit_acik), (True, "piper", [True]),
+               "bos ilk parca sonrasi yedek motorda kilit serbest olmalidir")
+            alindi = ses._EMA_KILIT.acquire(blocking=False)
+            ok(alindi, "bos ilk parca sonrasi kilit serbest kalir")
+            if alindi:
+                ses._EMA_KILIT.release()
         finally:
             ses._ema_kapat()
 

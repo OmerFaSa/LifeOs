@@ -125,6 +125,15 @@ def _mcp_mod():
         king_dizini = os.path.join(KOD, "king")
         if king_dizini not in sys.path:
             sys.path.insert(0, king_dizini)
+        mevcut = sys.modules.get("mcp")
+        if mevcut is not None:
+            # Yabanci "mcp" modulu sys.modules'te kayitliysa import_module("mcp") onu dondurur; dogrudan yukle.
+            import importlib.util
+            sp = importlib.util.spec_from_file_location("king_mcp", hedef)
+            m = importlib.util.module_from_spec(sp)
+            sp.loader.exec_module(m)
+            _MCP_MOD = m
+            return _MCP_MOD
         _MCP_MOD = importlib.import_module("mcp")
         return _MCP_MOD
 
@@ -187,14 +196,14 @@ def _alan_ozet(d):
 def alan_kaynaklari(konu, terimler, kok=None):
     """alan/**/*.json icindeki metinler; konuya uyan her dosya bir kaynak (uyan alanlar metni olur)."""
     kok = kok or KOD
-    alan_koku = os.path.abspath(os.path.join(kok, "alan")) + os.sep
+    alan_koku = os.path.normcase(os.path.abspath(os.path.join(kok, "alan"))) + os.sep
     dosyalar = sorted(glob.glob(os.path.join(kok, "alan", "**", "*.json"), recursive=True))
     esik = len(terimler) if len(terimler) <= 2 else (len(terimler) + 1) // 2
     aktif, out = set(), []
     for yol in dosyalar:
         if os.path.basename(yol) == "harita.json":
             continue        # konu haritasi yalniz baslik iskeletidir, ders metni degil: kaynak sayilmaz
-        abs_yol = os.path.abspath(yol)
+        abs_yol = os.path.normcase(os.path.abspath(yol))
         aktif.add(abs_yol)
         try:
             st = os.stat(yol)
@@ -217,7 +226,9 @@ def alan_kaynaklari(konu, terimler, kok=None):
             # Kapi sorulari ve cevaplari kaynak olmaz: ustalik kapisi olcumdur (mcp.py yol_haritasi da vermez)
             baslik, taslak, parca, tum_kucuk = _alan_ozet(d)
             with _ONBELLEK_KILIT:
-                _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca, tum_kucuk)
+                mevcut = _ALAN_INDEKS.get(abs_yol)
+                if not mevcut or mevcut[0] <= st.st_mtime_ns:
+                    _ALAN_INDEKS[abs_yol] = (st.st_mtime_ns, st.st_size, baslik, taslak, parca, tum_kucuk)
         eslesen = [t for t in terimler if t in tum_kucuk]
         if len(eslesen) < esik:
             continue

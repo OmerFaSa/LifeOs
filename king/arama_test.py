@@ -203,11 +203,20 @@ class AramaTest(unittest.TestCase):
     def test_mcp_tek_modul(self):
         import mcp
         eski = arama._MCP_MOD
+        eski_sys = sys.modules.get("mcp")
         arama._MCP_MOD = None
         try:
             self.assertIs(arama._mcp_mod(), mcp)
             self.assertNotIn("king_mcp", sys.modules)
+            # Yabanci/sahte sys.modules["mcp"] golgelemesinde yanlis modulu dondurmez
+            arama._MCP_MOD = None
+            sys.modules["mcp"] = type(sys)("sahte_mcp")
+            bulunan = arama._mcp_mod()
+            self.assertTrue(callable(getattr(bulunan, "t_notlar", None)))
+            self.assertIsNot(bulunan, sys.modules["mcp"])
         finally:
+            if eski_sys is not None:
+                sys.modules["mcp"] = eski_sys
             arama._MCP_MOD = eski
 
     def test_alan_on_suzgec_esik(self):
@@ -218,6 +227,7 @@ class AramaTest(unittest.TestCase):
                 "ad": "Dagilmis",
                 "a": "Bu cumlede yalniz alfa ve beta terimleri birlikte geciyor uzun metin.",
                 "b": "Burada da sadece gama ve delta kelimeleri ayri olarak duruyor uzun.",
+                "c": "Burada Türkçe büyük İŞĞÜÖÇ harfleri ayrı parçada duruyor.",
             }, f, ensure_ascii=False)
         d2 = os.path.join(self.kok, "alan", "fiz2")
         os.makedirs(d2, exist_ok=True)
@@ -225,12 +235,26 @@ class AramaTest(unittest.TestCase):
             json.dump({
                 "ad": "Eslesen",
                 "a": "Burada alfa, beta ve gama terimleri ayni metin parcasinda bulunuyor.",
+                "t": "Türkçe büyük İŞĞÜÖÇ ve ÖĞRETİM kavramları aynı cümlede geçiyor.",
             }, f, ensure_ascii=False)
         r = arama.alan_kaynaklari("sorgu", ["alfa", "beta", "gama", "delta", "epsilon"], self.kok)
         self.assertEqual([x["url"] for x in r], ["alan/fiz2/asama-1.json"])
         self.assertIn("alfa, beta ve gama", r[0]["metin"])
+        # Tek, iki, uc, dort terim + tekrarlayan terim + \n siniri + Turkce kucultme
+        self.assertEqual(len(arama.alan_kaynaklari("q1", ["alfa"], self.kok)), 2)
+        self.assertEqual([x["url"] for x in arama.alan_kaynaklari("q2", ["alfa", "gama"], self.kok)], ["alan/fiz2/asama-1.json"])
+        self.assertEqual([x["url"] for x in arama.alan_kaynaklari("q3", ["alfa", "gama", "epsilon"], self.kok)], ["alan/fiz2/asama-1.json"])
+        self.assertEqual([x["url"] for x in arama.alan_kaynaklari("q4", ["alfa", "gama", "theta", "epsilon"], self.kok)], ["alan/fiz2/asama-1.json"])
+        self.assertEqual(len(arama.alan_kaynaklari("qrep", ["alfa", "alfa", "alfa"], self.kok)), 2)
+        self.assertEqual([x["url"] for x in arama.alan_kaynaklari("qtr", ["işğüöç", "öğretim"], self.kok)], ["alan/fiz2/asama-1.json"])
         r_bos = arama.alan_kaynaklari("bos", [], self.kok)
         self.assertEqual(len(r_bos), 3)
+        if os.name == "nt":
+            arama._ALAN_INDEKS.clear()
+            arama.alan_kaynaklari("qwin1", ["alfa"], self.kok.upper())
+            arama.alan_kaynaklari("qwin2", ["alfa"], self.kok.lower())
+            anahtarlar = [k for k in arama._ALAN_INDEKS if os.path.normcase(self.kok) in k]
+            self.assertEqual(len(anahtarlar), 3)
 
 
 if __name__ == "__main__":

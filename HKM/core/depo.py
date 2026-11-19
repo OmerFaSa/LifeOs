@@ -126,11 +126,9 @@ def eslesen(con, anahtar):
     if not r:
         return None
     d = dict(r)
-    for alan, bos in (("govde", {}), ("denetim", None)):
-        try:
-            d[alan] = json.loads(d[alan]) if d.get(alan) else bos
-        except ValueError:
-            d[alan] = bos
+    d["govde"] = _json(d.get("govde"), {})
+    denetim = _json(d.get("denetim"), None)
+    d["denetim"] = denetim if isinstance(denetim, dict) else None
     return d
 
 
@@ -201,15 +199,12 @@ def taze_mi(con, kayit_id, now=None, en_cok_gun=None):
         if yas_saat is not None and yas_saat // 24 > en_cok_gun:
             return False, ("Kayıt %d gün önce yazıldı; bu tür veri %d günde eskir."
                            % (yas_saat // 24, en_cok_gun))
-    try:
-        g = json.loads(r["govde"] or "{}")
-    except ValueError:
-        g = {}
-    ar_id = r["id"] if r["tur"] == "arastirma" else g.get("dayanak")
+    g = _json(r["govde"], {})
+    ar_id = r["id"] if r["tur"] == "arastirma" else _dayanak_id(g.get("dayanak"))
     if not ar_id:
         return True, "Kayıt araştırmaya dayanmıyor; güncellik sorusu yok."
     ar = con.execute("SELECT id, anahtar, created_at, denetim FROM bam_kayitlar WHERE id=?",
-                     (int(ar_id),)).fetchone()
+                     (ar_id,)).fetchone()
     if not ar:
         return False, "Dayandığı araştırma kaydı yok."
     if ar["anahtar"]:
@@ -220,10 +215,7 @@ def taze_mi(con, kayit_id, now=None, en_cok_gun=None):
     yas = _saat(ar["created_at"], _simdi(now))
     if yas is not None and yas < YENI_SAYILIR_SAAT:
         return True, "Araştırma %d saat önce yazıldı." % yas
-    try:
-        d = json.loads(ar["denetim"] or "null") or {}
-    except ValueError:
-        d = {}
+    d = _json(ar["denetim"], {})
     dy = _saat(d.get("at"), _simdi(now))
     if d.get("durum") == "guncel" and dy is not None and dy < DENETIM_GECERLI_SAAT:
         return True, "Kaynakları %s tarihinde açıldı; güncel." % d["at"][:16]
@@ -378,6 +370,15 @@ def _json(x, bos):
     return v
 
 
+def _dayanak_id(v):
+    if isinstance(v, bool) or not isinstance(v, (int, str)):
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def _gun(a, b):
     s = _saat(a, b)
     return None if s is None else int(s // 24)
@@ -402,11 +403,7 @@ def _tazelik(r, son, arastirma, at, govde=None):
                 "metin": "Yeni sürümü var (#%d); bu kayıt geçmiş için duruyor." % son[r["anahtar"]]}
     if r["tur"] != "arastirma":
         g = govde if isinstance(govde, dict) else _json(r["govde"], {})
-        dayanak = g.get("dayanak")
-        try:
-            did = int(dayanak) if dayanak is not None and not isinstance(dayanak, bool) else None
-        except (TypeError, ValueError):
-            did = None
+        did = _dayanak_id(g.get("dayanak"))
         if not did or did not in arastirma:
             yas = _gun(r["created_at"], at)
             sinir = ESKI_GUN.get(r["tur"], 365)
@@ -480,7 +477,8 @@ def tarayici(con, sorgu="", tur=None, durum=None, limit=50, now=None):
             out.append({"id": r["id"], "tur": r["tur"], "baslik": r["baslik"],
                         "dogruluk": r["dogruluk"], "surum": r["surum"],
                         "tarih": str(r["created_at"])[:10], "yas_gun": _gun(r["created_at"], at),
-                        "kaynak": len(kaynaklar) if isinstance(kaynaklar, list) else 0, "tazelik": t})
+                        "kaynak": sum(1 for k in kaynaklar if isinstance(k, dict)) if isinstance(kaynaklar, list) else 0,
+                        "tazelik": t})
     return {"kayitlar": out, "toplam": toplam,
             "sayim": sayim, "at": at, "etiket": "olculdu", "adlar": TAZELIK_AD,
             "kural": "Tazelik kaynakların canlı açılmasıyla ölçülür; ölçülmemiş kayıt «güncel» "

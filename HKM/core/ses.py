@@ -354,7 +354,7 @@ EMA_HZ = 24000
 EMA_ZAMAN = 90                      # ilk istekte PyTorch ve model yuklenir
 EMA_BOS = 600
 _EMA = {"p": None, "q": None, "t": None, "py": None, "son": 0.0, "cihaz": None, "acilis_sn": None}
-_EMA_KILIT = threading.Lock()
+_EMA_KILIT = threading.RLock()
 
 
 def _ema_adaylar(cfg):
@@ -390,6 +390,7 @@ def ema_bul(cfg):
         paket = bool(glob.glob(os.path.join(v, "Lib", "site-packages", "ema_lightning"))
                      + glob.glob(os.path.join(v, "lib", "python3*", "site-packages", "ema_lightning")))
     betik = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "ema_isci.py")
+    cihaz = _EMA["cihaz"]
     if not py:
         metin = ("EMA bulunamadı. github.com/canberk7/ema-lightning paketini bir sanal ortama "
                  "(venv) kur: %s (ya da yolunu buraya yaz)." % os.path.join(aranan[-4], "venv"))
@@ -398,7 +399,7 @@ def ema_bul(cfg):
     elif not os.path.isfile(betik):
         metin = "EMA işçisi (tools/ema_isci.py) yok."
     else:
-        metin = "EMA hazır" + (" (%s)" % _EMA["cihaz"].upper() if _EMA["cihaz"] else "") + "."
+        metin = "EMA hazır" + (" (%s)" % cihaz.upper() if cihaz else "") + "."
     return {"bulundu": bool(py and paket and os.path.isfile(betik)), "python": py, "betik": betik,
             "aranan": aranan, "metin": metin, "calisiyor": _ema_canli()}
 
@@ -409,8 +410,9 @@ def _ema_canli():
 
 
 def _ema_kapat():
-    p, t = _EMA["p"], _EMA.get("t")
-    _EMA.update(p=None, q=None, t=None, cihaz=None)
+    with _EMA_KILIT:
+        p, t = _EMA["p"], _EMA.get("t")
+        _EMA.update(p=None, q=None, t=None, cihaz=None)
     if p is not None:
         try:
             p.kill()
@@ -422,12 +424,18 @@ def _ema_kapat():
             pass
         if t is not None and t is not threading.current_thread():
             t.join(timeout=1)
-        for boru in (getattr(p, "stdin", None), getattr(p, "stdout", None)):
-            if boru is not None:
-                try:
-                    boru.close()
-                except (OSError, ValueError):
-                    pass
+        stdin = getattr(p, "stdin", None)
+        if stdin is not None:
+            try:
+                stdin.close()
+            except (OSError, ValueError):
+                pass
+        stdout = getattr(p, "stdout", None)
+        if stdout is not None and (t is None or not t.is_alive()):
+            try:
+                stdout.close()
+            except (OSError, ValueError):
+                pass
 
 
 atexit.register(_ema_kapat)
@@ -451,13 +459,14 @@ def _ema_satir(q, timeout):
             continue                            # protokol disi satir
 
 
-def _ema_nobet():
+def _ema_nobet(hedef_p=None):
     """Bos kalan isciyi kapatir (kural 9)."""
-    while _ema_canli():
+    while _EMA["p"] is not None and (hedef_p is None or _EMA["p"] is hedef_p) and _EMA["p"].poll() is None:
         time.sleep(30)
         with _EMA_KILIT:
-            if _ema_canli() and time.monotonic() - _EMA["son"] > EMA_BOS:
+            if _ema_canli() and (hedef_p is None or _EMA["p"] is hedef_p) and time.monotonic() - _EMA["son"] > EMA_BOS:
                 _ema_kapat()
+                return
 
 
 def _ema_baslat(py, betik, timeout):
@@ -483,7 +492,7 @@ def _ema_baslat(py, betik, timeout):
         _ema_kapat()
         raise RuntimeError(ilk.get("hata") or "EMA açılmadı")
     _EMA.update(cihaz=ilk.get("cihaz"), acilis_sn=ilk.get("sn"))
-    threading.Thread(target=_ema_nobet, daemon=True).start()
+    threading.Thread(target=_ema_nobet, args=(p,), daemon=True).start()
 
 
 def _ema_akis(py, betik, metin, timeout):
@@ -745,6 +754,8 @@ def akis(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
             notlar.append("EMA sesi üretemedi (%s)." % type(e).__name__)
             continue
         if not ilk:
+            if hasattr(g, "close"):
+                g.close()
             notlar.append("EMA ses döndürmedi.")
             continue
         return {"ok": True, "motor": "ema", "hz": EMA_HZ, "parcalar": _biriktir(anahtar, ilk, g), "notlar": notlar}

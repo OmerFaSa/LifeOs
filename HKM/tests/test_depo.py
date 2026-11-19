@@ -410,11 +410,17 @@ def run():
     def t_bozuk_json_koruma():
         con = db.connect(":memory:")
         satirlar = [
-            ("arastirma", "Liste govde", "[]", "dogrulanmadi", "2026-01-01T10:00:00", None, "[1]"),
+            ("arastirma", "Liste govde", "[]", "dogrulanmadi", "2026-01-01T10:00:00", "ak1", "[1]"),
             ("materyal", "Sayi govde", "123", "dogrulanmadi", AN, None, None),
             ("plan", "Null govde", "null", "dogrulanmadi", "2025-01-01T10:00:00", None, None),
             ("materyal", "Bozuk dayanak", '{"dayanak":"bozuk","kaynaklar":5}', "dogrulanmadi", AN, None, None),
-            ("materyal", "Bool dayanak", '{"dayanak":true,"kaynaklar":null}', "dogrulanmadi", AN, None, None),
+            ("materyal", "Bool dayanak", '{"dayanak":true,"kaynaklar":[123,"x",null]}', "dogrulanmadi", AN, None, None),
+            ("materyal", "Float dayanak", '{"dayanak":1.9,"kaynaklar":[]}', "dogrulanmadi", AN, None, None),
+            ("materyal", "Inf dayanak", '{"dayanak":Infinity}', "dogrulanmadi", AN, None, None),
+            ("materyal", "List dayanak", '{"dayanak":[1]}', "dogrulanmadi", AN, None, None),
+            ("materyal", "Zero dayanak", '{"dayanak":"0"}', "dogrulanmadi", AN, None, None),
+            ("plan", "Bozuk JSON", "{bozuk", "dogrulanmadi", AN, None, None),
+            ("plan", "Dizgi govde", '"x"', "dogrulanmadi", AN, None, None),
         ]
         idler = []
         for s in satirlar:
@@ -423,11 +429,19 @@ def run():
                 "VALUES (?,?,?,?,?,?,?)", s)
             idler.append(cur.lastrowid)
         t = depo.tarayici(con, now=AN)
-        eq(t["toplam"], 5)
+        eq(t["toplam"], len(satirlar))
         ok(all(x["kaynak"] == 0 for x in t["kayitlar"]))
+        # Float dayanak #1 numarali arastirmaya yanlislikla baglanmamali
+        f_kayit = next(x for x in t["kayitlar"] if x["id"] == idler[5])
+        eq(f_kayit["tazelik"]["durum"], "soru_yok")
+        t_sinirli = depo.tarayici(con, limit=2, now=AN)
+        eq((len(t_sinirli["kayitlar"]), t_sinirli["toplam"], sum(t_sinirli["sayim"]["tur"].values())),
+           (2, len(satirlar), len(satirlar)))
         for kid in idler:
             d = depo.kayit_depo(con, kid, now=AN)
             eq(d["kaynaklar"], [])
+        ok(depo.eslesen(con, "ak1") is not None)
+        ok(isinstance(depo.taze_mi(con, idler[5], now=AN), tuple))
         ic, yap = aktif.icerik(con, AN[:10], datetime.datetime.fromisoformat(AN))
         ok(isinstance(ic, list) and isinstance(yap, list))
         con.execute(
