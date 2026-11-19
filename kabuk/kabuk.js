@@ -490,11 +490,14 @@
   }
   // Alan sayfasının sonunda: Tarih'te tarih tabloları ve Türk simgeleri (kabuk/ata.js)
   function mirasSonu(id) { var At = Kabuk.Ata; return id === 'tarih' && At ? At.tablolarHtml() + At.simgelerHtml() : ''; }
-  // tablo resimleri ayrı dosyada (kabuk/tablo.js): sayfada boş tablo çerçevesi varsa bir kez yüklenir, gelince doldurulur
-  var tabloIstendi = false;
-  function tabloYukle() {
-    var At = Kabuk.Ata; if (!At || !sayfaEl.querySelector('img[data-tablo]') || At.tabloDoldur(sayfaEl) || tabloIstendi) return;
-    tabloIstendi = true; var b = d.createElement('script'); b.src = 'tablo.js'; b.onload = function () { At.tabloDoldur(sayfaEl); }; d.head.appendChild(b);
+  // ağır görsel veri ayrı dosyalarda (açılış yüküne girmez): portre/harita/simge ızgaraları kabuk/ata-veri.js, tablo resimleri kabuk/tablo.js.
+  // Sayfada boş çerçeve varsa dosya bir kez yüklenir, gelince bütün belgedeki boş çerçeveler doldurulur (Başbuğ sohbeti dahil).
+  var betikIstendi = {};
+  function betik(ad, sonra) { if (betikIstendi[ad]) return; betikIstendi[ad] = 1; var b = d.createElement('script'); b.src = ad; b.onload = sonra; d.head.appendChild(b); }
+  function ataYukle() {
+    var At = Kabuk.Ata; if (!At) return;
+    if (d.querySelector('img[data-portre]:not([src]), img[data-harita]:not([src]), img[data-simge]:not([src])') && !At.doldur(d)) betik('ata-veri.js', function () { At.doldur(d); });
+    if (d.querySelector('img[data-tablo]:not([src])') && !At.tabloDoldur(d)) betik('tablo.js', function () { At.tabloDoldur(d); });
   }
   function sozEkIc(tur, gun) {
     if (tur === 'milli') {
@@ -1247,7 +1250,7 @@
       if (KAPAK[yer.id]) sayfaEl.setAttribute('data-ton', KAPAK[yer.id][1]); else sayfaEl.removeAttribute('data-ton');
       d.title = yer.ad === 'Başbuğ' ? 'Başbuğ' : yer.ad + ' · Başbuğ';
       altCubukYaz(yer);
-      kapakPay(); manzara(); tabloYukle();
+      kapakPay(); manzara(); ataYukle();
       // 2026-11-18 (sahip: «geçiş animasyonunu kaldır, direkt yüklensin»): yeni sayfa süzülmeden, doğrudan çizilir. Aynı sayfanın yeniden çizimi (veri geldi, hesap yüklendi, tıklandı) süzülmeyi baştan oynatmaz:
       // yeni öğelerin hareketleri kaldığı ana sarılır (innerHTML öğeleri yeniler, CSS hareketi sıfırdan başlardı: «animasyon tekrarlıyor»).
       if (!yeniSayfa && !yukleniyordu && gecen != null) surdur(gecen);

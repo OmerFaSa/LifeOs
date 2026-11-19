@@ -1,11 +1,11 @@
 // kabuk/ata.js: portre ızgaraları paletli ve 32×32, tablo çerçeveyle 40×40; harita ızgarası sabit boyda, devlet karada, başkent yıldızı devletin içinde;
 // söz kaynağından portre; afiş teması kökte koyu + data-afis (ayar.js).
 const assert = require('assert');
-const A = require('./ata.js'), Ayar = require('./ayar.js');
+const Veri = require('./ata-veri.js'), A = require('./ata.js'), Ayar = require('./ayar.js');
 let n = 0; const t = (ad, f) => { f(); n++; console.log('✓ ' + ad); };
 
-t('portreler paletli ve 32×32', () => Object.keys(A.PORTRE).forEach(k => {
-  const p = A.PORTRE[k];
+t('portreler paletli ve 32×32; her adın ızgarası var', () => Object.keys(A.PORTRE).forEach(k => {
+  const p = Veri.PORTRE[k]; assert.ok(p && A.PORTRE[k].ad, k);
   assert.strictEqual(p.s.length, 32, k); p.s.forEach(r => assert.strictEqual(r.length, 32, k));
   p.s.join('').split('').forEach(c => assert.ok(c === '.' || p.p[c], k + ': paletsiz ' + c));
 }));
@@ -28,7 +28,7 @@ t('tarih tabloları: adı, metni, millî gün; resimler kabuk/tablo.js', () => {
   assert.ok(/data-tablo="kocatepe"/.test(A.tablolarHtml()));
 });
 t('simgeler: 16×16, paletli, adı ve bilgisi var', () => Object.keys(A.SIMGE).forEach(k => {
-  const x = A.SIMGE[k]; assert.strictEqual(x.s.length, 16); x.s.forEach(r => assert.strictEqual(r.length, 16)); assert.ok(x.ad && x.bilgi, k);
+  const x = Veri.SIMGE[k]; assert.strictEqual(x.s.length, 16); x.s.forEach(r => assert.strictEqual(r.length, 16)); assert.ok(A.SIMGE[k].ad && A.SIMGE[k].bilgi, k);
   x.s.join('').split('').forEach(c => assert.ok(c === '.' || x.p[c], k + ': paletsiz ' + c));
 }));
 t('logo: 32×32, on altı yıldız (on altı büyük Türk devleti)', () => {
