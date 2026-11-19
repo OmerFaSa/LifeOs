@@ -1302,3 +1302,33 @@ a.asama-kart:hover{ box-shadow:var(--golge-yumusak); }
 :root[data-afis] .turk-muhur > .turk-bant{ display:flex; }
 /* sistem teması (Açık, Koyu, Cihaza uy): sade ve ciddi Türk kimliği — resmî yazı kâğıdı gibi tepede ince al çizgi; süs yok */
 :root:not([data-afis]) body::before{ content:""; position:fixed; z-index:50; inset:0 0 auto; height:2px; pointer-events:none; background:#c8102e; }
+
+/* Sade sistem teması (2026-11-19, sahip: «sade ve minimalist ciddi bir tema büründür sistemi, Türklük içinde»): Cihaza uy, Açık, Koyu.
+   Kâğıt beyazı ya da kömür zemin, siyah/kemik yazı, tek vurgu al; gölge ve ışıma yok denecek kadar az, sahne gravür gibi gri.
+   Türklük süs değil kimlik: bayrak, bozkurt logosu, tepede ince al çizgi, on altı yıldız, Göktürk harfleri. Eski renkli görünüm: Klasik. Yazı AA ≥ 4,8. */
+:root[data-sade]{
+  --bg:#f6f4ef; --yuzey:#ffffff; --yuzey-2:#efece5; --yuzey-ust:#f1eee8; --cizgi:#e3dfd6; --cizgi-guclu:#c9c3b6;
+  --yazi:#141414; --yazi-2:#33312d; --soluk:#5c5a55; --ana:#b3121f; --ana-yazi:#ffffff; --altin:#7a5f18; --murekkep:#141414;
+  --dugme-ana:#141414; --dugme-ana-yazi:#ffffff; --isik-oran:0%;
+  --golge-yumusak:0 1px 2px rgb(0 0 0 / .06); --golge-orta:0 1px 3px rgb(0 0 0 / .08), 0 8px 18px -10px rgb(0 0 0 / .14);
+  --golge-buyuk:0 2px 6px rgb(0 0 0 / .08), 0 18px 40px -18px rgb(0 0 0 / .22); --kose:10px; --kose-k:6px;
+}
+@media (prefers-color-scheme: dark){ :root[data-sade]:not([data-theme="light"]){
+  --bg:#0e0e0f; --yuzey:#161617; --yuzey-2:#1d1d1f; --yuzey-ust:#1f1f21; --cizgi:#2a2a2d; --cizgi-guclu:#3c3c40;
+  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#9d9a93; --ana:#ef5a4f; --ana-yazi:#0e0e0f; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111111;
+  --golge-yumusak:0 1px 2px rgb(0 0 0 / .5); --golge-orta:0 2px 6px rgb(0 0 0 / .5); --golge-buyuk:0 8px 28px -10px rgb(0 0 0 / .7);
+} }
+:root[data-sade][data-theme="dark"]{
+  --bg:#0e0e0f; --yuzey:#161617; --yuzey-2:#1d1d1f; --yuzey-ust:#1f1f21; --cizgi:#2a2a2d; --cizgi-guclu:#3c3c40;
+  --yazi:#f1efe9; --yazi-2:#d6d3cc; --soluk:#9d9a93; --ana:#ef5a4f; --ana-yazi:#0e0e0f; --altin:#cdb06a; --dugme-ana:#f1efe9; --dugme-ana-yazi:#111111;
+  --golge-yumusak:0 1px 2px rgb(0 0 0 / .5); --golge-orta:0 2px 6px rgb(0 0 0 / .5); --golge-buyuk:0 8px 28px -10px rgb(0 0 0 / .7);
+}
+:root[data-sade] body{ background:var(--bg); }
+:root[data-sade] [data-ton]{ --alan-ton:var(--ana); }
+:root[data-sade] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) contrast(1.04); }
+@media (prefers-color-scheme: dark){ :root[data-sade]:not([data-theme="light"]) :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) brightness(.78); } }
+:root[data-sade][data-theme="dark"] :is(.kapak__sahne, .b-karsilama__manzara){ filter:grayscale(1) brightness(.78); }
+:root[data-sade] .soz{ background:var(--yuzey); }
+:root[data-sade] .soz__metin{ font-style:normal; }
+:root[data-sade] .b-baslik h1, :root[data-sade] .b-baslik__metin h1{ padding-bottom:.14em; background:linear-gradient(var(--ana), var(--ana)) left bottom/1.4em 2px no-repeat; }
+:root[data-sade] .turk-muhur__yildiz{ color:var(--soluk); }

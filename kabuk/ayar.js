@@ -20,8 +20,8 @@
 
   var SEMA = [
     { anahtar: 'lifeos.tema.secim', ad: 'Tema', tur: 'secim', varsayilan: 'system', grup: 'gorunum', kok: 'data-theme', esitlenir: true,
-      secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu', otag: 'Kızıl Otağ', ordu: 'Ordu', boru: 'Gök Börü', ergenekon: 'Ergenekon', akinci: 'Akıncı', seferberlik: 'Seferberlik' },
-      aciklama: 'Açık ya da koyu renkler. Afiş temaları: Kızıl Otağ (siyah, al, altın), Ordu (haki, al), Gök Börü (gece laciverti, gök), Ergenekon (kömür, demir kızılı), Akıncı (çelik, al), Seferberlik (1914 afiş kâğıdı, açık).', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
+      secenekler: { system: 'Cihaza uy', light: 'Açık', dark: 'Koyu', klasik: 'Klasik', otag: 'Kızıl Otağ', ordu: 'Ordu', boru: 'Gök Börü', ergenekon: 'Ergenekon', akinci: 'Akıncı', seferberlik: 'Seferberlik' },
+      aciklama: 'Cihaza uy, Açık ve Koyu sade ve ciddi temadır. Klasik eski renkli piksel görünüm. Afiş temaları: Kızıl Otağ, Ordu, Gök Börü, Ergenekon, Akıncı (koyu) ve Seferberlik (açık).', kaynak: ENV + ' §3c Tema, yazı: tema.secim' },
     { anahtar: 'lifeos.tema.oto', ad: 'Saate göre tema', tur: 'secim', varsayilan: 'kapali', grup: 'gorunum', esitlenir: true,
       secenekler: { kapali: 'Kapalı', acik: 'Açık' }, aciklama: 'Akşam koyu, sabah açık tema.', kaynak: ENV + ' §3c Tema, yazı: tema.oto' },
     { anahtar: 'lifeos.yazi', ad: 'Yazı tipi', tur: 'secim', varsayilan: 'sistem', grup: 'gorunum', kok: 'data-yazi', esitlenir: true,
@@ -140,9 +140,13 @@
       o[t.kok] = (t.kok === 'data-theme' && v === 'system') ? null : v;
     });
     // afiş temaları (2026-11-19, sahip: «koyu, askerî, afiş estetiğinde»): koyu temanın üstüne kendi jetonları
-    var af = AFIS[o['data-theme']];
-    o['data-afis'] = af ? o['data-theme'] : null;
+    // sade sistem teması (2026-11-19, sahip: «sade ve minimalist ciddi bir tema büründür sistemi, Türklük içinde»): Cihaza uy, Açık, Koyu;
+    // Klasik eski renkli görünüm (cihaza uyar), afiş temaları kendi jetonlarıyla
+    var v = o['data-theme'], af = AFIS[v];
+    o['data-afis'] = af ? v : null;
+    o['data-sade'] = af || v === 'klasik' ? null : 'evet';
     if (af) o['data-theme'] = af;
+    if (v === 'klasik') o['data-theme'] = null;
     return o;
   }
   // afiş teması → altındaki açık/koyu taban (o tabanın bütün kuralları geçerli kalır)

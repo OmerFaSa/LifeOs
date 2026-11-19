@@ -49,6 +49,10 @@ t('afiş teması: kök koyu + data-afis; düz temada data-afis yok', () => {
   o = Ayar.kokNitelikleri(depo('ordu')); assert.strictEqual(o['data-afis'], 'ordu');
   o = Ayar.kokNitelikleri(depo('seferberlik')); assert.strictEqual(o['data-theme'], 'light'); assert.strictEqual(o['data-afis'], 'seferberlik');
   ['boru', 'ergenekon', 'akinci'].forEach(v => assert.strictEqual(Ayar.kokNitelikleri(depo(v))['data-theme'], 'dark', v));
+  // sade sistem teması: Cihaza uy, Açık, Koyu sade; Klasik cihaza uyar ve sade değil; afiş temaları sade değil
+  [null, 'system', 'light', 'dark'].forEach(v => assert.strictEqual(Ayar.kokNitelikleri(depo(v))['data-sade'], 'evet', String(v)));
+  o = Ayar.kokNitelikleri(depo('klasik')); assert.strictEqual(o['data-sade'], null); assert.strictEqual(o['data-theme'], null); assert.strictEqual(o['data-afis'], null);
+  assert.strictEqual(Ayar.kokNitelikleri(depo('otag'))['data-sade'], null);
   o = Ayar.kokNitelikleri(depo('light')); assert.strictEqual(o['data-theme'], 'light'); assert.strictEqual(o['data-afis'], null);
   o = Ayar.kokNitelikleri(depo(null)); assert.strictEqual(o['data-theme'], null); assert.strictEqual(o['data-afis'], null);
 });
