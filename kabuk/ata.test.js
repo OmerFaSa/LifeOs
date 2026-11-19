@@ -20,7 +20,23 @@ t('harita ızgarası: boy, devlet ve başkent', () => Object.keys(A.DEVLET).forE
   assert.ok(/[sS]/.test(s) && /[lL]/.test(s), 'deniz ve kara');
   assert.ok(A.DEVLET[k].kaynak && A.DEVLET[k].yil && A.DEVLET[k].zirve, k + ': kaynak, yıl, zirve yazılı');
 }));
-t('harita HTML yaklaşık der', () => assert.ok(/yaklaşık/.test(A.haritaHtml('gokturk'))));
+t('harita HTML yaklaşık der', () => assert.ok(/yaklaşık/.test(A.haritaHtml('gokturk')) && /yaklaşık/.test(A.haritalarHtml('gokturk'))));
+t('tarih tabloları: adı, metni, millî gün; resimler kabuk/tablo.js', () => {
+  const R = require('./tablo.js');
+  Object.keys(A.TABLO).forEach(k => { assert.ok(A.TABLO[k].ad && A.TABLO[k].metin, k); assert.ok(/^data:image\/png;base64,/.test(R[k].buyuk) && /^data:image\/png;base64,/.test(R[k].kucuk), k); });
+  assert.strictEqual(A.gununTablosu(new Date(2026, 7, 26)), 'kocatepe'); assert.strictEqual(A.gununTablosu(new Date(2026, 3, 1)), null);
+  assert.ok(/data-tablo="kocatepe"/.test(A.tablolarHtml()));
+});
+t('simgeler: 16×16, paletli, adı ve bilgisi var', () => Object.keys(A.SIMGE).forEach(k => {
+  const x = A.SIMGE[k]; assert.strictEqual(x.s.length, 16); x.s.forEach(r => assert.strictEqual(r.length, 16)); assert.ok(x.ad && x.bilgi, k);
+  x.s.join('').split('').forEach(c => assert.ok(c === '.' || x.p[c], k + ': paletsiz ' + c));
+}));
+t('logo: 32×32, on altı yıldız (on altı büyük Türk devleti)', () => {
+  const s = A.LOGO.s; assert.strictEqual(s.length, 32); s.forEach(r => assert.strictEqual(r.length, 32));
+  let n = 0; for (let y = 1; y < 31; y++) for (let x = 1; x < 31; x++) if (s[y][x] === 'w' && [s[y - 1][x], s[y + 1][x], s[y][x - 1], s[y][x + 1]].every(c => c === 'y')) n++;
+  assert.strictEqual(n, 16); assert.strictEqual(A.logoTablo().w, 32);
+});
+t('Divan hükümdarlarının portresi var', () => ['mete', 'attila', 'bilge', 'alparslan', 'fatih', 'osman', 'yavuz', 'kanuni', 'babur', 'timur', 'enver'].forEach(k => assert.ok(A.PORTRE[k], k)));
 t('söz kaynağından portre', () => {
   assert.strictEqual(A.sozPortresi('Atatürk, Gençliğe Hitabe, 1927'), 'ataturk');
   assert.strictEqual(A.sozPortresi('Mustafa Kemal, Çanakkale, 1915'), 'ataturk');
@@ -31,6 +47,8 @@ t('afiş teması: kök koyu + data-afis; düz temada data-afis yok', () => {
   const depo = v => ({ getItem: k => (k === 'lifeos.tema.secim' ? v : null), setItem() {}, removeItem() {} });
   let o = Ayar.kokNitelikleri(depo('otag')); assert.strictEqual(o['data-theme'], 'dark'); assert.strictEqual(o['data-afis'], 'otag');
   o = Ayar.kokNitelikleri(depo('ordu')); assert.strictEqual(o['data-afis'], 'ordu');
+  o = Ayar.kokNitelikleri(depo('seferberlik')); assert.strictEqual(o['data-theme'], 'light'); assert.strictEqual(o['data-afis'], 'seferberlik');
+  ['boru', 'ergenekon', 'akinci'].forEach(v => assert.strictEqual(Ayar.kokNitelikleri(depo(v))['data-theme'], 'dark', v));
   o = Ayar.kokNitelikleri(depo('light')); assert.strictEqual(o['data-theme'], 'light'); assert.strictEqual(o['data-afis'], null);
   o = Ayar.kokNitelikleri(depo(null)); assert.strictEqual(o['data-theme'], null); assert.strictEqual(o['data-afis'], null);
 });

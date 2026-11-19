@@ -351,6 +351,8 @@
   var depo = Kabuk.Depo, hazir = depo.ac(yerel), B = Kabuk.Bilesen; // B: ekranlar yalnız bileşen kataloğundan (kabuk/bilesen.js) kurulur
   var $ = function (s, k) { return (k || d).querySelector(s); };
 
+  // sekme simgesi Başbuğ logosundan (kabuk/ata.js; brand/life/favicon.png ilk anın yedeği)
+  (function () { var fi = d.querySelector('link[rel="icon"]'), u = fi && Kabuk.Ata && Kabuk.Ata.logoPng(6); if (u) fi.href = u; })();
   function uygula() {
     var n = A.kokNitelikleri(depo);
     if (A.oku(depo, 'lifeos.tema.oto') === 'acik' && !n['data-afis']) { var s = new Date().getHours(); n['data-theme'] = (s >= 19 || s < 7) ? 'dark' : 'light'; }
@@ -429,12 +431,13 @@
   // «Ne mutlu Türküm diyene!» ve Göktürk harfleriyle «Türük». Ders ve Başbuğ sohbeti hariç.
   function turkMuhru() {
     var y = ''; for (var i = 0; i < 16; i++) y += YILDIZ;
-    return '<footer class="turk-muhur"><div class="turk-muhur__yildiz" aria-hidden="true">' + y + '</div>' +
+    return '<footer class="turk-muhur">' + (Kabuk.Ata ? Kabuk.Ata.turkBandi() : '') + '<div class="turk-muhur__yildiz" aria-hidden="true">' + y + '</div>' +
       '<p class="turk-muhur__soz">Ne mutlu Türküm diyene!</p><p class="turk-muhur__runik" lang="otk" dir="rtl" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</p></footer>';
   }
-  function onAltiYildiz(t) {
-    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5) % 16, d = DEVLET[no];
-    return '<section class="tdev" aria-label="On altı büyük Türk devleti"><ol class="tdev__sira">' + DEVLET.map(function (x, i) {
+  // portre: Tarih'te bugünün devletinin tanınmış hükümdarının portresi (kabuk/ata.js; varsa)
+  function onAltiYildiz(t, portre) {
+    var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5) % 16, d = DEVLET[no], At = portre && Kabuk.Ata;
+    return '<section class="tdev" aria-label="On altı büyük Türk devleti">' + (At && d[2] ? At.portreHtml(At.sozPortresi(d[2]), 'tdev__portre') : '') + '<ol class="tdev__sira">' + DEVLET.map(function (x, i) {
       return '<li title="' + kac(x[0] + ' · ' + x[1]) + '"' + (i === no ? ' aria-current="true"' : '') + '>' + YILDIZ + '<span class="gizli">' + kac(x[0] + ', ' + x[1]) + '</span></li>';
     }).join('') + '</ol><p class="tdev__bugun"><span>Bugünün devleti</span> ' + kac(d[0]) + ' <span class="tdev__yil">' + kac(d[1]) + '</span>' +
       (d[2] ? '<span class="tdev__han">' + kac(d[2]) + '</span>' : '') + '</p></section>';
@@ -479,8 +482,19 @@
         (x[2] ? '<p class="miras__metin">' + kac(x[2]) + '</p>' : '') + '</aside>';
     }
     // Tarih: on altı yıldız ve günün haritası (kabuk/ata.js; sınırlar yaklaşık)
-    if (id === 'tarih') return '<aside class="miras miras--yildiz">' + onAltiYildiz(t) + '</aside>' + (Kabuk.Ata ? Kabuk.Ata.haritaHtml(Kabuk.Ata.gununHaritasi(t)) : '');
+    if (id === 'tarih') {
+      var At = Kabuk.Ata, hg = At && At.gununHaritasi(t);
+      return '<aside class="miras miras--yildiz">' + onAltiYildiz(t, true) + '</aside>' + (At ? At.haritaHtml(hg) + At.haritalarHtml(hg) : '');
+    }
     return '';
+  }
+  // Alan sayfasının sonunda: Tarih'te tarih tabloları ve Türk simgeleri (kabuk/ata.js)
+  function mirasSonu(id) { var At = Kabuk.Ata; return id === 'tarih' && At ? At.tablolarHtml() + At.simgelerHtml() : ''; }
+  // tablo resimleri ayrı dosyada (kabuk/tablo.js): sayfada boş tablo çerçevesi varsa bir kez yüklenir, gelince doldurulur
+  var tabloIstendi = false;
+  function tabloYukle() {
+    var At = Kabuk.Ata; if (!At || !sayfaEl.querySelector('img[data-tablo]') || At.tabloDoldur(sayfaEl) || tabloIstendi) return;
+    tabloIstendi = true; var b = d.createElement('script'); b.src = 'tablo.js'; b.onload = function () { At.tabloDoldur(sayfaEl); }; d.head.appendChild(b);
   }
   function sozEkIc(tur, gun) {
     if (tur === 'milli') {
@@ -502,6 +516,7 @@
     var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
     return '<figure class="soz' + (RESMI.indexOf(gunAnahtar(t)) >= 0 ? ' soz--bayrak">' + BAYRAK.replace('ust__bayrak', 'soz__bayrak') : '">') + (m ? '<p class="soz__milli">Bugün ' + kac(yilDonumu(m, t.getFullYear())) + '</p>' :
       y ? '<p class="soz__yakin">' + y[0] + ' gün sonra · ' + y[1].getDate() + ' ' + AY[y[1].getMonth()] + ' · ' + kac(y[2]) + '</p>' : '') +
+      (Kabuk.Ata && Kabuk.Ata.gununTablosu(t) ? Kabuk.Ata.tabloHtml(Kabuk.Ata.gununTablosu(t), 'soz__tablo') : '') + // millî günde o günün tablosu
       (Kabuk.Ata ? Kabuk.Ata.portreHtml(Kabuk.Ata.sozPortresi(s[1]), 'soz__portre') : '') + // sözün sahibinin portresi (varsa)
       '<span class="soz__runik" lang="otk" title="Türük (Göktürk yazısıyla)">\u{10C45}\u{10C07}\u{10C3C}\u{10C1C}</span>' +
       '<blockquote class="soz__metin">' + kac(s[0]) + '</blockquote><figcaption class="soz__kaynak">' + kac(s[1]) + '</figcaption>' + sozEk(t) + '</figure>' + onAltiYildiz(t);
@@ -601,7 +616,7 @@
     '<circle cx="475" cy="400" r="160" fill="#e30a17"/><polygon fill="#fff" points="583.334,400 764.235,458.779 652.431,304.894 652.431,495.106 764.235,341.221"/></svg>';
   function cubuk(sahne) {
     var ad = hesapAdi(), se = sekmeOf(simdiYer);
-    return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun"><span class="ust__kare" aria-hidden="true">B</span>Başbuğ' + BAYRAK + '</a>' +
+    return '<header class="ust ' + (sahne ? 'ust--sahne' : 'ust--duz') + '"><a class="ust__logo" href="#/bugun">' + (Kabuk.Ata && Kabuk.Ata.logoHtml('ust__amblem') || '<span class="ust__kare" aria-hidden="true">B</span>') + 'Başbuğ' + BAYRAK + '</a>' +
       '<nav class="ust__sekmeler" aria-label="Ana bölümler">' + sekmeHtml('ust__sekme', se) + '</nav>' +
       '<button type="button" class="ust__ara" data-ac="komut" aria-keyshortcuts="Control+K /" aria-label="Ara"><svg aria-hidden="true"><use href="#i-ara"/></svg><span aria-hidden="true">Ara</span><kbd>Ctrl K</kbd></button>' +
       '<a class="ust__hesap" href="#/ayarlar" aria-label="Ayarlar">' + (ad ? kac(ad.charAt(0).toLocaleUpperCase('tr')) : '<svg aria-hidden="true"><use href="#i-kisi"/></svg>') + '</a></header>';
@@ -1008,7 +1023,7 @@
     }
     var dal = seciliDal(etkinAlan);
     return ust(kirinti(yer)) + '<div class="govde">' + B.baslik({ metin: yer.ad, alt: dal ? 'Çalıştığın dal: ' + dal.ad : yer.aciklama }) + mirasKarti(yer.id) + ic +
-      B.eylemler([yer.eski ? { metin: 'Eski ' + yer.ad + ' sayfası', tur: 'sade', href: eskiYol(yer.eski) } : null]) + '</div>';
+      B.eylemler([yer.eski ? { metin: 'Eski ' + yer.ad + ' sayfası', tur: 'sade', href: eskiYol(yer.eski) } : null]) + mirasSonu(yer.id) + '</div>';
   }
   // Nerede olduğun: konum satırı (ünite, ders n/N), sıradaki dersin adı, tek ince ilerleme çizgisi ve tek ana düğme.
   // o.alan: Öğren sayfasında alanın adı da yazılır. o.yeni: hiç başlanmamış alanda «Seviyemi bul» küçük ikincil bağlantı (kendiliğinden açılmaz).
@@ -1225,11 +1240,14 @@
       var gecen = !yeniSayfa && !yukleniyordu && sayfaEl.classList.contains('canlan') ? canlanAni() : null;
       sayfaEl.innerHTML = html + (/\/ders\//.test(parca[0]) || yer.id === 'king' ? '' : turkMuhru()); // ders ve sohbet ekranı sade kalır
       sayfaEl.setAttribute('data-ciz', yer.id);
+      // afiş temalarında sayfa başlığının altında Türk simgeleri bandı (kapakPay onu başlıktan sonraki blok olarak sahnenin altına iter)
+      var bb = Kabuk.Ata && kokEl.hasAttribute('data-afis') && sayfaEl.querySelector(':scope > .govde > .b-baslik:first-child');
+      if (bb) bb.insertAdjacentHTML('afterend', '<div class="afis-bant">' + Kabuk.Ata.turkBandi() + '</div>');
       // alanın tonu sayfaya (kabuk.css --alan-ton/--alan-isik): kapak ışıması, ders ve kart vurguları; tonsuz sayfa sıcak ana renkte
       if (KAPAK[yer.id]) sayfaEl.setAttribute('data-ton', KAPAK[yer.id][1]); else sayfaEl.removeAttribute('data-ton');
       d.title = yer.ad === 'Başbuğ' ? 'Başbuğ' : yer.ad + ' · Başbuğ';
       altCubukYaz(yer);
-      kapakPay(); manzara();
+      kapakPay(); manzara(); tabloYukle();
       // 2026-11-18 (sahip: «geçiş animasyonunu kaldır, direkt yüklensin»): yeni sayfa süzülmeden, doğrudan çizilir. Aynı sayfanın yeniden çizimi (veri geldi, hesap yüklendi, tıklandı) süzülmeyi baştan oynatmaz:
       // yeni öğelerin hareketleri kaldığı ana sarılır (innerHTML öğeleri yeniler, CSS hareketi sıfırdan başlardı: «animasyon tekrarlıyor»).
       if (!yeniSayfa && !yukleniyordu && gecen != null) surdur(gecen);

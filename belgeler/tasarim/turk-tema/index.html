@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Türk Teması — örnek</title>
+<style>
+  :root { --zemin:#14111c; --yazi:#ece4d4; --soluk:#9a90a8; --vurgu:#f0c040; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--zemin); color:var(--yazi); font:14px/1.4 system-ui, sans-serif; display:flex; flex-direction:column; align-items:center; gap:12px; padding:16px; }
+  h1 { font-size:16px; font-weight:600; margin:0; letter-spacing:.02em; }
+  canvas { width:min(100%, 1260px); image-rendering:pixelated; border-radius:6px; display:block; }
+  .cubuk { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  button { background:#241e30; color:var(--soluk); border:1px solid #352c44; border-radius:999px; padding:5px 12px; font:inherit; cursor:pointer; }
+  button[aria-pressed="true"] { color:var(--zemin); background:var(--vurgu); border-color:var(--vurgu); }
+  p { margin:0; color:var(--soluk); max-width:72ch; text-align:center; }
+</style>
+</head>
+<body>
+  <h1>LifeOS · Türk teması örneği</h1>
+  <div class="cubuk" id="tur"></div>
+  <canvas id="c"></canvas>
+  <div class="cubuk" id="vakit"></div>
+  <p id="not"></p>
+<script src="piksel-doga-turk.js"></script>
+<script>
+  const D = window.LIFEOS.PIKSEL_DOGA, W = 420, H = 236;
+  const TURLER = {
+    bozkir:['Ötüken · Göktürk', 'batim', 'Kağan otağı ve önünde altın kurt başlı tuğ · kaplumbağa kaideli Kül Tigin yazıtı, tepeliğinde dağ keçisi damgası · taş baba ve doğuya uzanan balbal sırası, sonunda kurgan · Orhun ırmağı, Ötüken yışı · dörtnala atlılar, at sürüsü, bürküt · gece: Kuş Yolu, Yedi Han, Demir Kazık.'],
+    kocatepe:['Kocatepe · 26 Ağustos 1922', 'dogum', 'Sisli şafak (topçu ateşi sis yüzünden ilk ışıkla başladı) · dürbünle bakan başkomutan, yanında Fevzi ve İsmet Paşalar · bayrak kanunu oranlarıyla dalgalanan al bayrak · ateş eden sahra topları, uzak sırtlarda patlamalar · kağnı ve cephane taşıyan kadın (İstiklal Yolu) · ilerleyen piyade.'],
+    semerkant:['Semerkant · Timur', 'batim', 'Gur-i Emir: sekizgen gövde, kufi yazılı kasnak, dilimli firuze kubbe, minareler ve mukarnaslı taç kapı · uzakta Bibi Hanım ve Zerefşan dağları · kavaklar, bahçeler, ark · deve kervanı · Timur\'un üç halka damgalı sancağı.'],
+  };
+  const VAKIT = { dogum:'Şafak', ogle:'Öğle', batim:'Gün batımı', gece:'Gece' };
+  let tur = 'bozkir', vakit = 'batim', zaman;
+  const c = document.getElementById('c'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  function ciz(){
+    const arka = document.createElement('canvas'); arka.width = W; arka.height = H;
+    const o = D.yerlesim(W, H, vakit, tur);
+    D.binaCiz(arka.getContext('2d'), o);
+    clearInterval(zaman);
+    const kare = () => { o.imza = null; D.kare(g, arka, o, performance.now() / 1000); };
+    kare(); zaman = setInterval(kare, 125);
+    document.getElementById('not').textContent = TURLER[tur][2];
+    document.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.d === tur || b.dataset.d === vakit));
+  }
+  const dugme = (kap, d, ad, f) => { const b = document.createElement('button'); b.dataset.d = d; b.textContent = ad; b.onclick = () => { f(d); ciz(); }; document.getElementById(kap).appendChild(b); };
+  Object.keys(TURLER).forEach(k => dugme('tur', k, TURLER[k][0], d => { tur = d; vakit = TURLER[d][1]; }));
+  Object.keys(VAKIT).forEach(k => dugme('vakit', k, VAKIT[k], d => { vakit = d; }));
+  /* #tur=kocatepe&vakit=gece&kirp=x,y,w,h : bağlantıyla sahne seçimi; kirp bir bölgeyi büyütür (inceleme için) */
+  const ADRES = new URLSearchParams(location.hash.slice(1));
+  if(TURLER[ADRES.get('tur')]){ tur = ADRES.get('tur'); vakit = TURLER[tur][1]; }
+  if(VAKIT[ADRES.get('vakit')]) vakit = ADRES.get('vakit');
+  ciz();
+  if(ADRES.get('kirp')){
+    const [x, y, w, h] = ADRES.get('kirp').split(',').map(Number), k = document.createElement('canvas');
+    k.width = w; k.height = h; c.after(k);
+    setInterval(() => k.getContext('2d').drawImage(c, x, y, w, h, 0, 0, w, h), 125);
+    c.style.display = 'none';
+  }
+</script>
+</body>
+</html>
