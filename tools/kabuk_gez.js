@@ -161,7 +161,8 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/ayarlar');
     await p.waitForSelector('.ayarlar');
     await p.waitForTimeout(150);
-    dene('ayarlar: açılışta ilk grup (Görünüm) seçili gösterilir', (await p.getAttribute('nav.ayar-menu a[data-grup="gorunum"]', 'aria-current')) === 'true');
+    dene('ayarlar: tek sütun; grup menüsü yok, arama ve yedi grup başlığı var', (await p.locator('.ayar-menu, .ayarlar .b-yanli').count()) === 0
+      && (await p.locator('.ayarlar [data-ayar-ara]').count()) === 1 && (await p.locator('.ayarlar .b-bolum__ust h2[id^="grup-"]').count()) === 7);
     await p.mouse.move(640, 500);
     await p.mouse.down(); await p.waitForTimeout(700); await p.mouse.up();
     dene('basılı tutmak halkayı açmaz (masaüstünde yalnız sağ tık ve Ctrl .)', !(await halkaAcik()));
@@ -172,13 +173,13 @@ async function goruntu(p, ad, sec = {}) {
     await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(150);
     dene('üst çubuk: aşağı kaydırınca gizlenir, yukarı kaydırınca döner, başta görünür', gizli && dondu && !(await p.evaluate(() => document.documentElement.classList.contains('ust-gizli'))), [gizli, dondu]);
     await p.goto(T + '/kabuk/#/ayarlar?grup-hesap'); await p.waitForTimeout(150);
-    const gHesap = await p.getAttribute('nav.ayar-menu a[data-grup="hesap"]', 'aria-current');
+    const gHesap = await p.evaluate(() => { const r = document.getElementById('grup-hesap').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
     await p.goto(T + '/kabuk/#/ayarlar?lifeos.beden.boy'); await p.waitForTimeout(150);
-    const gBeden = await p.getAttribute('nav.ayar-menu a[data-grup="beden"]', 'aria-current');
+    const gBeden = await p.evaluate(() => !!(document.activeElement && document.activeElement.closest('[data-ayar-satir="lifeos.beden.boy"]')));
     await p.evaluate(() => scrollTo(0, 0));
     await p.goto(T + '/kabuk/#/ayarlar?a%22b'); await p.waitForTimeout(150);
-    const gBozuk = await p.getAttribute('nav.ayar-menu a[data-grup="gorunum"]', 'aria-current');
-    dene('ayarlar: grup, satır ve geçersiz odaklarda etkin sekme korunur ve hata çıkmaz', gHesap === 'true' && gBeden === 'true' && gBozuk === 'true', JSON.stringify({ gHesap, gBeden, gBozuk }));
+    const gBozuk = await p.locator('.ayarlar #grup-gorunum').count() === 1;
+    dene('ayarlar: grup odağı başlığa kaydırır, satır odağı o satırı odaklar, geçersiz odak hata vermez', gHesap && gBeden && gBozuk, JSON.stringify({ gHesap, gBeden, gBozuk }));
     {
       const tc = await b.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', hasTouch: true, isMobile: true }), tp = await tc.newPage();
       await tp.goto(T + '/kabuk/#/alan/tarih');
@@ -455,7 +456,7 @@ async function goruntu(p, ad, sec = {}) {
     await p.goto(T + '/kabuk/#/motor/not');
     await p.waitForSelector('[data-arac="not"]');
     dene('not: boş defter öyle der', /Henüz not yok/.test(await p.textContent('#not-liste')));
-    dene('not: boş defterde #etiket ve [[bağ]] gösteren örnek not, araç yokken tek sakin «Yeni araç» satırı', /#felsefe/.test(await p.textContent('.not-bos__ornek')) && /\[\[/.test(await p.textContent('.not-bos__ornek'))
+    dene('not: boş defterde süs yok (örnek kâğıt, tek başına «Hepsi» çipi), araç yokken tek sakin «Yeni araç» satırı', (await p.locator('.not-bos__ornek, .klasor-cip:not(.klasor-cip--ekle)').count()) === 0
       && (await p.locator('#not-liste a').count()) === 0 && (await p.locator('a.arac-ekle[href="#/motor/not/arac/yeni"]').count()) === 1 && (await p.locator('#araclar-baslik').count()) === 0);
     // hızlı not: üstteki kutuya yaz, Ctrl+Enter; ilk satır ad olur, kutu boşalır (sonra silinir: aşağıdaki sayımlar boş defterden)
     await p.fill('.nothizli textarea', 'Hızlı deneme\nikinci satır');
@@ -663,10 +664,10 @@ async function goruntu(p, ad, sec = {}) {
     dene('ayarlar: Beden › boy aralık dışını yazmaz, alanı geçersiz işaretler', (await p.evaluate(() => LIFEOS.Kabuk.ic.depo.getItem('lifeos.beden.boy'))) === '165'
       && (await p.getAttribute('[data-ayar-satir="lifeos.beden.boy"] input', 'aria-invalid')) === 'true');
     const grupSay = await p.evaluate(() => LIFEOS.Kabuk.Ayar.GRUPLAR.length);
-    dene('ayarlar: yanlı düzende grup gezinmesi (her grup bir bağlantı, bölümü bulunur)', (await p.locator('.b-yanli--sol nav.b-gezinme[aria-label="Ayar grupları"] a.b-gezinme__oge').count()) === grupSay
-      && (await p.$$eval('nav.b-gezinme a', l => l.every(a => document.getElementById(a.getAttribute('href').split('?')[1])))), grupSay);
+    dene('ayarlar: her grup tek sütunda kendi başlıklı bölümünde (grup menüsü yok)', (await p.locator('.ayarlar section.b-bolum h2[id^="grup-"]').count()) === grupSay
+      && (await p.locator('nav.b-gezinme').count()) === 0, grupSay);
     await p.goto(T + '/kabuk/#/ayarlar');
-    await p.waitForSelector('nav.b-gezinme');
+    await p.waitForSelector('.ayarlar #grup-gorunum');
     await goruntu(p, 'ayarlar');
     { // 2026-11-18 (tur-20261118/ekranlar.md): telefonda tercih seçici sarınca hap biçimli yumağa dönüyor, «Yazı tipi» kesiliyordu
       const bulgu = [];
@@ -1147,6 +1148,11 @@ async function goruntu(p, ad, sec = {}) {
     await p.reload(); await p.waitForSelector('.king-msj--king');
     await p.click('[data-king-yeni]');
     dene('Başbuğ: konuşma yenilemede kalır, «Yeni konuşma» temizler', (await p.locator('.king-msj').count()) === 0 && (await p.locator('[data-king-oneri]').count()) === 3);
+    // 2026-11-19: Divan'da hükümdar seçimi sohbeti yeniden çizer; sahne payı (kapakPay) kaybolup kip şeridi sahnenin üstüne biniyordu
+    await p.click('[data-king-kip="divan"]'); await p.click('[data-king-hukumdar="fatih"]'); await p.waitForTimeout(100);
+    const divanPay = await p.evaluate(() => { const k = document.querySelector('#sayfa > .kapak'), s = document.querySelector('.king-sohbet'); return !k || innerWidth < 641 || s.getBoundingClientRect().top >= k.getBoundingClientRect().bottom; });
+    await p.click('[data-king-kip="ortak"]');
+    dene('Başbuğ: Divan’da hükümdar seçilince sohbet sahnenin altında kalır', divanPay);
     await goruntu(p, 'king');
     await p.goto(T + '/kabuk/#/bugun');
     await p.waitForFunction(() => window.LIFEOS && window.LIFEOS.HESAP && document.querySelector('.b-karsilama__selam')); // bölüm geçişinin çizimi bir kare sonra

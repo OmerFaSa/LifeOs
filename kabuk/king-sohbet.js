@@ -216,6 +216,7 @@
     var el = yeni.firstChild;
     if (eski) eski.replaceWith(el);
     else { var bas = g.firstElementChild; if (bas && bas.nextSibling) g.insertBefore(el, bas.nextSibling); else g.appendChild(el); }
+    if (Kabuk.ic && Kabuk.ic.kapakPay) Kabuk.ic.kapakPay(); // sohbet sayfa çiziminden sonra girer: sahne payı ona geçer (kip şeridi sahneye binmesin)
     var m = el.querySelector('[name="metin"]');
     if (m) m.value = eski ? yazilan : depoOku(TASLAK) || ''; // ilk çizimde gönderilmemiş taslak geri gelir
     boyutla(m);

@@ -35,15 +35,10 @@
 .notsatir__cip{ padding:0 var(--a2); border-radius:var(--kose-tam); font-size:var(--yz-k); line-height:1.6; color:var(--yazi-2); background:var(--yuzey-2); }
 .notsatir__yan{ display:flex; align-items:center; gap:var(--a2); flex:none; }
 .notsatir__tarih{ font-size:var(--yz-k); color:var(--soluk); white-space:nowrap; font-variant-numeric:tabular-nums; }
-/* boş defter: sakin cümle + masaya bırakılmış, hafif eğik örnek not kâğıdı (ton + gölge) */
-.not-bos{ display:grid; justify-items:center; gap:var(--a2); padding:var(--a6) var(--a4) var(--a7); text-align:center;
-  background:radial-gradient(ellipse 60% 45% at 50% 68%, color-mix(in srgb, var(--altin) 10%, transparent), transparent); }
+/* boş defter: sakin cümle (süs ışıması ve örnek kâğıt 2026-11-19'da kalktı) */
+.not-bos{ display:grid; justify-items:center; gap:var(--a2); padding:var(--a6) var(--a4) var(--a7); text-align:center; }
 .not-bos p{ margin:0; font-size:var(--yz-k); color:var(--soluk); }
 :root .not-bos__baslik{ font:600 var(--yz-h3) var(--baslik-serif); color:var(--yazi); }
-.not-bos__ornek{ position:relative; display:grid; justify-items:start; gap:4px; width:min(100%, 320px); margin-top:var(--a5); padding:var(--a4) var(--a4) var(--a3); text-align:left;
-  font:var(--yz-k) var(--okuma); color:var(--yazi-2); border-radius:var(--kose-k); background:var(--yuzey); box-shadow:var(--golge-orta); transform:rotate(-1.5deg); }
-.not-bos__ornek b{ font-size:var(--yz); color:var(--yazi); }
-.not-bos__pul{ position:absolute; top:-8px; right:var(--a3); padding:1px var(--a2); border-radius:var(--kose-tam); font:.75rem var(--govde); color:var(--altin); background:var(--yuzey-2); }
 .arac-ekle{ display:flex; align-items:center; gap:var(--a3); margin-top:var(--a6); font-size:var(--yz-k); color:var(--soluk); text-decoration:none; }
 .arac-ekle b{ color:var(--yazi); }
 .arac-ekle__arti{ display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:var(--yazi-2); background:var(--yuzey-2); }

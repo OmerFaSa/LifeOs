@@ -523,7 +523,7 @@
       B.alan({ ad: eski ? 'Yeni adı' : 'Klasör adı', isim: 'klasorAd', deger: deger, enCok: 120, yerTutucu: 'ör. Felsefe ya da Ders/Tarih' }) +
       B.eylemler([{ metin: dugme, tur: 'ana', tip: 'submit' }]) + '</form>';
   }
-  // Üstte klasör çipleri: Hepsi, her klasör (ad + not sayısı; «Ders/Tarih» üst katı soluk), Klasörsüz, «+ Yeni klasör»
+  // Üstte klasör çipleri (Hepsi ve Klasörsüz yalnız klasör varken; tek seçenekli seçim olmasın): Hepsi, her klasör (ad + not sayısı; «Ders/Tarih» üst katı soluk), Klasörsüz, «+ Yeni klasör»
   function klasorCubugu(notlar, araclar, secili) {
     var k = ic().kac, l = tumKlasorler(notlar, araclar), kd = klasorDurum && !klasorDurum.eski ? klasorDurum : null; // adlandırma hatası klasorEylemleri'nde
     var cip = function (ad, kl, sayi, ek) {
@@ -532,7 +532,7 @@
     };
     var adCiz = function (ad) { var i = ad.lastIndexOf('/'); return i < 0 ? k(ad) : '<span class="klasor-cip__ust">' + k(ad.slice(0, i + 1)) + '</span>' + k(ad.slice(i + 1)); };
     return '<nav class="klasorler" aria-label="Klasörler">' + (kd && !kd.eski ? B.uyari({ tur: 'hata', metin: kd.metin }) : '') + '<ul class="klasorler__liste">' +
-      cip('Hepsi', null, notlar.length) + l.map(function (x) { return cip(adCiz(x.ad), x.ad, x.sayi, klasorAraci(araclar, x.ad) ? ' klasor-cip--arac' : ''); }).join('') +
+      (l.length ? cip('Hepsi', null, notlar.length) : '') + l.map(function (x) { return cip(adCiz(x.ad), x.ad, x.sayi, klasorAraci(araclar, x.ad) ? ' klasor-cip--arac' : ''); }).join('') +
       (l.length ? cip('Klasörsüz', '', notlar.filter(function (n) { return !n.klasor; }).length, ' klasor-cip--sakin') : '') +
       '<li><details class="klasor-yeni"' + (kd && !kd.eski ? ' open' : '') + '><summary class="klasor-cip klasor-cip--ekle"><span aria-hidden="true">+</span> Yeni klasör</summary>' +
         klasorFormu('', '', 'Oluştur') + '</details></li></ul></nav>';
@@ -550,9 +550,8 @@
   }
   function notListesi(notlar, sorgu, kl) { // kl: seçili klasör (null Hepsi); notlar o klasörün notlarıdır
     if (!notlar.length && kl != null) return B.bos({ baslik: kl ? 'Bu klasörde not yok.' : 'Klasörsüz not yok.', metin: kl ? 'Yukarıdaki kutuya yaz; not bu klasöre girer.' : 'Bütün notların bir klasörde.' });
-    // boş defter: kısa cümle + örnek not kâğıdı (#etiket, [[bağ]])
-    if (!notlar.length) return '<div class="not-bos" role="note"><p class="not-bos__baslik">Henüz not yok.</p><p>Yukarıdaki kutuya bir satır yazman yeter; ilk satır notun adı olur.</p>' +
-      '<div class="not-bos__ornek"><span class="not-bos__pul">örnek</span><b>Thales ve su</b><span>Her şeyin ilkesi su mu? Bkz. [[Anaksimandros]]</span><span class="notsatir__cip">#felsefe</span></div></div>';
+    // boş defter: kısa cümle (eğik «örnek» not kâğıdı 2026-11-19'da kalktı; #etiket ve [[bağ]] kutunun ipucunda)
+    if (!notlar.length) return '<div class="not-bos" role="note"><p class="not-bos__baslik">Henüz not yok.</p><p>Yukarıdaki kutuya bir satır yazman yeter; ilk satır notun adı olur.</p></div>';
     if (!sorgu.trim()) return satirlar('Notlar', notlar.slice().sort(notSira).map(function (n) { return notSatiri(n, '', kl == null); }));
     var harita = {}; notlar.forEach(function (n) { harita[n.id] = n; });
     var s = Not.ara(notlar, sorgu, { sinir: 50 });

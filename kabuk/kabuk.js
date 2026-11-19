@@ -424,41 +424,11 @@
     [0x10C0D, 'g, ğ'], [0x10C0F, 'g, ğ ince'], [0x10C34, 'k'], [0x10C1A, 'k ince'], [0x10C38, 'ok, uk'], [0x10C36, 'ık'], [0x10C1E, 'l'], [0x10C20, 'l ince'], [0x10C22, 'm'],
     [0x10C23, 'n'], [0x10C24, 'n ince'], [0x10C2D, 'ng'], [0x10C2F, 'p'], [0x10C32, 'ç'], [0x10C3A, 'r'], [0x10C3C, 'r ince'], [0x10C3D, 's'], [0x10C3E, 's ince'],
     [0x10C41, 'ş'], [0x10C43, 't'], [0x10C45, 't ince'], [0x10C16, 'y'], [0x10C18, 'y ince'], [0x10C14, 'z']];
-  // Alan sayfalarında Türk mirası (2026-11-18i, sahip: «YKS ve SPİ alanında da Türklük teması»): Akademik/Öğren'de günün Türk bilgini,
-  // Sağlık'ta ata sporu ve sağlık geleneği, Tarih'te bugünün devleti ve haritası. Gün sırasıyla döner; yalnız kesin bilgiler.
-  var BILGIN = [['Uluğ Bey', '1394–1449', 'Matematik · Astronomi', 'Semerkant\'ta rasathane kurdu; adını taşıyan Zîc\'te binden fazla yıldızın konumu ölçüldü.'],
-    ['Ali Kuşçu', 'ö. 1474', 'Matematik · Astronomi', 'Uluğ Bey\'in öğrencisiydi; Fatih döneminde İstanbul\'a gelip medresede matematik ve astronomi okuttu.'],
-    ['Kaşgarlı Mahmud', '11. yüzyıl', 'Türkçe · Coğrafya', 'Divanü Lugati\'t-Türk\'ü yazdı; eserdeki dünya haritasında Türk yurtları gösterilir.'],
-    ['Yusuf Has Hacib', '11. yüzyıl', 'Edebiyat', 'Kutadgu Bilig\'i (1069–1070) yazdı: devleti ve iyi yaşamayı anlatan Türkçe bir öğüt kitabı.'],
-    ['Piri Reis', 'y. 1465–1553', 'Coğrafya', '1513 tarihli dünya haritasında Amerika kıyılarını gösterdi; Kitab-ı Bahriye\'de Akdeniz kıyılarını anlattı.'],
-    ['Takiyüddin', '1526–1585', 'Fizik · Astronomi', '1577\'de İstanbul Tophane\'de rasathane kurdu.'],
-    ['Mimar Sinan', 'y. 1490–1588', 'Geometri', 'Selimiye Camii\'ni (1569–1575) ustalık eseri saydı; üç yüzü aşkın yapı inşa etti.'],
-    ['Kâtip Çelebi', '1609–1657', 'Coğrafya · Tarih', 'Cihannüma ile dünya coğrafyasını, Keşfü\'z-Zunun ile binlerce kitabı tanıttı.'],
-    ['Cahit Arf', '1910–1997', 'Matematik', 'Arf değişmezi onun adını taşır; portresi 10 liralık banknotta yer aldı.'],
-    ['Feza Gürsey', '1921–1992', 'Fizik', 'Kuramsal fizikte simetri çalışmalarıyla 1986\'da Wigner Madalyası\'nı aldı.'],
-    ['Hulusi Behçet', '1889–1948', 'Biyoloji', '1937\'de tanımladığı hastalık dünyada «Behçet hastalığı» adıyla anılır.'],
-    ['Aziz Sancar', 'd. 1946', 'Kimya · Biyoloji', 'DNA onarımı çalışmalarıyla 2015 Nobel Kimya Ödülü\'nü aldı.']];
-  var GELENEK = [['Okçuluk', 'Ata sporu', 'Osmanlı okçuları İstanbul Okmeydanı\'nda yarışır, en uzun atışlar menzil taşlarına kazınırdı.'],
-    ['Yağlı güreş', 'Ata sporu', 'Edirne\'deki Kırkpınar, yüzyıllardır süren bir güreş geleneğidir.'],
-    ['Cirit', 'Ata sporu', 'Atlı cirit, Orta Asya\'dan Anadolu\'ya taşınan bir binicilik oyunudur; Erzurum\'da bugün de oynanır.'],
-    ['Binicilik', 'Bozkır', 'Bozkırda çocuklar ata erken yaşta binmeyi öğrenirdi; Hun ve Göktürk ordularının gücü atlı okçulardı.'],
-    ['Yoğurt ve kımız', 'Sofra', '«Yoğurt» sözcüğü dünya dillerine Türkçeden geçmiştir; kımız, bozkırın mayalanmış kısrak sütüdür.'],
-    ['Darüşşifa', 'Şifa', 'Selçuklu ve Osmanlı şifahanelerinde müzik ve su sesi de tedavinin parçasıydı; Edirne\'deki II. Bayezid Darüşşifası bilinen örnektir.'],
-    ['Sağlık varlıktan iyidir.', 'Atasözü', ''], ['Hastalık kantarla gelir, dirhemle gider.', 'Atasözü', '']];
-  var SAGLIK_YER = { saglik: 1, beslenme: 1, hareket: 1, uyku: 1, tahlil: 1 };
+  // Alan sayfalarında Türk mirası yalnız Tarih'te (2026-11-19 karargâh: Öğren/Akademik «Günün Türk bilgini» ve Sağlık «Türk geleneğinden» kartları
+  // araya giren süs olarak kalktı; sahip: «arayüzdeki tüm karışıklıkları kaldır»)
   function gunNo(t) { return Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5); }
   function mirasKarti(id) {
-    var t = new Date(), n = gunNo(t), x;
-    if (id === 'akademik' || id === 'ogren') {
-      x = BILGIN[n % BILGIN.length];
-      return '<aside class="miras" aria-label="Günün Türk bilgini"><p class="miras__etiket">Günün Türk bilgini · ' + kac(x[2]) + '</p><p class="miras__ad">' + kac(x[0]) +
-        ' <span>' + kac(x[1]) + '</span></p><p class="miras__metin">' + kac(x[3]) + '</p></aside>';
-    }
-    if (SAGLIK_YER[id]) {
-      x = GELENEK[n % GELENEK.length];
-      return '<aside class="miras" aria-label="Türk geleneğinden"><p class="miras__etiket">Türk geleneğinden · ' + kac(x[1]) + '</p><p class="miras__ad">' + kac(x[0]) + '</p>' +
-        (x[2] ? '<p class="miras__metin">' + kac(x[2]) + '</p>' : '') + '</aside>';
-    }
+    var t = new Date(), n = gunNo(t);
     // Tarih: tek kart — bugünün devleti (hükümdar portresi varsa) ve haritası; devletin haritası yoksa günün haritası kendi başlığıyla; millî günde o günün tablosu (kabuk/ata.js; sınırlar yaklaşık)
     if (id === 'tarih') {
       var At = Kabuk.Ata, dv = DEVLET[n % DEVLET.length], hk = At && (dv[3] || At.gununHaritasi(t));
@@ -693,13 +663,14 @@
   // Ambiyans (ay) düğmesi üst çubuktan kalktı (2026-11-16b: tema sanılıyordu); aç/kapa Ayarlar › Ses'te.
   // Geniş ekranda başlık manzaranın içinde: başlıktan sonraki ilk blok sahnenin solan kenarına düşmesin diye sahnenin altına itilir
   // (Plan'daki «Bugünün planı» etiketi sahnenin üstünde okunmuyordu). Kart değil ölçü: içerik ne olursa olsun aynı kural.
+  // Sonradan eklenen blok (Başbuğ sohbeti, king-sohbet.js) başlığın ardına girince yeniden çağrılır: pay önceki bloktan kalkar, yenisine geçer.
+  var payEl = null;
   function kapakPay() {
+    if (payEl) { payEl.style.marginTop = ''; payEl = null; }
     var k = sayfaEl.querySelector(':scope > .kapak'), b = sayfaEl.querySelector(':scope > .govde > .b-baslik:first-child'), s = b && b.nextElementSibling;
-    if (!k || !s) return;
-    s.style.marginTop = '';
-    if (innerWidth < 641) return;
+    if (!k || !s || innerWidth < 641) return;
     var fark = k.getBoundingClientRect().bottom + 24 - s.getBoundingClientRect().top;
-    if (fark > 0) s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px';
+    if (fark > 0) { s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px'; payEl = s; }
   }
   var manzaraIstendi = false;
   // sahne çizimi önbellekte (en çok 24 tuval): aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
@@ -791,37 +762,24 @@
     return ust(kirinti(yer)) + '<div class="govde govde--genis">' + B.baslik({ metin: 'Sistem haritası', alt: 'Başbuğ\'daki ' + H.YERLER.length + ' yer, tek sayfada.' }) +
       '<div class="harita">' + dallar + '</div></div>';
   }
+  // Ayarlar tek sütun (2026-11-19 karargâh): sol grup menüsü kalktı; bölüm başlıkları görünür, «Ayar ara» her satırı bulur (iki gezinme yolu olmasın).
+  // odak: «?grup-<id>» o grubun başlığına, «?<ayar anahtarı>» o satıra kaydırır ve odaklar.
   function sayfaAyarlar(yer, odak) {
     var gruplar = A.GRUPLAR.map(function (g) {
       return B.bolum({ baslik: g.ad, id: 'grup-' + g.id, eylem: g.id === 'hesap' ? { metin: 'Hesap ve cihazlar', tur: 'sade', href: '#/hesap' } : null, govde: A.SEMA.filter(function (t) { return t.grup === g.id; }).map(function (t) { return A.ciz(t, A.oku(depo, t.anahtar)); }) });
     }).join('');
-    var tOdak = odak && A.tanim ? A.tanim(odak) : null;
-    var ilkGrup = (odak && odak.indexOf('grup-') === 0 && A.GRUPLAR.some(function (g) { return g.id === odak.slice(5); })) ? odak.slice(5)
-      : (tOdak && tOdak.grup) ? tOdak.grup : (A.GRUPLAR[0] ? A.GRUPLAR[0].id : '');
-    var odakGecerli = Boolean((odak && odak.indexOf('grup-') === 0 && ilkGrup === odak.slice(5)) || (tOdak && tOdak.grup));
-    setTimeout(function () {
-      if (odak) {
-        var el = d.getElementById(odak) || [].filter.call(d.querySelectorAll('[data-ayar-satir]'), function (x) { return x.getAttribute('data-ayar-satir') === odak; })[0];
-        if (el) {
-          el.scrollIntoView({ block: 'center' });
-          var f = $('[aria-checked="true"], input', el) || el;
-          f.focus();
-          el.classList.add('b-ayar--isik');
-        }
-      }
-      var menu = $('.ayar-menu'), secili = menu && menu.querySelector('[aria-current="true"]');
-      if (secili && menu.scrollWidth > menu.clientWidth) menu.scrollTo({ left: secili.offsetLeft - menu.clientWidth / 2 + secili.offsetWidth / 2, behavior: 'auto' });
-      ayarIzle(odakGecerli);
+    if (odak) setTimeout(function () {
+      var el = d.getElementById(odak) || [].filter.call(d.querySelectorAll('[data-ayar-satir]'), function (x) { return x.getAttribute('data-ayar-satir') === odak; })[0];
+      if (!el) return;
+      el.scrollIntoView({ block: 'center' });
+      var f = $('[aria-checked="true"], input', el) || el;
+      f.focus();
+      el.classList.add('b-ayar--isik');
     }, 0);
-    // sol menü: her grubun simgesi; kaydırdıkça bulunduğun grup işaretlenir (ayarIzle)
-    var menu = '<nav class="b-gezinme ayar-menu" aria-label="Ayar grupları">' + A.GRUPLAR.map(function (g) {
-      return '<a class="b-gezinme__oge" href="#/ayarlar?grup-' + g.id + '" data-grup="' + g.id + '"' + (g.id === ilkGrup ? ' aria-current="true"' : '') + '><svg aria-hidden="true"><use href="#i-' + (AYAR_SIMGE[g.id] || 'ayar') + '"/></svg>' + kac(g.ad) + '</a>';
-    }).join('') + '</nav>';
     var ara = '<div class="ayar-ara">' + B.alan({ ad: 'Ayarlarda ara', isim: 'ayarAra', tur: 'arama', yerTutucu: 'Ayar ara: tema, yazı boyu, ses, beden…', veri: { 'ayar-ara': '' } }) +
       '<p class="soluk ayar-ara__yok" hidden>Bu sözcükle bir ayar yok.</p></div>';
-    return ust(kirinti(yer)) + '<div class="govde govde--genis ayarlar">' + B.baslik({ metin: 'Ayarlar', alt: 'Değişiklikler hemen uygulanır.' }) + ara + B.yanli({ taraf: 'sol',
-      yan: menu,
-      ana: [gruplar, B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }])] }) + '</div>';
+    return ust(kirinti(yer)) + '<div class="govde ayarlar">' + B.baslik({ metin: 'Ayarlar' }) + ara + gruplar +
+      B.eylemler([{ metin: 'Hepsini varsayılana döndür', tur: 'sade', veri: { ac: 'sifirla' } }]) + '</div>';
   }
   // Ayarlarda ara: satırın adı ve açıklamasında geçen sözcüğe göre süzer; eşleşmesi olmayan grup gizlenir (Türkçe küçük harf)
   function ayarSuz(q) {
@@ -839,21 +797,6 @@
   }
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('[data-ayar-ara]')) ayarSuz(e.target.value); });
   d.addEventListener('input', function (e) { if (e.target.matches && e.target.matches('.gokturk__gir')) { var c = e.target.closest('details').querySelector('.gokturk__cik'); if (c) c.textContent = gokturk(e.target.value); } });
-  // ayar grubu simgeleri (index.html sprite): ses nota (ay tema sanılıyordu), hesap kişi, erişilebilirlik bilgi, Başbuğ taç
-  var AYAR_SIMGE = { gorunum: 'gunes', erisim: 'ipucu', bildirim: 'saat', ses: 'muzik', beden: 'saglik', king: 'king', hesap: 'kisi' };
-  var ayarGozcu = null;
-  function ayarIzle(odakli) {
-    if (ayarGozcu) { ayarGozcu.disconnect(); ayarGozcu = null; }
-    var menu = $('.ayar-menu'); if (!menu || !kok.IntersectionObserver) return;
-    var gorunen = {}, kilitSon = odakli ? Date.now() + 450 : 0;
-    ayarGozcu = new IntersectionObserver(function (l) {
-      l.forEach(function (g) { gorunen[g.target.getAttribute('aria-labelledby')] = g.isIntersecting; });
-      if (Date.now() < kilitSon) return;
-      var ilk = A.GRUPLAR.filter(function (g) { return gorunen['grup-' + g.id]; })[0];
-      if (ilk) [].forEach.call(menu.children, function (a) { if (a.getAttribute('data-grup') === ilk.id) { a.setAttribute('aria-current', 'true'); if (menu.scrollWidth > menu.clientWidth) menu.scrollTo({ left: a.offsetLeft - menu.clientWidth / 2 + a.offsetWidth / 2, behavior: 'smooth' }); } else a.removeAttribute('aria-current'); }); // telefonda yatay şeritte seçili grup ortada
-    }, { rootMargin: '-80px 0px -55% 0px' });
-    A.GRUPLAR.forEach(function (g) { var s = d.getElementById('grup-' + g.id); if (s) ayarGozcu.observe(s.closest('section') || s); });
-  }
   function yuzde(x) { return Math.round(x * 100); }
   var GECILDI = { metin: 'geçildi', tur: 'altin' };
   // kapı satırı (liste öğesi): açıksa bağlantı ve son denemesi, kilitliyse rozet
@@ -972,7 +915,7 @@
       return { ad: x.ad, not: zamanKisa(kayit.dersler[id].okundu) + ' okundu' + (sec ? ' · alıştırma ' + dogru + '/' + sec + ' doğru' : ''), pul: { metin: 'okundu', tur: 'altin' }, href: F() + '/ders/' + id };
     }) }) }) : '';
   }
-  // Neredesin: aşama (seviye) n/N ve adı, hedef, şu anki bölüm (ünite · ders k/m) ve sıradaki dersin adı, ilerleme, tek ana düğme
+  // Neredesin: aşama n/N ve adı, hedef (aşama listesi yoksa; varsa hedef yalnız orada, 2026-11-19), şu anki bölüm (ünite · ders k/m) ve sıradaki dersin adı, ilerleme, tek ana düğme
   function neredesin(f, dr, a) {
     var od = dr.ilerleme.okunanDers, ls = asamaListe(etkinAlan), yer_ = dr.asama.yerlestirme, kapi = a && a.tur === 'kapi';
     var u = a ? f.y.oge[kapi ? a.id : f.y.ust[a.id]] || {} : {}, ud = (u.dersler || []).map(function (x) { return x && x.id || x; });
@@ -980,9 +923,9 @@
     var bolum = !a ? '' : kapi ? (u.ad || 'Ünite') + ' · dersler bitti, ünite kapısı' : (u.ad || '') + (ud.length ? ' · ders ' + (ud.indexOf(a.id) + 1) + ' / ' + ud.length : '');
     var eylem = a ? { metin: kapi ? 'Ünite kapısına geç' : od && od.deger ? 'Öğrenmeye devam et' : 'Öğrenmeye başla', tur: 'ana', href: adimYolu(a) }
       : sonraki ? { metin: 'Sonraki aşama', tur: 'ana', href: asamaYolu(sonraki.n) } : null;
-    return '<section class="asama-ozet" aria-labelledby="asama-ad"><div class="asama-ozet__ust"><h2 class="asama-ozet__ad" id="asama-ad"><span>Seviye · Aşama ' + f.n + (ls.length > 1 ? ' / ' + ls.length : '') + '</span>' + kac(dr.asama.ad) + '</h2>' +
+    return '<section class="asama-ozet" aria-labelledby="asama-ad"><div class="asama-ozet__ust"><h2 class="asama-ozet__ad" id="asama-ad"><span>Aşama ' + f.n + (ls.length > 1 ? ' / ' + ls.length : '') + '</span>' + kac(dr.asama.ad) + '</h2>' +
         (a && alanYeni(etkinAlan) ? '<a class="asama-ozet__ikincil" href="' + F() + '/yer/1" data-yer-bul="">Biliyorsan: seviyemi bul</a>' : '') + '</div>' +
-      (f.y.veri.hedef ? '<p class="asama-ozet__hedef">' + kac(f.y.veri.hedef) + '</p>' : '') +
+      (ls.length < 2 && f.y.veri.hedef ? '<p class="asama-ozet__hedef">' + kac(f.y.veri.hedef) + '</p>' : '') +
       (bolum ? '<div class="asama-ozet__bolum"><p><span>Bölüm</span>' + kac(bolum) + '</p>' + (a.tur === 'ders' ? '<p><span>Sıradaki ders</span>' + kac(a.ad) + '</p>' : '') + '</div>' : '') +
       (dr.asama.gecti && !a ? '<p class="asama-ozet__hedef">Bu aşamanın bütün derslerini ve kapısını geçtin.</p>' : '') +
       (od && od.toplam ? B.ilerleme({ ad: 'Okunan ders', deger: od.deger, toplam: od.toplam }) : '') +
@@ -1080,16 +1023,15 @@
     var dene = n && /[?&]dene\b/.test(location.hash), yol = F() + '/ders/' + id, bitir = function (bos) {
       return { metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id, bos: okundu ? '0' : String(bos) } }; };
     var cubuk_ = '<header class="ust ust--duz ust--ogren"><nav class="konum" aria-label="Konum">' + dersKirinti(y, id) + '</nav></header>';
-    // kâğıdın başında alanın piksel sahnesi (2026-11-18e, sahip: «öğrenme bölümünün pixel artını geliştir»); manzara() çizer, kitaplık yoksa düz gök
-    var sahne = KAPAK[etkinAlan] ? '<div class="ders-sahne" aria-hidden="true"><canvas class="kapak__sahne" width="480" height="72" data-sahne="' + KAPAK[etkinAlan][0] + '"></canvas></div>' : '';
+    // kâğıdın başındaki piksel sahne kalktı (2026-11-19 karargâh: okuma sayfasında süs, başlığı 200 px itiyordu)
     if (dene) {
-      return cubuk_ + '<article class="govde ders ders--dene">' + sahne + dersAdimlari(Math.max(adim, 1), n) + B.baslik({ metin: 'Kendini dene', alt: x.ad }) +
+      return cubuk_ + '<article class="govde ders ders--dene">' + dersAdimlari(Math.max(adim, 1), n) + B.baslik({ metin: 'Kendini dene', alt: x.ad }) +
         '<p class="soluk ders__sayac">' + n + ' soru · ' + cevap + ' / ' + n + ' cevaplandı</p>' +
         x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; }).join('') +
         '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) + B.eylemler([bitir(n - cevap), { metin: 'Derse dön', tur: 'sade', href: yol }]) + '</div></article>';
     }
     // ders-ilerleme: üstte kaydırınca dolan ince çizgi (kaydir yazar), süs; okuma oranı ekran okuyucuya ayrıca söylenmez
-    return cubuk_ + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + sahne + dersAdimlari(adim, n) + dersMetni(y, x) +
+    return cubuk_ + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + dersAdimlari(adim, n) + dersMetni(y, x) +
       '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) +
       (n ? '<a class="ders__dene" href="' + yol + '?dene"><span><b>Kendini dene</b>' + n + ' kısa soru' + (cevap ? ' · ' + cevap + ' cevaplandı' : ', isteğe bağlı') + '</span><svg aria-hidden="true"><use href="#i-sag"/></svg></a>' : '') +
       B.eylemler([bitir(0), { metin: "Başbuğ'la çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
@@ -1102,13 +1044,7 @@
     if (okundu) l.push('<span class="ders__son-tik"><svg aria-hidden="true"><use href="#i-tik"/></svg>Okundu</span>');
     if (cevap) l.push(sec ? 'Alıştırma ' + dogru + ' / ' + sec + ' doğru' : cevap + ' / ' + x.alistirmalar.length + ' cevaplandı');
     return (l.length ? '<p class="ders__son">' + l.join(' · ') + '</p>' : '') +
-      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '') + dersAtasozu(id);
-  }
-  // ders sonunda, derse göre sabit bir Türk atasözü
-  function dersAtasozu(id) {
-    var l = SOZ.filter(function (s) { return s[1] === 'Türk atasözü'; }), h = 0;
-    String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 9973; });
-    return '<p class="ders__atasozu">«' + kac(l[h % l.length][0]) + '» <span>Türk atasözü</span></p>';
+      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '');
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
   function dersAdimlari(adim, n) {
@@ -1549,7 +1485,7 @@
     if (Kabuk.Tasima && Kabuk.Tasima.calis) Kabuk.Tasima.calis(); // tek kapıya geçişte eski modüllerin deposu bu kökene geri yazılır
     alanYukle(etkinAlan).then(function () { if (sayfaEl.getAttribute('data-yer') === 'bugun') bugunAlanGuncelle(); }); // Bugün'ün «sırada» satırı için
   }
-  Kabuk.ic = { miras: mirasKarti, canlan: canlan, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
+  Kabuk.ic = { canlan: canlan, kapakPay: kapakPay, kac: kac, ust: ust, kirinti: kirinti, depo: depo, git: git, rota: rota, Yol: Yol, kayitOku: kayitOku, fDurum: fDurum, al: al, alanYukle: alanYukleCizimle, etkin: function () { return etkinAlan; },
     dersMetni: dersMetni, onayDegisti: function (id) { if (hamlar[id]) alanKur(id); },
     asamalar: function (id) { var a = alanlar[id]; return a && a.ys ? a.ys : null; },
     asamaY: function (id, asamaId) { var a = alanlar[id]; return a && a.ys ? a.ys.filter(function (y) { return y.id === asamaId; })[0] || null : null; },
