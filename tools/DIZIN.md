@@ -7,7 +7,8 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 ## Denetim
 - `ci_hata.sh` — CI adımını koşar; kalırsa çıktının ilgili satırlarını tek bir açık okunur `::error` bildirimine yazar (iş kaydı yönetici yetkisi ister).
 - `ci_satir.sh` — Çok satırlı bir CI adımının (`run: |`) her satırını ayrı koşar ve kalan her satırı `ci_hata.sh` ile kendi bildirimine yazar; ofis adımının `shell:` koşucusudur.
-- `ci_yerel.py` — CI'nin denetimlerini yerelde tek komutla koşar: adımları `ci.yml`'den okur (ikinci liste yok), tarayıcısızları paralel, tarayıcılıları sonra sırayla; `--liste`, `-k`, `--sira`, `--selftest`.
+- `ci_yerel.py` — CI'nin denetimlerini yerelde tek komutla koşar: adımları `ci.yml`'den okur (ikinci liste yok), tarayıcısızları paralel, tarayıcılıları sonra sırayla; `--liste`, `--hizli`, `--degisen`, `-k`, `--sira`, `--selftest`.
+- `pano_cek.js` — Kabuk rotalarının yalıtılmış tek kapıda ekran görüntüsünü alıp yatay taşma / 40 px mobil dokunma / konsol hatası denetleyen (`cek`) ve iki klasörden yan yana Önce/Sonra PNG panosu üreten (`birlestir`) görsel denetim aracıdır.
 - `piksel_rakam.py` — Sistemin kendi rakam yazı tipini (5×7, yalnız 0-9) üretip `piksel-yazi.css`e gömer; `--denetle`.
 - `piksel_bulut.py` — Modül geçişi perdesinin bulut resmini (PNG) üretip `piksel.css`e gömer; `--denetle`.
 - `piksel_gorsel.js` — Logo ve modül simgesi dosyalarını (PNG, ICO, SVG) piksel figürlerden üretir.
@@ -76,6 +77,7 @@ Kapanışta (Faz 7) eski üç modülü, HKM yüzünü ve kopya dağıtımını s
 - `muzik_test.py` — sistem/muzik.py müzik dosyaları ve çalma listesi sözleşme testleri, CI'da koşulur.
 - `ofis_pilot_test.py` — tools/ofis_pilot.py ve tools/ofis_test.py pilot karar tablosu ve kota testleri, CI'da koşulur.
 - `ofis_test.py` — AGENTS.md §2 tam denetimlerini ajan dalında dil modelsiz koşturan testçi aracıdır, pilot tarafından tetiklenir.
+- `pano_cek.test.js` — tools/pano_cek.js argüman ayrıştırma, eşleştirme, HTML kaçışı ve Playwright'sız çalışma birim testleri, CI'da koşulur.
 - `planlama_test.py` — sistem/planlama.py sistem planlama ve kural sözleşme testleri, CI'da koşulur.
 - `playwrightsiz.test.js` — Tarayıcı istemeyen araçların Playwright olmadan da çalıştığını denetler, CI'da koşulur.
 - `portreonar_test.py` — marka.py --onar görsel onarma mantığının birim testi; Pillow yoksa atlanır, CI'da koşar.

@@ -8,6 +8,8 @@ ayni anda bir suru tarayici sahte kirmizi uretir (belgeler/NOTLAR, denetim yuku)
 
   python tools/ci_yerel.py            hepsi (paralel + tarayicilar sirayla)
   python tools/ci_yerel.py --liste    yalniz adimlari yazar
+  python tools/ci_yerel.py --hizli    tarayici adimlarini atlar (hizli ic dongu)
+  python tools/ci_yerel.py --degisen [TABAN]  yalniz degisen dosyalardan etkilenen adimlar
   python tools/ci_yerel.py -k kabuk   adinda «kabuk» gecenler
   python tools/ci_yerel.py --sira     hepsi sirayla (yuklu makinede)
 
@@ -27,6 +29,130 @@ KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CI = os.path.join(KOK, ".github", "workflows", "ci.yml")
 KURULUM = re.compile(r"\bnpm ci\b|playwright install")
 TARAYICI = re.compile(r"tarayıcı|_gez\.js|ortak_test\.js")
+GENEL_YOLLAR = {
+    "AGENTS.md",
+    "tools/ci_yerel.py",
+    "tools/ci_hata.sh",
+    "tools/ci_satir.sh",
+    "tools/gez_sunucu.js",
+    "tools/package.json",
+    "tools/package-lock.json",
+}
+BILINEN_ONEKLER = (
+    "belgeler/",
+    "HKM/",
+    "king/",
+    "motor/",
+    "alan/",
+    "kabuk/",
+    "brand/",
+    "sistem/",
+    "kalite/",
+    "uygulama/",
+    "tools/",
+)
+
+
+def _tarayici_mi(adim):
+    return bool(TARAYICI.search(adim["ad"] + " " + " ".join(adim["komutlar"])))
+
+
+def _degisen_yollar(taban):
+    """Calisma agaci (HEAD) ya da TABAN...HEAD arasindaki degisen yollar; git okunamazsa None."""
+    def _git(*args):
+        return subprocess.run(
+            ["git", "-c", "core.quotepath=false", *args],
+            cwd=KOK, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+
+    yollar = set()
+    if taban != "HEAD":
+        r = _git("diff", "--name-only", "%s...HEAD" % taban)
+        if r.returncode != 0:
+            return None
+        yollar.update(x.strip().replace("\\", "/") for x in r.stdout.splitlines() if x.strip())
+    r_head = _git("diff", "--name-only", "HEAD")
+    r_yeni = _git("ls-files", "--others", "--exclude-standard")
+    if r_head.returncode != 0 or r_yeni.returncode != 0:
+        return None
+    yollar.update(x.strip().replace("\\", "/") for x in r_head.stdout.splitlines() if x.strip())
+    yollar.update(x.strip().replace("\\", "/") for x in r_yeni.stdout.splitlines() if x.strip())
+    if taban == "HEAD" and not yollar:
+        for ref in ("origin/main", "main"):
+            if _git("rev-parse", "--verify", ref).returncode == 0:
+                r_ref = _git("diff", "--name-only", "%s...HEAD" % ref)
+                if r_ref.returncode == 0:
+                    yollar.update(x.strip().replace("\\", "/") for x in r_ref.stdout.splitlines() if x.strip())
+                break
+    return sorted(yollar)
+
+
+def _adim_eslesir(adim, yol):
+    k = " ".join(adim["komutlar"])
+    is_ = adim["is"]
+    if yol.startswith("belgeler/"):
+        return "belge_dizin_kabul_test" in k
+    if yol.startswith("HKM/"):
+        return (is_ == "hkm" or "tekkapi_test" in k or "king/" in k or "olcum.py" in k
+                or "not-hkm.test.js" in k or "hafiza_" in k or "merdiven_" in k)
+    if yol.startswith("king/"):
+        return ("king/" in k or "king-sohbet.test.js" in k or "tekkapi_test" in k
+                or "olcum.py" in k or "bilgisayar_kabul_test" in k or "kopru" in adim["ad"].lower())
+    if yol.startswith("motor/"):
+        return ("motor/" in k or "king/" in k or "kabuk" in k or "ortak_test" in k
+                or "hiz_olcum" in k or "hareket_gez" in k or "gercek_kosu" in k
+                or "tekkapi_test" in k or "olcum.py" in k or "kalite/katman" in k)
+    if yol.startswith("alan/"):
+        return ("alan/" in k or "king/" in k or "kabuk_gez" in k or "hareket_gez" in k
+                or "hiz_olcum" in k or "onay_uygula" in k or "veri_" in k
+                or "olcum.py" in k or "kalite/katman" in k)
+    if yol.startswith(("kabuk/", "brand/")):
+        return ("kabuk" in k or "brand/" in k or "ortak_test" in k or "hiz_olcum" in k
+                or "hareket_gez" in k or "marka.py" in k or "vitrin.py" in k
+                or "tekkapi_test" in k or "gocpaket" in k or "web_paket" in k
+                or "kabul_js" in k or "kullanim" in k or "bilinc_kabul" in k
+                or "turk_tablo_kabul" in k or "portreonar_test" in k
+                or "kalite/katman" in k or "olcum.py" in k or "king/" in k)
+    if yol.startswith("sistem/"):
+        return any(t in k for t in (
+            "tekkapi_test", "kuyruk_test", "tasi_test", "goc_test", "tekdepo_test",
+            "gocpaket_test", "zemin_test", "planlama_test", "muzik_test", "ice_test",
+            "ayar_test", "kalite_etiket_test", "bilgisayar_kabul_test", "olcum.py",
+            "kabuk_esit_gez", "kabuk_gez", "ayar_esit_kabul", "ice_suren_kabul",
+        ))
+    if yol.startswith("kalite/"):
+        return any(t in k for t in (
+            "olcum", "katman", "kullanim", "anlama", "hiz_olcum", "kalite_etiket_test", "king/",
+        ))
+    if yol.startswith("uygulama/"):
+        return "web_paket" in k or "olcum.py" in k
+    if yol.startswith("tools/"):
+        ad = os.path.basename(yol)
+        kok_ad = re.sub(r"(?:_kabul_test|_test|\.test)?\.(?:py|js)$", "", ad)
+        if ad == "ema_isci.py" and is_ == "hkm":
+            return True
+        if "tools_dizin_kabul_test" in k:
+            return True
+        if ("tools/" + ad) in k:
+            return True
+        return len(kok_ad) >= 4 and ("tools/" + kok_ad) in k
+    return False
+
+
+def etkilenen_adimlar(liste, yollar):
+    """Degisen yollardan etkilenen CI adimlarini guvenli geri dususle secer."""
+    if yollar is None:
+        return list(liste), "git okunamadı: tüm adımlar"
+    if not yollar:
+        return [], "değişen dosya yok"
+    for y in yollar:
+        yol = y.replace("\\", "/")
+        if yol.startswith(".github/") or yol in GENEL_YOLLAR or not yol.startswith(BILINEN_ONEKLER):
+            return list(liste), "genel değişiklik (%s): tüm adımlar" % yol
+    secilen = [a for a in liste if any(_adim_eslesir(a, y.replace("\\", "/")) for y in yollar)]
+    if not secilen:
+        return list(liste), "eşleşen özel adım yok: tüm adımlar"
+    return secilen, "%d dosya -> %d/%d adım" % (len(yollar), len(secilen), len(liste))
 
 
 def adimlar(metin):
@@ -115,17 +241,29 @@ def main(argv=None):
     p = argparse.ArgumentParser(description="CI denetimlerini yerelde tek komutla koşar.")
     p.add_argument("--liste", action="store_true")
     p.add_argument("--sira", action="store_true")
+    p.add_argument("--hizli", action="store_true", help="tarayıcı adımlarını atlar")
+    p.add_argument("--degisen", nargs="?", const="HEAD", default=None, metavar="TABAN",
+                   help="yalnız değişen dosyalardan etkilenen adımlar (varsayılan HEAD)")
     p.add_argument("-k", default="", help="adında bu geçen adımlar")
     a = p.parse_args(argv)
     with open(CI, encoding="utf-8") as f:
-        liste = [x for x in adimlar(f.read()) if a.k.lower() in x["ad"].lower()]
+        liste = adimlar(f.read())
+    if a.degisen is not None:
+        liste, neden = etkilenen_adimlar(liste, _degisen_yollar(a.degisen))
+        print("[ci_yerel] --degisen: %s" % neden, file=sys.stderr)
+    if a.hizli:
+        liste = [x for x in liste if not _tarayici_mi(x)]
+    liste = [x for x in liste if a.k.lower() in x["ad"].lower()]
     if a.liste:
         for x in liste:
-            print("%-10s %s%s" % (x["is"], x["ad"], "  [tarayıcı]" if TARAYICI.search(x["ad"] + " ".join(x["komutlar"])) else ""))
+            print("%-10s %s%s" % (x["is"], x["ad"], "  [tarayıcı]" if _tarayici_mi(x) else ""))
+        return 0
+    if not liste:
+        print("Koşulacak adım yok.")
         return 0
     gecici = tempfile.mkdtemp(prefix="ci-yerel-")
     ortam = _ortam(gecici)
-    tarayicili = [x for x in liste if TARAYICI.search(x["ad"] + " ".join(x["komutlar"]))]
+    tarayicili = [x for x in liste if _tarayici_mi(x)]
     duz = [x for x in liste if x not in tarayicili]
     kalan, t0 = [], time.time()
 
@@ -165,6 +303,23 @@ if __name__ == "__main__":
             gercek = adimlar(f.read())
         assert len(gercek) > 30 and any("tekkapi_test" in " ".join(s["komutlar"]) for s in gercek)
         assert any(s["is"] == "hkm" and s["dizin"] == "HKM" for s in gercek)
+        assert len(etkilenen_adimlar(gercek, [])[0]) == 0
+        assert len(etkilenen_adimlar(gercek, None)[0]) == len(gercek)
+        assert len(etkilenen_adimlar(gercek, [".github/workflows/ci.yml"])[0]) == len(gercek)
+        assert len(etkilenen_adimlar(gercek, ["bilinmeyen/x.txt"])[0]) == len(gercek)
+        b_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["belgeler/DIZIN.md"])[0]]
+        assert any("Ofis kabul" in ad for ad in b_adimlar) and len(b_adimlar) <= 2, b_adimlar
+        a_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["king/arama.py"])[0]]
+        assert any("Arama motoru" in ad for ad in a_adimlar) and not any(_tarayici_mi(s) for s in etkilenen_adimlar(gercek, ["king/arama.py"])[0]), a_adimlar
+        h_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["HKM/core/depo.py"])[0]]
+        assert "Testler" in h_adimlar and "Sorgu bütçesi" in h_adimlar, h_adimlar
+        k_adimlar = etkilenen_adimlar(gercek, ["kabuk/kabuk.css"])[0]
+        assert any(_tarayici_mi(s) for s in k_adimlar) and any("Kabuk haritası" in s["ad"] for s in k_adimlar)
+        assert len([s for s in k_adimlar if not _tarayici_mi(s)]) < len(k_adimlar)
+        t_adimlar = [s["ad"] for s in etkilenen_adimlar(gercek, ["tools/pano_cek.js"])[0]]
+        assert any("Ofis kabul" in ad for ad in t_adimlar), t_adimlar
+        hizli = [s for s in gercek if not _tarayici_mi(s)]
+        assert 0 < len(hizli) < len(gercek)
         if os.name == "nt":
             b = _bash()
             assert b.lower().endswith("bash.exe") and os.path.isfile(b), b
