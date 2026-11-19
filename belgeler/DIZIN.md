@@ -89,6 +89,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
   - [Ajan C raporu](ekip/sadelesme/tur-20261118i/ajan-c.md) — tarih.5 Osmanlı’dan Cumhuriyet’e; kaynak hataları ve emin olunmayan noktalar
 - [Tur 2026-11-18j · Başbuğ adı, tok ses, geçişsiz, keskin piksel](ekip/sadelesme/tur-20261118j/rapor.md) — King görünen adı Başbuğ, sesler iki oktav aşağı ve tok, sayfa geçişi kalktı, sahne pikselleri tam sayıda cihaz noktası.
 - [Tur 2026-11-18k · Notlarda klasör, kendi konuların, tuğ, otağ, Türk mührü](ekip/sadelesme/tur-20261118k/tur.md) — notlar klasörlenir, alanlara kendi başlık ve konuların, Başbuğ simgesi tuğ, otağ sesi, her sayfada Türk mührü, sahneler, Sağlık içeriği.
+- [Gece altyapı iyileştirme turu (2026-11-19)](ekip/sadelesme/gece-altyapi-20261119.md) — Faz 0–4 Başbuğ/King köprü/MCP, HTTP/1.1 Keep-Alive + CSS paketi, motor tek-geçiş optimizasyonları, tek depo atomik işlemleri ve salt-okunur denetim bulguları.
   - [Notlar: klasörler ve yazma ekranı](ekip/sadelesme/tur-20261118k/notlar.md) — klasör çipleri, yeniden adlandırma, geri alınır silme, yazma kartı
   - [Kendi başlıkların ve konuların, Başbuğ'la çalış ve konuya kaydet](ekip/sadelesme/tur-20261118k/konularim.md) — alan sayfasında başlık/konu, «Başbuğ düzenlesin», «Başbuğ’un notu»
   - [Piksel: taht figürü, tuğ amblemi, yaylak, medrese huzmeleri](ekip/sadelesme/tur-20261118k/piksel.md) — önce/sonra görüntüler, renk ve süre ölçümü
