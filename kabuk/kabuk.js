@@ -1069,16 +1069,15 @@
     var dene = n && /[?&]dene\b/.test(location.hash), yol = F() + '/ders/' + id, bitir = function (bos) {
       return { metin: okundu ? 'Sıradaki' : 'Bitir, sıradakine geç', tur: 'ana', veri: { ac: 'okudum', ders: id, bos: okundu ? '0' : String(bos) } }; };
     var cubuk_ = '<header class="ust ust--duz ust--ogren"><nav class="konum" aria-label="Konum">' + dersKirinti(y, id) + '</nav></header>';
-    // kâğıdın başında alanın piksel sahnesi (2026-11-18e, sahip: «öğrenme bölümünün pixel artını geliştir»); manzara() çizer, kitaplık yoksa düz gök
-    var sahne = KAPAK[etkinAlan] ? '<div class="ders-sahne" aria-hidden="true"><canvas class="kapak__sahne" width="480" height="72" data-sahne="' + KAPAK[etkinAlan][0] + '"></canvas></div>' : '';
+    // kâğıdın başındaki piksel sahne kalktı (2026-11-19 karargâh: okuma sayfasında süs, başlığı 200 px itiyordu)
     if (dene) {
-      return cubuk_ + '<article class="govde ders ders--dene">' + sahne + dersAdimlari(Math.max(adim, 1), n) + B.baslik({ metin: 'Kendini dene', alt: x.ad }) +
+      return cubuk_ + '<article class="govde ders ders--dene">' + dersAdimlari(Math.max(adim, 1), n) + B.baslik({ metin: 'Kendini dene', alt: x.ad }) +
         '<p class="soluk ders__sayac">' + n + ' soru · ' + cevap + ' / ' + n + ' cevaplandı</p>' +
         x.alistirmalar.map(function (a, i) { return '<div class="ders__soru" data-no="' + (i + 1) + '/' + n + '">' + soruHtml(a, kayit) + '</div>'; }).join('') +
         '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) + B.eylemler([bitir(n - cevap), { metin: 'Derse dön', tur: 'sade', href: yol }]) + '</div></article>';
     }
     // ders-ilerleme: üstte kaydırınca dolan ince çizgi (kaydir yazar), süs; okuma oranı ekran okuyucuya ayrıca söylenmez
-    return cubuk_ + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + sahne + dersAdimlari(adim, n) + dersMetni(y, x) +
+    return cubuk_ + '<article class="govde ders"><div class="ders-ilerleme" aria-hidden="true"><i></i></div>' + dersAdimlari(adim, n) + dersMetni(y, x) +
       '<div class="ders__bitir">' + dersSonu(y, kayit, x, id, okundu) +
       (n ? '<a class="ders__dene" href="' + yol + '?dene"><span><b>Kendini dene</b>' + n + ' kısa soru' + (cevap ? ' · ' + cevap + ' cevaplandı' : ', isteğe bağlı') + '</span><svg aria-hidden="true"><use href="#i-sag"/></svg></a>' : '') +
       B.eylemler([bitir(0), { metin: "Başbuğ'la çalış", tur: 'sade', href: '#/king', veri: { 'king-calis': id } }]) + '</div></article>'; // king-sohbet.js: ders bağlamıyla açar
@@ -1091,13 +1090,7 @@
     if (okundu) l.push('<span class="ders__son-tik"><svg aria-hidden="true"><use href="#i-tik"/></svg>Okundu</span>');
     if (cevap) l.push(sec ? 'Alıştırma ' + dogru + ' / ' + sec + ' doğru' : cevap + ' / ' + x.alistirmalar.length + ' cevaplandı');
     return (l.length ? '<p class="ders__son">' + l.join(' · ') + '</p>' : '') +
-      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '') + dersAtasozu(id);
-  }
-  // ders sonunda, derse göre sabit bir Türk atasözü
-  function dersAtasozu(id) {
-    var l = SOZ.filter(function (s) { return s[1] === 'Türk atasözü'; }), h = 0;
-    String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 9973; });
-    return '<p class="ders__atasozu">«' + kac(l[h % l.length][0]) + '» <span>Türk atasözü</span></p>';
+      (a ? '<p class="ders__sonraki"><span>Sıradaki</span> ' + kac(a.tur === 'ders' ? a.ad : 'Kapı sınavı · ' + (a.ad || '')) + '</p>' : '');
   }
   // Dersin üç adımı: oku, alıştır, bitir. Şimdiki adım vurgulu, geçilenler ✓ (renk tek başına değil).
   function dersAdimlari(adim, n) {
