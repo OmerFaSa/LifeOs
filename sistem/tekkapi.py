@@ -116,10 +116,26 @@ def _hkm_ayni_surecte(port):
 
 class TekKapi(Giris):
     """Giris'in kendisi + yol onekine gore mevcut isleyicilere devir."""
+    protocol_version = "HTTP/1.1"
+    timeout = 15
+    disable_nagle_algorithm = True
+
+    def send_response(self, code, message=None):
+        self._son_kod = code
+        super().send_response(code, message)
+
+    def end_headers(self):
+        # Okunmamis govdeli POST/DELETE hata cevaplarinda TCP akisinin kaymamasi icin baglantiyi kapat.
+        if (self.close_connection or
+                (getattr(self, "_son_kod", 0) >= 400 and self.command not in ("GET", "HEAD"))):
+            if b"connection:" not in b"".join(getattr(self, "_headers_buffer", ())).lower():
+                self.send_header("Connection", "close")
+        super().end_headers()
 
     def parse_request(self):
         # Sunucu.parse_request ile ayni: Tailscale serve P6'da BU kapiya gelecek; vekil
         # istegi «bu bilgisayar» sayilmasin (uzak.py soz 2). Giris'te yoktu, cunku serve 4180'e gelmiyordu.
+        self._son_kod = 0
         tamam = super().parse_request()
         if tamam and uzak.vekilden_mi(self.client_address[0], self.headers):
             self.client_address = (uzak.VEKIL_IP, self.client_address[1])
@@ -129,6 +145,11 @@ class TekKapi(Giris):
         h = sinif.__new__(sinif)
         for a in _ISTEK:
             setattr(h, a, getattr(self, a))
+        if self.command in ("GET", "HEAD"):
+            h.protocol_version = self.protocol_version
+        else:
+            h.protocol_version = "HTTP/1.0"
+            h.close_connection = True
         h.path = yol
         for k, v in nitelik.items():
             setattr(h, k, v)

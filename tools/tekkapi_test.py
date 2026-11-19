@@ -11,6 +11,7 @@ klasoru (LOCALAPPDATA/APPDATA dahil) gecici klasore yonlendirilir.
   python tools/tekkapi_test.py --bellek   + bostaki bellek (RSS), eski vs tek, uc tur, ortanca
 """
 import gzip
+import http.client
 import json
 import os
 import re
@@ -257,14 +258,24 @@ def sina(eski, tek, kokler=()):
     with open(os.path.join(KOK, "kabuk", "index.html"), "rb") as f_:
         kaynak_ = f_.read()
     srcler_ = re.findall(rb'<script src="([^"]+)"></script>', kaynak_)
+    cssler_ = re.findall(rb'<link rel="stylesheet" href="([^/"]+\.css)">', kaynak_)
     dene("/kabuk/ tek betik ister (paket.js + açılmazsa ?ayri koruması)", gv.count(b"<script src=") == 1 and b'<script src="paket.js">' in gv
          and b"ayri" in gv and len(srcler_) > 20, gv.count(b"<script src="))
+    dene("/kabuk/ yerel stilleri paket.css olarak birleştirir",
+         len(cssler_) >= 4 and gv.count(b'rel="stylesheet"') == 2 and b'<link rel="stylesheet" href="paket.css">' in gv
+         and b'href="../brand/ortak/piksel-yazi.css"' in gv, gv[:500])
     k, b, pv = iste(T, "/kabuk/paket.js")
     sira_ = [pv.find(b"/* " + s + b" */") for s in srcler_]
     dene("/kabuk/paket.js index'teki betikleri aynı sırayla, her biri kendi try'ında taşır", k == 200 and "javascript" in b.get("Content-Type", "")
          and -1 not in sira_ and sira_ == sorted(sira_) and pv.count(b"} catch (e) { setTimeout(function () { throw e; }); }") == len(srcler_), (k, sira_[:3]))
+    k, b, pcss = iste(T, "/kabuk/paket.css")
+    csira_ = [pcss.find(b"/* " + s + b" */") for s in cssler_]
+    dene("/kabuk/paket.css index'teki stilleri aynı sırayla taşır", k == 200 and "text/css" in b.get("Content-Type", "")
+         and -1 not in csira_ and csira_ == sorted(csira_), (k, csira_))
     with open(os.path.join(KOK, "kabuk", "kabuk.js"), "rb") as f_:
         dene("paket kaynak dosyanın kendisini taşır (kabuk.js birebir)", f_.read() in pv)
+    with open(os.path.join(KOK, "kabuk", "kabuk.css"), "rb") as f_:
+        dene("paket kaynak stili taşır (kabuk.css birebir)", f_.read() in pcss)
     dene("/kabuk/?ayri kaynak index.html'i aynen verir", iste(T, "/kabuk/?ayri")[2] == kaynak_)
     dene("paketli ve ayrı index'in ETag'i ayrı", iste(T, "/kabuk/")[1].get("ETag") != iste(T, "/kabuk/?ayri")[1].get("ETag"))
     dene("/kabuk → 301 /kabuk/", iste_yonsuz(T, "/kabuk")[0] == 301)
@@ -333,10 +344,12 @@ def sina(eski, tek, kokler=()):
 
     k, b, gv = iste(T, "/kabuk/kabuk.js", "HEAD")
     dene("HEAD /kabuk/kabuk.js gövdesiz 200", k == 200 and gv == b"" and int(b.get("Content-Length", 0)) > 0, k)
+    k, b, gv = iste(T, "/kabuk/paket.css", "HEAD")
+    dene("HEAD /kabuk/paket.css gövdesiz 200", k == 200 and gv == b"" and int(b.get("Content-Length", 0)) > 0, k)
     dene("POST /kabuk/ 405", iste(T, "/kabuk/", "POST", b"")[0] == 405)
     # Onbellek ve sikistirma (altyapi 2026-11-15): her acilis 4,2 MB'i yeniden indiriyordu. Degismeyen dosya 304, gzip
     # isteyene gzip, dosya degisince yeni ETag; Chromium fetch() yalniz ETag'le sormuyor, Last-Modified ile soruyor.
-    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/kabuk/paket.js", "/alan/felsefe/asama-1.json", "/hesap.js"):
+    for yol in ("/kabuk/", "/kabuk/kabuk.js", "/kabuk/paket.js", "/kabuk/paket.css", "/alan/felsefe/asama-1.json", "/hesap.js"):
         k, b, gv = iste(T, yol)
         et, lm = b.get("ETag"), b.get("Last-Modified")
         dene("%s ETag + Last-Modified + no-cache" % yol, k == 200 and et and lm and b.get("Cache-Control") == "no-cache", dict(b))
@@ -361,6 +374,38 @@ def sina(eski, tek, kokler=()):
     v2 = _s._statik_oku(gec)
     dene("dosya değişince yeni ETag ve yeni gövde", v2[2] != e1 and v2[0] == b"b" * 2000, (e1, v2[2]))
     shutil.rmtree(os.path.dirname(gec), ignore_errors=True)
+
+    # HTTP/1.1 Keep-Alive: 5 ardisik istek tek TCP soketini paylasmali; okunmamis govdeli POST hata cevabi baglantiyi kapatmali.
+    conn = http.client.HTTPConnection(H, T, timeout=5)
+    fds, durumlar, css_etag = [], [], None
+    try:
+        for kyol, khdr in (("/kabuk/", {}), ("/kabuk/paket.css", {}), ("/kabuk/paket.js", {}),
+                           ("/kabuk/paket.css", None), ("/api/hkm/health", {})):
+            if khdr is None:
+                khdr = {"If-None-Match": css_etag} if css_etag else {}
+            conn.request("GET", kyol, headers=khdr)
+            r = conn.getresponse()
+            r.read()
+            durumlar.append(r.status)
+            if kyol == "/kabuk/paket.css" and r.status == 200:
+                css_etag = r.getheader("ETag")
+            fds.append(conn.sock.fileno() if conn.sock is not None else None)
+    finally:
+        conn.close()
+    dene("HTTP/1.1 Keep-Alive 5 ardışık GET tek soket kullanır",
+         durumlar == [200, 200, 200, 304, 200] and len(fds) == 5 and all(f is not None and f == fds[0] for f in fds),
+         (durumlar, fds))
+    c2 = http.client.HTTPConnection(H, T, timeout=5)
+    try:
+        c2.request("POST", "/api/kabuk/hata", body=b'{"mesaj":"sinama"}', headers={"Content-Type": "application/json"})
+        r2 = c2.getresponse()
+        r2.read()
+        kapat = (r2.getheader("Connection") or "").lower() == "close"
+        k_err = r2.status
+    finally:
+        c2.close()
+    dene("okunmamış gövdeli POST 403 bağlantıyı kapatır, taze istek 200 döner",
+         k_err == 403 and kapat and iste(T, "/api/hkm/health")[0] == 200, (k_err, kapat))
 
     dene("kökte HEAD dosya vermez", iste(T, "/sistem/tekkapi.py", "HEAD")[0] in (404, 405))
     # --port'suz tek kapi 4180'de acilir (ETKIN): sinama onu hic calistirmaz.

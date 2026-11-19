@@ -269,7 +269,18 @@
       }).join('');
     }).join('⁚');
   }
-  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gokturk = gokturk; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz;
+  function kac(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function gunAnahtar(t) { return (t.getMonth() + 1) + '-' + t.getDate(); }
+  function sahneBoyut(en, boy, dpr, pencereEn) {
+    dpr = dpr > 0 ? dpr : 1;
+    var olc = Math.max(2, Math.round((pencereEn < 640 ? 2 : 3) * dpr)) / dpr;
+    return { olc: olc, w: Math.max(120, Math.ceil((en + 24) / olc)), h: Math.max(40, Math.ceil((boy + 12) / olc)) };
+  }
+  function sozEk(t) {
+    return '<div class="soz__ek"><details class="soz__acil" data-soz-ek="milli" data-gun="' + kac(gunAnahtar(t)) +
+      '"><summary>Yılın tarihî günleri</summary></details><details class="soz__acil" data-soz-ek="gokturk"><summary>Göktürk yazısı</summary></details></div>';
+  }
+  Kabuk.katla = katla; Kabuk.puan = puan; Kabuk.ara = ara; Kabuk.komutOgeleri = komutOgeleri; Kabuk.komutSonucu = komutSonucu; Kabuk.selam = selam; Kabuk.gokturk = gokturk; Kabuk.gunYayi = gunYayi; Kabuk.gunYayiHtml = gunYayiHtml; Kabuk.dersParagraf = dersParagraf; Kabuk.ozetCumle = ozetCumle; Kabuk.siradaki = siradaki; Kabuk.durumPul = durumPul; Kabuk.kingGovde = kingGovde; Kabuk.uniteGruplari = uniteGruplari; Kabuk.haritaSuz = haritaSuz; Kabuk.dalOku = dalOku; Kabuk.dalYaz = dalYaz; Kabuk.sahneBoyut = sahneBoyut; Kabuk.sozEk = sozEk;
   Kabuk.Asama = { kayitAnahtari: kayitAnahtari, hazirla: asamaHazirla, kur: asamalariKur, kayit: asamaKaydi, yaz: asamaYaz, liste: asamaListesi, calisilan: calisilanAsama,
     yeniMi: alanYeniMi, yerlestir: yerlestirYaz, tahminSil: tahminSilHepsi };
   kok.LIFEOS = kok.LIFEOS || {}; kok.LIFEOS.Kabuk = Kabuk;
@@ -339,7 +350,6 @@
   // kayıtlar IndexedDB'de (depo.js: kayıt/ayar ayrımı orada), ayarlar yerel depoda; sayfa kayıtlar belleğe yüklenince çizilir
   var depo = Kabuk.Depo, hazir = depo.ac(yerel), B = Kabuk.Bilesen; // B: ekranlar yalnız bileşen kataloğundan (kabuk/bilesen.js) kurulur
   var $ = function (s, k) { return (k || d).querySelector(s); };
-  function kac(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   function uygula() {
     var n = A.kokNitelikleri(depo);
@@ -397,7 +407,6 @@
     '11-8': 'Şuşa\'nın kurtuluşu, Azerbaycan Zafer Günü (2020)', '11-12': 'Türk Devletleri Teşkilatı (2021)', '11-15': 'Kuzey Kıbrıs Türk Cumhuriyeti\'nin kuruluşu (1983)',
     '11-22': 'Enver Paşa\'nın doğumu (1881)', '11-24': 'Öğretmenler Günü · Atatürk soyadının verilişi (1934)', '12-5': 'Türk kadınına seçme ve seçilme hakkı (1934)',
     '12-16': 'Kazakistan\'ın bağımsızlığı (1991)', '12-22': 'Sarıkamış şehitlerini anıyoruz (1914)', '12-27': 'Mustafa Kemal\'in Ankara\'ya gelişi (1919)', '12-15': 'Göktürk yazısının çözülüşü, Vilhelm Thomsen (1893)' };
-  function gunAnahtar(t) { return (t.getMonth() + 1) + '-' + t.getDate(); }
   // tek yılı olan olaya yıl dönümü eklenir («… (1923) · 103. yıl dönümü»); iki olaylı ya da yılsız günde eklenmez
   function yilDonumu(m, yil) { var y = m.match(/\((\d{3,4})\)/g); return y && y.length === 1 ? m + ' · ' + (yil - +y[0].slice(1, -1)) + '. yıl dönümü' : m; }
   // bugün tarihî bir gün değilse en yakın gelen gün ve kaç gün kaldığı
@@ -430,7 +439,7 @@
     }).join('') + '</ol><p class="tdev__bugun"><span>Bugünün devleti</span> ' + kac(d[0]) + ' <span class="tdev__yil">' + kac(d[1]) + '</span>' +
       (d[2] ? '<span class="tdev__han">' + kac(d[2]) + '</span>' : '') + '</p></section>';
   }
-  var HARF = [[0x10C00, 'a, e'], [0x10C03, 'ı, i'], [0x10C06, 'o, u'], [0x10C07, 'ö, ü'], [0x10C09, 'b'], [0x10C0B, 'b ince'], [0x10C11, 'd'], [0x10C13, 'd ince'],
+  var GT_HARF = [[0x10C00, 'a, e'], [0x10C03, 'ı, i'], [0x10C06, 'o, u'], [0x10C07, 'ö, ü'], [0x10C09, 'b'], [0x10C0B, 'b ince'], [0x10C11, 'd'], [0x10C13, 'd ince'],
     [0x10C0D, 'g, ğ'], [0x10C0F, 'g, ğ ince'], [0x10C34, 'k'], [0x10C1A, 'k ince'], [0x10C38, 'ok, uk'], [0x10C36, 'ık'], [0x10C1E, 'l'], [0x10C20, 'l ince'], [0x10C22, 'm'],
     [0x10C23, 'n'], [0x10C24, 'n ince'], [0x10C2D, 'ng'], [0x10C2F, 'p'], [0x10C32, 'ç'], [0x10C3A, 'r'], [0x10C3C, 'r ince'], [0x10C3D, 's'], [0x10C3E, 's ince'],
     [0x10C41, 'ş'], [0x10C43, 't'], [0x10C45, 't ince'], [0x10C16, 'y'], [0x10C18, 'y ince'], [0x10C14, 'z']];
@@ -472,15 +481,21 @@
     if (id === 'tarih') return '<aside class="miras miras--yildiz">' + onAltiYildiz(t) + '</aside>';
     return '';
   }
-  function sozEk(t) {
-    var bu = gunAnahtar(t), gunler = Object.keys(MILLI).sort(function (a, b) { var x = a.split('-'), y = b.split('-'); return x[0] - y[0] || x[1] - y[1]; });
-    return '<div class="soz__ek"><details class="soz__acil"><summary>Yılın tarihî günleri</summary><ol class="soz-gun">' + gunler.map(function (k) {
-      var x = k.split('-');
-      return '<li' + (k === bu ? ' aria-current="date"' : '') + '><span class="soz-gun__tarih">' + x[1] + ' ' + AY[x[0] - 1] + '</span>' + kac(MILLI[k]) + '</li>';
-    }).join('') + '</ol></details><details class="soz__acil"><summary>Göktürk yazısı</summary><label class="gokturk"><span>Bir şey yaz, Göktürk harfleriyle görün</span>' +
-      '<input class="gokturk__gir" type="text" maxlength="60" value="Türk" autocomplete="off" spellcheck="false"></label>' +
-      '<p class="gokturk__cik" lang="otk" dir="rtl" aria-live="polite">' + gokturk('Türk') + '</p><p class="gokturk__not">Harf harf, yaklaşık: yazıtlarda bazı ünlüler yazılmaz, sağdan sola okunur.</p>' +
-      '<ul class="gokturk__harf">' + HARF.map(function (h) { return '<li><b lang="otk">' + String.fromCodePoint(h[0]) + '</b>' + h[1] + '</li>'; }).join('') + '</ul></details></div>';
+  function sozEkIc(tur, gun) {
+    if (tur === 'milli') {
+      var gunler = Object.keys(MILLI).sort(function (a, b) { var x = a.split('-'), y = b.split('-'); return x[0] - y[0] || x[1] - y[1]; });
+      return '<ol class="soz-gun">' + gunler.map(function (k) {
+        var x = k.split('-');
+        return '<li' + (k === gun ? ' aria-current="date"' : '') + '><span class="soz-gun__tarih">' + x[1] + ' ' + AY[x[0] - 1] + '</span>' + kac(MILLI[k]) + '</li>';
+      }).join('') + '</ol>';
+    }
+    if (tur === 'gokturk') {
+      return '<label class="gokturk"><span>Bir şey yaz, Göktürk harfleriyle görün</span>' +
+        '<input class="gokturk__gir" type="text" maxlength="60" value="Türk" autocomplete="off" spellcheck="false"></label>' +
+        '<p class="gokturk__cik" lang="otk" dir="rtl" aria-live="polite">' + gokturk('Türk') + '</p><p class="gokturk__not">Harf harf, yaklaşık: yazıtlarda bazı ünlüler yazılmaz, sağdan sola okunur.</p>' +
+        '<ul class="gokturk__harf">' + GT_HARF.map(function (h) { return '<li><b lang="otk">' + String.fromCodePoint(h[0]) + '</b>' + h[1] + '</li>'; }).join('') + '</ul>';
+    }
+    return '';
   }
   function gununSozu(t) {
     var no = Math.floor(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5), s = SOZ[no % SOZ.length], m = MILLI[gunAnahtar(t)], y = m ? null : yaklasan(t);
@@ -674,8 +689,13 @@
     if (fark > 0) s.style.marginTop = Math.round(parseFloat(getComputedStyle(s).marginTop) + fark) + 'px';
   }
   var manzaraIstendi = false;
-  // sahne çizimi önbellekte: aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
-  var sahneOnbellek = {};
+  // sahne çizimi önbellekte (en çok 24 tuval): aynı sahne, saat ve boy bir kez çizilir, sonraki sayfa çizimlerinde kopyalanır
+  var sahneOnbellek = {}, sahneSira = [];
+  function sahneSakla(ad, o) {
+    if (!sahneOnbellek[ad]) sahneSira.push(ad);
+    sahneOnbellek[ad] = o;
+    while (sahneSira.length > 24) delete sahneOnbellek[sahneSira.shift()];
+  }
   function manzara() {
     var c = sayfaEl.querySelector('.b-karsilama__manzara, .kapak__sahne'), D = kok.LIFEOS && kok.LIFEOS.PIKSEL_DOGA;
     if (!c) return;
@@ -683,14 +703,13 @@
       if (location.protocol !== 'file:' && !manzaraIstendi) { manzaraIstendi = true; var b = d.createElement('script'); b.src = '/piksel-doga.js'; b.onload = manzara; d.head.appendChild(b); }
       return;
     }
+    var kutu = c.parentNode.getBoundingClientRect(); // DOM'u degistiren amblemKoy'dan once okunur (zoraki reflow yok)
     amblemKoy();
-    // Keskin piksel (2026-11-18, sahip: «arka plandaki pixelartları kaliteli yap»): sahnenin her pikseli TAM SAYIDA cihaz noktası (yaklaşık 3, telefonda 2
-    // CSS pikseli); tuval CSS'te tam o ölçüde, gerilmez. Eskiden %100'e gerilip üstüne scale(1.05) ve 1,25/1,5 ekran ölçeği binince pikseller 3-5 nokta arası
-    // eşitsiz çıkıyordu (bulanık, pürüzlü). İmleç kayması için tuval kutudan her yanda 12/6 px taşar (kabuk.css), büyütme yok.
-    var kutu = c.parentNode.getBoundingClientRect(), dpr = kok.devicePixelRatio || 1, olc = Math.max(2, Math.round((innerWidth < 640 ? 2 : 3) * dpr)) / dpr;
+    // Keskin piksel (2026-11-18): sahnenin her pikseli tam sayida cihaz noktasi; boy ve olcek sahneleriHazirla ile ayni formulle hesaplanir.
     if (kutu.width > 0 && kutu.height > 0) {
-      c.width = Math.max(120, Math.ceil((kutu.width + 24) / olc)); c.height = Math.max(40, Math.ceil((kutu.height + 12) / olc));
-      c.style.width = c.width * olc + 'px'; c.style.height = c.height * olc + 'px';
+      var boyut = sahneBoyut(kutu.width, kutu.height, kok.devicePixelRatio || 1, innerWidth);
+      c.width = boyut.w; c.height = boyut.h;
+      c.style.width = boyut.w * boyut.olc + 'px'; c.style.height = boyut.h * boyut.olc + 'px';
     }
     var saat = new Date().getHours(), tur = c.getAttribute('data-sahne') || 'yayla', ad = [tur, saat, c.width, c.height].join();
     try {
@@ -702,14 +721,14 @@
       canli = { c: c, g: c.getContext('2d'), arka: o, D: D };
       canli.g.drawImage(o, 0, 0); D.kare(canli.g, o, o.yer, Date.now() / 1000);
       if (!canliSaat) canliSaat = setInterval(canlandir, 125);
-      setTimeout(function () { sahneleriHazirla(D); }, 1500);
+      if (!onCizildi) setTimeout(function () { sahneleriHazirla(D); }, 1500);
     } catch (e) { /* süs */ }
   }
   // Sahneyi önbelleğe çizer; boşta (requestIdleCallback), yoksa kısa bir gecikmeyle. Aynı sahne iki kez sıraya girmez.
   var cizilecek = {};
   function sahneYap(D, tur, saat, w, h) {
     var ad = [tur, saat, w, h].join(); if (sahneOnbellek[ad]) return;
-    var o = d.createElement('canvas'); o.width = w; o.height = h; o.yer = D.yerlesim(w, h, D.vakit(saat), tur); D.binaCiz(o.getContext('2d'), o.yer); sahneOnbellek[ad] = o;
+    var o = d.createElement('canvas'); o.width = w; o.height = h; o.yer = D.yerlesim(w, h, D.vakit(saat), tur); D.binaCiz(o.getContext('2d'), o.yer); sahneSakla(ad, o);
   }
   // Önceden çizim (sonra yok: ekranda bekleyen tuval yok) yalnız gerçek boşlukta: süzülme ya da geçiş sürerken kalan süre kısaysa ertelenir.
   // Eskiden zaman aşımıyla (400 ms) hareketin ortasında koşup 4× yavaş CPU'da 130-170 ms'lik kareler bırakıyordu (2026-11-17b ölçümü).
@@ -725,10 +744,10 @@
   var onCizildi = false;
   function sahneleriHazirla(D) {
     if (onCizildi || !D) return; onCizildi = true;
-    var olc = innerWidth < 640 ? 2 : 3, w = Math.max(120, Math.round(innerWidth / olc)), saat = new Date().getHours();
-    var kh = Math.max(40, Math.round((innerWidth < 641 ? 144 : 300) / olc)), turler = {};
+    var boyut = sahneBoyut(innerWidth, innerWidth < 641 ? 144 : 300, kok.devicePixelRatio || 1, innerWidth);
+    var saat = new Date().getHours(), turler = {};
     Object.keys(KAPAK).forEach(function (k) { turler[KAPAK[k][0]] = 1; });
-    Object.keys(turler).forEach(function (t) { bostaCiz(D, t, saat, w, kh); });
+    Object.keys(turler).forEach(function (t) { bostaCiz(D, t, saat, boyut.w, boyut.h); });
   }
   // Sahnenin sakinleri (süzülen bulut, kuş sürüsü, düşen yaprak, ördek, yıldız) kitaplığın kendi rutinleriyle yürür; kare değişmedikçe çizilmez.
   var canli = null, canliSaat = null;
@@ -1478,6 +1497,12 @@
       if (e.target.matches('[data-ayar][data-parca]')) aralikYaz(e.target);
       else if (e.target.matches('input[data-ayar]')) sayiYaz(e.target);
     });
+    d.addEventListener('toggle', function (e) {
+      var el = e.target, tur = el && el.open && el.getAttribute && el.getAttribute('data-soz-ek');
+      if (!tur || el.getAttribute('data-soz-ek-dolu')) return;
+      el.setAttribute('data-soz-ek-dolu', '1');
+      el.insertAdjacentHTML('beforeend', sozEkIc(tur, el.getAttribute('data-gun') || ''));
+    }, true);
     d.addEventListener('contextmenu', sagTik);
     altEl = $('#alt-cubuk');
     d.addEventListener('pointermove', halkaYon);

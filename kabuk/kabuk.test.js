@@ -848,5 +848,30 @@ t('açılış yükü: SONRA tablosundaki betikler index.html\'de yok, diskte var
   dogru(html.indexOf('src="acilis.js"') >= 0, 'acilis.js açılış videosu için açılışta kalır');
 });
 
+t('sahneBoyut: tüm DPR ve ekran genişliklerinde manzara ile önbellek anahtarını hizalar', () => {
+  dogru(typeof K.sahneBoyut === 'function', 'K.sahneBoyut dışa verilmeli');
+  [1, 1.25, 1.5, 2].forEach(dpr => {
+    [[390, 144, 390], [640, 300, 640], [1280, 300, 1280]].forEach(([en, boy, pen]) => {
+      const a = K.sahneBoyut(en, boy, dpr, pen);
+      const b = K.sahneBoyut(en, boy, dpr, pen);
+      esit(a, b);
+      dogru(Number.isInteger(a.w) && a.w >= 120 && Number.isInteger(a.h) && a.h >= 40 && a.olc >= 2 / dpr, JSON.stringify(a));
+    });
+  });
+  const kucuk = K.sahneBoyut(390, 144, 1, 390), buyuk = K.sahneBoyut(1280, 300, 1, 1280);
+  esit([kucuk.olc, kucuk.w, kucuk.h], [2, 207, 78]);
+  esit([buyuk.olc, buyuk.w, buyuk.h], [3, 435, 104]);
+});
+
+t('sozEk: kapalı details başlıklarıyla hafif DOM üretir, ağır iç listeler açılınca dolar', () => {
+  dogru(typeof K.sozEk === 'function', 'K.sozEk dışa verilmeli');
+  const html = K.sozEk(new Date(2026, 10, 19));
+  dogru(/<details class="soz__acil" data-soz-ek="milli"/.test(html), 'millî günler lazy details');
+  dogru(/<details class="soz__acil" data-soz-ek="gokturk"/.test(html), 'Göktürk lazy details');
+  dogru(/<summary>Yılın tarihî günleri<\/summary><\/details>/.test(html), 'kapalıyken liste basılmamalı');
+  dogru(/<summary>Göktürk yazısı<\/summary><\/details>/.test(html), 'kapalıyken harf tablosu basılmamalı');
+  dogru(!/<(li|input|ul|ol)\b/.test(html), 'ilk açılışta ağır alt etiket olmamalı');
+});
+
 console.log('\n' + gecen + ' geçti, ' + kalan + ' kaldı');
 process.exit(kalan ? 1 : 0);

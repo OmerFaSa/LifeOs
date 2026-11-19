@@ -1289,32 +1289,41 @@ def _statik_oku(tam):
 # hatasi) sayfa kendini bir kez ?ayri ile yeniden acar.
 KABUK_GIRIS = os.path.join(KOK, "kabuk", "index.html")
 _BETIK_ETIKET = re.compile(r'<script src="([^"]+)"></script>')
+_STIL_ETIKET = re.compile(r'<link rel="stylesheet" href="([^/"]+\.css)">')
 _PAKET_KORUMA = ('<script>if (!(window.LIFEOS && LIFEOS.Kabuk && LIFEOS.Kabuk.ic) && !/[?&]ayri\\b/.test(location.search)) '
                  'location.replace(location.pathname + (location.search ? location.search + "&" : "?") + "ayri" + location.hash);</script>')
 _PAKET = {}
 
 
 def kabuk_paketi():
-    """((index govde, gzip, etag, son), (paket.js ...)) _statik_oku bicimiyle; betikten biri yoksa None (ayri dosyalar)."""
+    """((index govde, gzip, etag, son), (paket.js ...), (paket.css ...)) _statik_oku bicimiyle; betikten biri yoksa None."""
     html_, _, h_etag, h_son = _statik_oku(KABUK_GIRIS)
     metin = html_.decode("utf-8")
     srcler = _BETIK_ETIKET.findall(metin)
+    cssler = _STIL_ETIKET.findall(metin)
     parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in srcler]
-    if not srcler or None in parcalar:
+    css_parcalar = [kabuk_dosyasi(posixpath.normpath("/kabuk/" + s)) for s in cssler]
+    if not srcler or None in parcalar or not cssler or None in css_parcalar:
         return None
     okunan = [_statik_oku(p) for p in parcalar]
-    anahtar = h_etag + "".join(o[2] for o in okunan)
+    css_okunan = [_statik_oku(p) for p in css_parcalar]
+    css_etag_toplam = "".join(o[2] for o in css_okunan)
+    anahtar = h_etag + "".join(o[2] for o in okunan) + css_etag_toplam
     with _STATIK_KILIT:
         k = _PAKET.get("kabuk")
     if k and k[0] == anahtar:
         return k[1]
-    ilk = []
-    sayfa = _BETIK_ETIKET.sub(lambda m: "" if ilk else ilk.append(1) or '<script src="paket.js"></script>' + _PAKET_KORUMA, metin).encode("utf-8")
+    ilk_js, ilk_css = [], []
+    metin_css = _STIL_ETIKET.sub(lambda m: "" if ilk_css else ilk_css.append(1) or '<link rel="stylesheet" href="paket.css">', metin)
+    sayfa = _BETIK_ETIKET.sub(lambda m: "" if ilk_js else ilk_js.append(1) or '<script src="paket.js"></script>' + _PAKET_KORUMA, metin_css).encode("utf-8")
     js = "".join("/* %s */\ntry {\n%s\n} catch (e) { setTimeout(function () { throw e; }); }\n" % (s, o[0].decode("utf-8"))
                  for s, o in zip(srcler, okunan)).encode("utf-8")
+    css = "".join("/* %s */\n%s\n" % (s, o[0].decode("utf-8")) for s, o in zip(cssler, css_okunan)).encode("utf-8")
     son = email.utils.formatdate(max(os.stat(p).st_mtime for p in parcalar), usegmt=True)
+    css_son = email.utils.formatdate(max(os.stat(p).st_mtime for p in css_parcalar), usegmt=True)
     sonuc = ((sayfa, gzip.compress(sayfa, 6, mtime=0), h_etag[:-1] + '-p"', h_son),
-             (js, gzip.compress(js, 6, mtime=0), '"p%s"' % hashlib.sha1(anahtar.encode()).hexdigest()[:16], son))
+             (js, gzip.compress(js, 6, mtime=0), '"p%s"' % hashlib.sha1(anahtar.encode()).hexdigest()[:16], son),
+             (css, gzip.compress(css, 6, mtime=0), '"c%s"' % hashlib.sha1(css_etag_toplam.encode()).hexdigest()[:16], css_son))
     with _STATIK_KILIT:
         _PAKET["kabuk"] = (anahtar, sonuc)
     return sonuc
@@ -1327,8 +1336,11 @@ class Giris(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(govde)))
         self.send_header("Cache-Control", "no-store")
+        if kod >= 400 and self.command not in ("GET", "HEAD"):
+            self.send_header("Connection", "close")
         self.end_headers()
-        self.wfile.write(govde)
+        if self.command != "HEAD":
+            self.wfile.write(govde)
 
     def do_OPTIONS(self):
         if self.path.startswith("/api/hesap/"):
@@ -1400,13 +1412,19 @@ class Giris(SimpleHTTPRequestHandler):
 
     def _kabuk_sun(self, tam):
         yol, _, sorgu = self.path.partition("?")
-        paket = yol == "/kabuk/paket.js"
+        paket_js = yol == "/kabuk/paket.js"
+        paket_css = yol == "/kabuk/paket.css"
+        paket = paket_js or paket_css
         if not (tam or paket) or self.command not in ("GET", "HEAD"):
             return self.send_error(404 if not (tam or paket) else 405)
         if paket or (tam == KABUK_GIRIS and "ayri" not in parse_qs(sorgu, keep_blank_values=True)):
             p = kabuk_paketi()
             if p:
-                return self._statik(None, _KABUK_TUR[".js" if paket else ".html"], p[1 if paket else 0])
+                if paket_js:
+                    return self._statik(None, _KABUK_TUR[".js"], p[1])
+                if paket_css:
+                    return self._statik(None, _KABUK_TUR[".css"], p[2])
+                return self._statik(None, _KABUK_TUR[".html"], p[0])
             if paket:
                 return self.send_error(404)
         return self._statik(tam, _KABUK_TUR[os.path.splitext(tam)[1]])
